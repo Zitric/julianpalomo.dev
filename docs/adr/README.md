@@ -18,13 +18,13 @@ files are the answer, written down at the time instead of remembered later.
 
 ## Decisions so far
 
-| Date | Decision |
-|---|---|
-| 2026-10-26 | [A new repository, not a fork](2026-10-26-new-repo-not-fork.md) |
-| 2026-10-26 | [TanStack Start on Cloudflare](2026-10-26-tanstack-start-on-cloudflare.md) |
-| 2026-10-26 | [The Vercel AI SDK with Claude and read-only tools](2026-10-26-ai-sdk-claude-read-only-tools.md) |
+| Date       | Decision                                                                                             |
+| ---------- | ---------------------------------------------------------------------------------------------------- |
+| 2026-10-26 | [A new repository, not a fork](2026-10-26-new-repo-not-fork.md)                                      |
+| 2026-10-26 | [TanStack Start on Cloudflare](2026-10-26-tanstack-start-on-cloudflare.md)                           |
+| 2026-10-26 | [The Vercel AI SDK with Claude and read-only tools](2026-10-26-ai-sdk-claude-read-only-tools.md)     |
 | 2026-10-26 | [The assistant answers only from confirmed claims](2026-10-26-answers-only-from-confirmed-claims.md) |
-| 2026-10-26 | [The AI-first setup](2026-10-26-ai-first-setup.md) |
-| 2026-10-26 | [The site in English and Spanish](2026-10-26-english-and-spanish.md) |
-| 2026-10-26 | [The licence split](2026-10-26-licence-split.md) |
-| 2026-10-26 | [Git rules and the issue workflow](2026-10-26-git-rules-and-issue-workflow.md) |
+| 2026-10-26 | [The AI-first setup](2026-10-26-ai-first-setup.md)                                                   |
+| 2026-10-26 | [The site in English and Spanish](2026-10-26-english-and-spanish.md)                                 |
+| 2026-10-26 | [The licence split](2026-10-26-licence-split.md)                                                     |
+| 2026-10-26 | [Git rules and the issue workflow](2026-10-26-git-rules-and-issue-workflow.md)                       |
