@@ -54,7 +54,13 @@ These are the intended next steps, not a description of something that exists:
 - Deploys to Cloudflare, with a preview URL for each pull request
 - The Vercel AI SDK with Claude for the assistant
 
-Decisions will be recorded as they're made, one file each, in `docs/adr/`.
+Each decision is recorded as it's made, one file each, in `docs/adr/`.
+
+## Docs
+
+- [Architecture decision records](docs/adr/README.md): what was decided,
+  what else was considered, and why.
+- [Tech debt](docs/tech-debt.md): shortcuts taken on purpose, and their status.
 
 ## Licence
 
