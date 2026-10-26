@@ -1,0 +1,47 @@
+This repository is covered by two different sets of terms. The source code is
+MIT-licensed. The personal content about its author is not licensed for reuse.
+Read both sections before copying anything out of here.
+
+================================================================================
+1. SOURCE CODE — MIT License
+================================================================================
+
+Applies to all source code, configuration and documentation in this repository,
+EXCEPT the material described in section 2.
+
+Copyright (c) 2026 Julián Palomo
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+================================================================================
+2. PERSONAL CONTENT — All rights reserved, not licensed for reuse
+================================================================================
+
+The MIT grant above does NOT apply to any of the following, wherever it appears
+in this repository:
+
+  - facts, claims and biographical text about Julián Palomo, including the
+    data files the site's assistant answers from
+  - CV documents, in any format
+  - photographs, avatars and other images of him
+  - the written text of the site's pages about him
+
+This content is present in this repository only because the site is built from
+it. You may not copy, redistribute, modify or reuse it, in any medium,
+including as training data for machine-learning systems.
