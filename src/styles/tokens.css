@@ -1,0 +1,35 @@
+/*
+ * Colour tokens: the only place colours are defined.
+ * Light is the default. Dark follows the OS, and `data-theme` on <html> will
+ * override either way once a theme toggle exists.
+ */
+
+:root {
+  color-scheme: light;
+  --background: oklch(98.5% 0 0);
+  --foreground: oklch(21% 0 0);
+  --muted: oklch(46% 0 0);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --background: oklch(16% 0 0);
+    --foreground: oklch(96% 0 0);
+    --muted: oklch(72% 0 0);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: oklch(16% 0 0);
+  --foreground: oklch(96% 0 0);
+  --muted: oklch(72% 0 0);
+}
+
+/* Exposes the tokens as Tailwind utilities: bg-background, text-foreground, text-muted. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+}

@@ -1,0 +1,16 @@
+node_modules
+.DS_Store
+dist
+*.local
+.env
+.dev.vars*
+!.dev.vars.example
+!.env.example
+
+# TanStack Start and Wrangler
+.tanstack
+.wrangler
+
+# Playwright
+playwright-report
+test-results
