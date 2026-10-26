@@ -5,7 +5,8 @@
 
 ## Context
 
-Most of the code here is written with Claude Code, under my review. Agents
+I build this site with Claude Code. I decide what gets built, Claude writes
+most of the code, and nothing reaches `main` until I've reviewed it. Agents
 follow instructions well when the instructions are short, specific and close
 to the code they're about, and they can forget or bend rules that live only
 in prose. In Form:at, the most important rules are each backed by a hook or a
