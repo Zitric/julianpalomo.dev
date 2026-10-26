@@ -14,3 +14,6 @@ dist
 # Playwright
 playwright-report
 test-results
+
+# Personal Claude Code instructions, never committed
+CLAUDE.local.md
