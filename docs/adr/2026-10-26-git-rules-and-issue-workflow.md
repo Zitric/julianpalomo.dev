@@ -22,9 +22,10 @@ portfolio, so my contribution graph should reflect the work.
 - **One branch, one driver.** A branch belongs to one session at a time.
   Nobody pushes to a branch another session is working on.
 - **Only I merge.** No agent merges a pull request or enables auto-merge.
-- **Commits are authored under my identity**, with Claude added as a
-  `Co-Authored-By` trailer, so both names appear and the commits count on my
-  profile.
+- **Commits are authored under my identity**, with no AI attribution
+  trailers, so they count on my profile and match my other repositories. How
+  the code is written, with Claude Code, is documented openly in `AGENTS.md`
+  and these records instead.
 - **No force-pushes or history rewrites** on shared branches.
 
 ## Alternatives considered
