@@ -1,0 +1,109 @@
+# Expected verdicts for guard-bash.sh, one case per line: <verdict> | <command>
+# Verdicts: block (exit 2), ask (permissionDecision "ask"), pass (no output).
+# `@repo <name>` switches the scratch repo the following cases run against:
+#   feature-dirty  on branch feat/x with an uncommitted change to a tracked file
+#   main-clean     on branch main, clean
+# run.sh runs every case twice: with jq, and with the node fallback.
+# Run with: bash .claude/hooks/tests/run.sh
+
+@repo feature-dirty
+pass  | git status
+pass  | git diff --stat
+pass  | git diff origin/main...HEAD
+pass  | git log --oneline -5
+pass  | git add src/lib/site.ts
+pass  | git add src/lib/site.ts tests/unit/site.test.ts
+pass  | git add ./src/lib/site.ts
+pass  | git add .claude/settings.json
+pass  | git commit -m "add the home page"
+pass  | git commit -m "add .claude config for claude code"
+pass  | git push -u origin feat/x
+pass  | git push
+pass  | git fetch origin
+pass  | git merge origin/main
+pass  | git worktree add ../julianpalomo-dev-other feat/other
+pass  | git switch -c feat/new-thing
+pass  | git checkout -b fix/thing
+pass  | git config user.email
+pass  | git config user.name
+pass  | git config --get user.email
+pass  | git restore --staged src/lib/site.ts
+pass  | gh issue view 4
+pass  | gh pr create --title "x" --body-file /dev/null
+pass  | gh pr view 9
+pass  | gh pr checks 9 --watch
+pass  | gh api repos/Zitric/julianpalomo.dev/pulls/9
+pass  | pnpm check
+pass  | pnpm test
+pass  | pnpm knip
+pass  | pnpm dev
+pass  | pnpm exec biome check --write src/lib/site.ts
+pass  | pnpm test -- --grep update
+pass  | cat wrangler.jsonc
+pass  | grep wrangler package.json
+pass  | echo "git stash is forbidden" > /dev/null
+pass  | bash .claude/hooks/tests/run.sh
+
+block | git stash
+block | git stash list
+block | git stash pop
+block | git -C src stash
+block | git add -A
+block | git add --all
+block | git add .
+block | git add :/
+block | cd src && git add .
+block | git add src/lib/site.ts && git add -A
+block | git commit --amend --no-edit
+block | git commit -m "x" --author "Someone <a@b.c>"
+block | git -c user.email=other@example.com commit -m "x"
+block | GIT_AUTHOR_EMAIL=other@example.com git commit -m "x"
+block | git config user.email other@example.com
+block | git config --global user.name "Other"
+block | git push --force
+block | git push -f origin feat/x
+block | git push --force-with-lease origin feat/x
+block | git push origin +feat/x
+block | git push origin main
+block | git push origin HEAD:main
+block | git reset --hard origin/main
+block | git clean -fd
+block | git rebase origin/main
+block | git checkout main
+block | git switch main
+block | gh pr merge 9 --squash
+block | gh pr merge 9 --auto --squash
+block | gh api -X PUT repos/Zitric/julianpalomo.dev/pulls/9/merge
+block | git commit -m "fix x" -m "Co-Authored-By: Claude <noreply@anthropic.com>"
+block | git commit -m "add x 🤖 Generated with Claude Code"
+block | git commit -m "add x" -m "https://claude.ai/code/session_abc"
+block | gh pr create --title "x" --body "Generated with [Claude Code](https://claude.com/claude-code)"
+
+ask   | git checkout -- src/lib/site.ts
+ask   | git checkout HEAD -- src/lib/site.ts
+ask   | git checkout .
+ask   | git restore src/lib/site.ts
+ask   | pnpm build
+ask   | pnpm run build
+ask   | pnpm test:e2e
+ask   | pnpm exec playwright test
+ask   | pnpm exec vite build
+ask   | pnpm add zod
+ask   | pnpm add -D @types/node
+ask   | pnpm install
+ask   | pnpm i
+ask   | pnpm install --frozen-lockfile
+ask   | pnpm -C . update
+ask   | pnpm remove knip
+ask   | npx wrangler deploy
+ask   | pnpm exec wrangler whoami
+ask   | pnpm wrangler secret put ANTHROPIC_API_KEY
+ask   | wrangler dev
+ask   | node_modules/.bin/wrangler deploy
+
+@repo main-clean
+pass  | git status
+pass  | git checkout feat/x
+pass  | git switch -c chore/claude-config
+block | git push
+block | git push -u origin HEAD
