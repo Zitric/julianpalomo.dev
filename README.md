@@ -21,6 +21,12 @@ These are the intended choices, not a description of something that exists:
 
 Decisions will be recorded as they're made, one file each, in `docs/adr/`.
 
+## Docs
+
+- [Architecture decision records](docs/adr/README.md): what was decided,
+  what else was considered, and why.
+- [Tech debt](docs/tech-debt.md): shortcuts taken on purpose, and their status.
+
 ## Licence
 
 The code is MIT. My personal content (facts and texts about me, CV documents,
