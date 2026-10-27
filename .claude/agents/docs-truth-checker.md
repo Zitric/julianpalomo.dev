@@ -1,8 +1,8 @@
 ---
 name: docs-truth-checker
-description: Read-only check of which julianpalomo.dev doc sentences the branch diff made false or incomplete. Run only when the user explicitly asks (the handoff skill offers it). Expects the handoff skill to have written .diff-dump/.
+description: Read-only check of which julianpalomo.dev doc sentences the branch diff made false or incomplete. Runs on every handoff, after the handoff skill writes .diff-dump/.
 tools: Read, Grep, Glob
-model: haiku
+model: sonnet
 omitClaudeMd: true
 color: yellow
 ---

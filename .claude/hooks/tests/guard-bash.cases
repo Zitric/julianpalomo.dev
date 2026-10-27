@@ -17,6 +17,7 @@ pass  | git add ./src/lib/site.ts
 pass  | git add .claude/settings.json
 pass  | git commit -m "add the home page"
 pass  | git commit -m "add .claude config for claude code"
+pass  | git commit -m "format files regenerated with biome"
 pass  | git push -u origin feat/x
 pass  | git push
 pass  | git fetch origin
@@ -70,6 +71,7 @@ block | git reset --hard origin/main
 block | git clean -fd
 block | git rebase origin/main
 block | git checkout main
+block | git checkout feat/other
 block | git switch main
 block | gh pr merge 9 --squash
 block | gh pr merge 9 --auto --squash
@@ -78,10 +80,14 @@ block | git commit -m "fix x" -m "Co-Authored-By: Claude <noreply@anthropic.com>
 block | git commit -m "add x 🤖 Generated with Claude Code"
 block | git commit -m "add x" -m "https://claude.ai/code/session_abc"
 block | gh pr create --title "x" --body "Generated with [Claude Code](https://claude.com/claude-code)"
+block | git commit -m "Generated with Claude Code"
+block | git commit -m "add x" -m "generated with claude"
 
 ask   | git checkout -- src/lib/site.ts
 ask   | git checkout HEAD -- src/lib/site.ts
 ask   | git checkout .
+ask   | git checkout tracked.txt
+ask   | git checkout HEAD tracked.txt
 ask   | git restore src/lib/site.ts
 ask   | pnpm build
 ask   | pnpm run build

@@ -8,8 +8,9 @@ sections.
 - **`## What`:** one paragraph saying what the PR delivers, then one bullet per area with the lead word in bold (`**Hooks**: …`).
 - **`## Decisions worth a look`:** anything a reviewer could reasonably have chosen differently, and why it went this way. This is where the complex parts go.
 - **`## Checks`:** every command run locally and its result, then what was not run or not verified and why, then CI's result.
+- **`## Review`:** what `constraint-reviewer` and `docs-truth-checker` reported at handoff, what was fixed, and why any finding stays. Always present.
 
-Sections the change doesn't need are left out; don't pad.
+Other sections the change doesn't need are left out; don't pad.
 
 If PR #8 stops being the best example of this shape, point this file at a newer
 PR.

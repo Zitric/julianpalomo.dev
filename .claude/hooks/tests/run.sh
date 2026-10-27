@@ -87,7 +87,9 @@ HOOK_JSON_PARSER=node run_cases node
 # Attribution read from a -F / --body-file file.
 printf 'fix x\n\nCo-Authored-By: Claude <noreply@anthropic.com>\n' >"$scratch/msg-bad.txt"
 printf 'fix x\n' >"$scratch/msg-ok.txt"
+printf 'fix x\n\nGenerated with Claude Code\n' >"$scratch/msg-line-start.txt"
 report block "$(verdict_of "$scratch/feature-dirty" "git commit -F $scratch/msg-bad.txt")" "guard-bash: commit -F file with attribution"
+report block "$(verdict_of "$scratch/feature-dirty" "git commit -F $scratch/msg-line-start.txt")" "guard-bash: commit -F file, attribution at line start"
 report pass "$(verdict_of "$scratch/feature-dirty" "git commit -F $scratch/msg-ok.txt")" "guard-bash: commit -F clean file"
 report block "$(verdict_of "$scratch/feature-dirty" "gh pr create --body-file $scratch/msg-bad.txt")" "guard-bash: pr --body-file with attribution"
 

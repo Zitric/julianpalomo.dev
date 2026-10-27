@@ -18,6 +18,11 @@ English, except the Spanish half of each complex part.
 
 - What wasn't checked (a real phone, production, a new Claude Code session), and what was checked instead.
 
+## Review
+
+- `constraint-reviewer`: what it reported ("No findings", or each finding), and what was fixed in which commit.
+- `docs-truth-checker`: the same. A finding that stays says why.
+
 ## Complex parts
 
 **<name>** (`file.ts:123`)
@@ -29,5 +34,5 @@ ES: lo mismo, en español.
 - Anything to run, approve or decide. "Nothing" if nothing.
 ```
 
-The PR body (`/ship-pr`) reuses "What changed" and "Complex parts" in English
-only.
+The PR body (`/ship-pr`) reuses "What changed", "Review" and "Complex parts"
+in English only.
