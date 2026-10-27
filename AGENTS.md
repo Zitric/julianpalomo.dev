@@ -42,6 +42,7 @@ don't look for another way to run it.
 | `pnpm test`                       | Vitest unit tests, once.                                      |
 | `pnpm knip`                       | Unused files, exports and dependencies.                       |
 | `pnpm build`                      | Production build into `dist/`. Takes a while: ask first.      |
+| `pnpm preview`                    | Serves the last build in the local Workers runtime.           |
 | `pnpm test:e2e`                   | Builds, serves and runs Playwright in Chromium. Ask first.    |
 | `bash .claude/hooks/tests/run.sh` | Tests for the Claude Code hooks.                              |
 
