@@ -47,7 +47,9 @@ don't look for another way to run it.
 | `bash .claude/hooks/tests/run.sh` | Tests for the Claude Code hooks.                              |
 
 `pnpm add` and `pnpm install` change the lockfile: ask first. Nothing writes to
-Cloudflare without Julián.
+Cloudflare without Julián, except the preview build Workers Builds runs when a
+branch is pushed. Production deploys only when he merges, and agents never run
+wrangler commands that change Cloudflare.
 
 ## 4. Where things live
 
