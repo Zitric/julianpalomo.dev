@@ -34,8 +34,11 @@ Write the body to a file in the scratchpad, from
 [pr-body-template.md](pr-body-template.md), then:
 
 ```bash
-gh pr create --base main --head <branch> --title "<lowercase imperative, like the commits>" --body-file <file>
+gh pr create --base main --head <branch> --title "<lowercase imperative, like the commits>" --body-file <file> --assignee @me
 ```
+
+`@me` is the authenticated `gh` user, so the PR lands in Julián's "Assigned"
+list on GitHub.
 
 No attribution anywhere in the title or body. `.claude/settings.json` sets
 `attribution` to empty and `guard-bash.sh` blocks one if it slips in.
