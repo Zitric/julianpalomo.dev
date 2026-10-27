@@ -31,6 +31,7 @@ pass  | git config --get user.email
 pass  | git restore --staged src/lib/site.ts
 pass  | gh issue view 4
 pass  | gh pr create --title "x" --body-file /dev/null
+pass  | gh pr create --base main --head feat/x --title "x" --body-file /dev/null --assignee @me
 pass  | gh pr view 9
 pass  | gh pr checks 9 --watch
 pass  | gh api repos/Zitric/julianpalomo.dev/pulls/9
