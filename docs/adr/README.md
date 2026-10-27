@@ -29,3 +29,4 @@ files are the answer, written down at the time instead of remembered later.
 | 2026-10-26 | [The licence split](2026-10-26-licence-split.md)                                                     |
 | 2026-10-26 | [Git rules and the issue workflow](2026-10-26-git-rules-and-issue-workflow.md)                       |
 | 2026-10-27 | [Deploys with Cloudflare Workers Builds](2026-10-27-deploy-with-workers-builds.md)                   |
+| 2026-10-27 | [Claims in English only](2026-10-27-claims-in-english-only.md)                                       |
