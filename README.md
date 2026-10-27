@@ -15,9 +15,10 @@ CSS) that runs on Cloudflare Workers at
 
 The assistant has its server side but no chat on the page: an endpoint,
 `POST /api/chat`, streams an answer from Claude (Haiku 5.5, through the Vercel
-AI SDK), which can only look up the facts I've confirmed. Without an Anthropic
-API key it answers "not available", which is what previews and the live site
-do for now.
+AI SDK), which can only look up the facts I've confirmed. With each answer it
+sends the facts the model looked up, and a citation only counts as a source if
+it points to one of them. Without an Anthropic API key it answers "not
+available", which is what previews and the live site do for now.
 
 What exists around it:
 
@@ -107,9 +108,7 @@ version from `packageManager` in `package.json`.
 
 These are the intended next steps, not a description of something that exists:
 
-- Citations the server checks, so every answer shows which confirmed facts it
-  used
-- The chat on the home page
+- The chat on the home page, with a source chip for each fact an answer cites
 - Daily spending limits, per visitor and in total
 
 Each decision is recorded as it's made, one file each, in `docs/adr/`.

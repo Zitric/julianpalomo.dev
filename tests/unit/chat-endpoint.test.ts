@@ -38,6 +38,16 @@ function streamOf(chunks: StreamPart[]) {
   return async () => ({ stream: simulateReadableStream({ chunks }) });
 }
 
+/** A model response that streams `text` and stops. */
+function answer(text: string) {
+  return streamOf([
+    { type: "text-start", id: "t1" },
+    { type: "text-delta", id: "t1", delta: text },
+    { type: "text-end", id: "t1" },
+    { type: "finish", finishReason: { unified: "stop", raw: undefined }, usage },
+  ]);
+}
+
 const textAnswer = streamOf([
   { type: "text-start", id: "t1" },
   { type: "text-delta", id: "t1", delta: "Hello" },
@@ -301,5 +311,56 @@ describe("handleChat", () => {
       ],
     });
     expect(confirmedClaims).toHaveBeenCalled();
+  });
+});
+
+describe("citations", () => {
+  let warnLog: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    warnLog = vi.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnLog.mockRestore();
+  });
+
+  /** Every data-sources chunk in a response, in order. */
+  function sourceChunks(all: Record<string, unknown>[]) {
+    return all.filter((chunk) => chunk.type === "data-sources");
+  }
+
+  it("sends the claims a tool returned as sources, and logs nothing for a valid citation", async () => {
+    const model = new MockLanguageModelV4({
+      doStream: [await getClaimsCall(), await answer(`A fact.[[${sentinel.id}]]`)()],
+    });
+    const response = await handleChat(chatRequest({ messages: [userMessage("Sources?")] }), env, {
+      createModel: () => model,
+    });
+
+    const sources = sourceChunks(await chunks(response));
+    expect(sources).toHaveLength(1);
+    expect(sources[0]).toMatchObject({
+      id: "sources",
+      data: {
+        sources: [{ id: sentinel.id, label: sentinel.label, source: sentinel.source }],
+      },
+    });
+    expect(warnLog).not.toHaveBeenCalled();
+  });
+
+  it("never sends a source no tool returned in this answer, and logs the invalid ids", async () => {
+    // The sentinel is a real confirmed claim, but no tool returned it here.
+    const model = new MockLanguageModelV4({
+      doStream: answer(`One.[[${sentinel.id}]] Two.[[made-up-claim]] My secret visitor words.`),
+    });
+    const response = await handleChat(chatRequest({ messages: [userMessage("Sources?")] }), env, {
+      createModel: () => model,
+    });
+
+    expect(sourceChunks(await chunks(response))).toEqual([]);
+    expect(warnLog).toHaveBeenCalledTimes(1);
+    expect(warnLog).toHaveBeenCalledWith("chat: invalid citations", [sentinel.id, "made-up-claim"]);
+    expect(JSON.stringify(warnLog.mock.calls)).not.toContain("secret visitor words");
   });
 });

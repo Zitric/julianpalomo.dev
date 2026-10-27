@@ -7,14 +7,17 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
 import {
   convertToModelMessages,
+  createUIMessageStream,
   createUIMessageStreamResponse,
   isStepCount,
   type LanguageModel,
   streamText,
   toUIMessageStream,
+  type UIMessage,
 } from "ai";
 import { z } from "zod";
 import { confirmedClaims } from "../claims";
+import { parseCitations, type Source } from "./citations";
 import { anthropicOptions, MAX_OUTPUT_TOKENS, MAX_STEPS, MODEL_ID } from "./model";
 import { SYSTEM_PROMPT } from "./prompt";
 import { buildTools } from "./tools";
@@ -31,10 +34,30 @@ const MAX_ANSWER_TEXT = 10_000;
 /** The JSON body of every error response, so the UI can tell them apart. */
 type ChatError = { error: "invalid_request" | "unavailable" | "failed" };
 
+/**
+ * The answer as the UI receives it: the model's text, plus one `data-sources`
+ * part listing every claim a tool returned while producing it. The UI shows a
+ * citation as a source only when its id is in that list.
+ */
+type ChatUIMessage = UIMessage<never, { sources: { sources: Source[] } }>;
+
 /** What the stream says when the model fails mid-answer; never the provider's message. */
 export const STREAM_ERROR_TEXT = "Something went wrong. Please try again.";
 
 const envSchema = z.object({ ANTHROPIC_API_KEY: z.string().trim().min(1) });
+
+// What get_claims and search_claims return, read down to the fields a source
+// needs. z.object drops the rest (text, area), so a source never carries them.
+const claimsOutputSchema = z.object({
+  claims: z.array(
+    z.object({
+      id: z.string(),
+      label: z.string(),
+      org: z.string().optional(),
+      source: z.enum(["cv", "julian"]) satisfies z.ZodType<Source["source"]>,
+    }),
+  ),
+});
 
 // Only text parts reach the model. Tool results and any other part type in the
 // history are dropped, because the visitor controls the history and could
@@ -119,32 +142,65 @@ export async function handleChat(
   if (!body.success) return errorResponse(400, "invalid_request");
 
   try {
-    const messages = body.data.messages.filter((message) => message.parts.length > 0);
+    const messages = await convertToModelMessages(
+      body.data.messages.filter((message) => message.parts.length > 0),
+    );
     const tools = buildTools(confirmedClaims());
-    const result = streamText({
-      model: deps.createModel(parsedEnv.data.ANTHROPIC_API_KEY),
-      // One breakpoint here caches the tools and the system prompt, which
-      // come first in the request. Both are byte-stable between requests.
-      instructions: {
-        role: "system",
-        content: SYSTEM_PROMPT,
-        providerOptions: { anthropic: { cacheControl: { type: "ephemeral" } } },
+    const model = deps.createModel(parsedEnv.data.ANTHROPIC_API_KEY);
+    const onError = (error: unknown) => {
+      console.error("chat stream failed", error);
+      return STREAM_ERROR_TEXT;
+    };
+
+    const stream = createUIMessageStream<ChatUIMessage>({
+      execute: ({ writer }) => {
+        // The claims tools returned during this answer, in the order they
+        // arrived. Only these ids may become sources.
+        const sources = new Map<string, Source>();
+
+        writer.write({ type: "start" });
+        const result = streamText({
+          model,
+          // One breakpoint here caches the tools and the system prompt, which
+          // come first in the request. Both are byte-stable between requests.
+          instructions: {
+            role: "system",
+            content: SYSTEM_PROMPT,
+            providerOptions: { anthropic: { cacheControl: { type: "ephemeral" } } },
+          },
+          messages,
+          tools,
+          stopWhen: isStepCount(MAX_STEPS),
+          maxOutputTokens: MAX_OUTPUT_TOKENS,
+          providerOptions: { anthropic: anthropicOptions },
+          onToolExecutionEnd: ({ toolOutput }) => {
+            if (toolOutput.type !== "tool-result") return;
+            const output = claimsOutputSchema.safeParse(toolOutput.output);
+            if (!output.success) return;
+            const before = sources.size;
+            for (const claim of output.data.claims) {
+              if (!sources.has(claim.id)) sources.set(claim.id, claim);
+            }
+            if (sources.size === before) return;
+            // The same id each time, so the UI updates one part instead of adding another.
+            writer.write({
+              type: "data-sources",
+              id: "sources",
+              data: { sources: [...sources.values()] },
+            });
+          },
+          onEnd: ({ steps }) => {
+            const text = steps.map((step) => step.text).join("");
+            const { invalid } = parseCitations(text, new Set(sources.keys()));
+            // Ids only: the answer can quote the visitor, so its text is never logged.
+            if (invalid.length > 0) console.warn("chat: invalid citations", invalid);
+          },
+        });
+        writer.merge(toUIMessageStream({ stream: result.stream, sendStart: false, onError }));
       },
-      messages: await convertToModelMessages(messages),
-      tools,
-      stopWhen: isStepCount(MAX_STEPS),
-      maxOutputTokens: MAX_OUTPUT_TOKENS,
-      providerOptions: { anthropic: anthropicOptions },
+      onError,
     });
-    return createUIMessageStreamResponse({
-      stream: toUIMessageStream({
-        stream: result.stream,
-        onError: (error) => {
-          console.error("chat stream failed", error);
-          return STREAM_ERROR_TEXT;
-        },
-      }),
-    });
+    return createUIMessageStreamResponse({ stream });
   } catch (error) {
     console.error("chat request failed", error);
     return errorResponse(500, "failed");
