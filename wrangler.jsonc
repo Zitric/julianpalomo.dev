@@ -4,6 +4,11 @@
   "compatibility_date": "2026-10-23",
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
+  "routes": [{ "pattern": "julianpalomo.dev", "custom_domain": true }],
+  // Preview URLs are served from workers.dev, so both stay on. Set explicitly
+  // because their defaults differ between wrangler's schema and Cloudflare's docs.
+  "workers_dev": true,
+  "preview_urls": true,
   "observability": {
     "enabled": true
   }
