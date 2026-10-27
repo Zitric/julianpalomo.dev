@@ -30,7 +30,7 @@ don't look for another way to run it.
 - **GitHub issues are the spec.** One issue, one branch from an up-to-date `origin/main`, one PR whose body says `Closes #N`. The epic an issue belongs to holds the shared rules; read it too.
 - **One branch, one driver.** A branch is worked on by one session only; another session reads and comments on the PR.
 - **If the issue and the code disagree, ask** instead of choosing.
-- Explore, plan, implement, then `/handoff` (checks, docs, commit, change summary) and `/ship-pr` (push, PR, CI). `/implement-issue <N>` runs the whole loop.
+- Explore, plan, implement, then `/handoff` (checks, docs, commit, both reviewer subagents, change summary) and `/ship-pr` (push, PR, CI). `/implement-issue <N>` runs the whole loop.
 - Each commit typechecks and builds on its own. Subjects are short, lowercase and imperative ("add …", "fix …").
 
 ## 3. Commands

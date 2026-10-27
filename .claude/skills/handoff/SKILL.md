@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: Close out a finished unit of work in julianpalomo.dev. Runs the checks, applies the "is any doc now false?" test, stages by name, commits, and writes the change summary (complex parts in English and Spanish). Use when an implementation is done, before /ship-pr.
+description: Close out a finished unit of work in julianpalomo.dev. Runs the checks, applies the "is any doc now false?" test, stages by name, commits, runs the two reviewer subagents, and writes the change summary (complex parts in English and Spanish). Use when an implementation is done, before /ship-pr.
 ---
 
 # Handoff
@@ -52,10 +52,11 @@ Exemplar: the subjects in `git log --oneline origin/main` ("add ci workflow",
 with", no attribution of any kind. Several commits are fine when the work splits
 into reviewable steps, as long as each one passes `pnpm check` on its own.
 
-## 5. Offer the reviewers
+## 5. Run the reviewers
 
-Offer, don't start, the two read-only subagents. They have no Bash, so write the
-branch diff for them first:
+Both read-only subagents run on every handoff; this step is part of the
+handoff, so don't ask first. They have no Bash, so write the branch diff for
+them:
 
 ```bash
 mkdir -p .diff-dump
@@ -63,10 +64,17 @@ git diff origin/main...HEAD --stat > .diff-dump/summary.txt
 git diff origin/main...HEAD > .diff-dump/branch.diff
 ```
 
+Then start both in one message, so they run in parallel, each in its own
+context:
+
 - `constraint-reviewer` checks the diff against AGENTS.md §1-§2 and `.claude/rules/`.
 - `docs-truth-checker` finds doc sentences the diff made false.
 
-`.diff-dump/` is gitignored. Fixes they lead to are new commits.
+Name any untracked task files in the prompt. `.diff-dump/` is gitignored.
+
+For each finding, fix it in a new commit and re-run the checks from step 1, or
+keep it and say why in the summary. One pass: run the reviewers again only when
+the fixes are large enough to need their own review.
 
 ## 6. Summary
 

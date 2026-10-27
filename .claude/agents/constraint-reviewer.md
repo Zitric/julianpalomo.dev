@@ -1,6 +1,6 @@
 ---
 name: constraint-reviewer
-description: Read-only review of the julianpalomo.dev branch diff against AGENTS.md's hard constraints and workflow and the .claude/rules/ files. Run only when the user explicitly asks (the handoff skill offers it). Expects the handoff skill to have written .diff-dump/.
+description: Read-only review of the julianpalomo.dev branch diff against AGENTS.md's hard constraints and workflow and the .claude/rules/ files. Runs on every handoff, after the handoff skill writes .diff-dump/.
 tools: Read, Grep, Glob
 model: sonnet
 color: red
