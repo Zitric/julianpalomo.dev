@@ -53,7 +53,10 @@ export function keepConfirmed(claims: readonly Claim[]): Claim[] {
 // Parsed on load, so an invalid file fails `pnpm test` before it can merge.
 const claims = parseClaims(data);
 
-/** The only way callers get claims: confirmed ones, never the rest. */
-export function confirmedClaims(): Claim[] {
+/**
+ * The only way callers get claims: confirmed ones, never the rest. Typed
+ * read-only so callers treat the list as shared data, not something to edit.
+ */
+export function confirmedClaims(): readonly Claim[] {
   return keepConfirmed(claims);
 }
