@@ -7,13 +7,15 @@ streamed answer with its sources. Every step links to the file that does it.
 flowchart TD
   visitor([Visitor types a question]) --> chat[Chat on the home page<br/>useChat]
   chat -->|POST /api/chat| route[Server route]
-  route --> validate{Valid request?}
-  validate -->|no| r400[400 invalid_request]
-  validate -->|yes| key{API key?}
-  key -->|no, BOT_DEMO=1| demo[Demo model<br/>scripted, no cost]
+  route --> key{API key?}
+  key -->|no, BOT_DEMO=1| validateDemo{Valid request?}
   key -->|no, no demo| r503[503 unavailable]
   key -->|yes, but no D1 or salt| r503
-  key -->|yes| limits{Today's limits<br/>in D1}
+  key -->|yes| validate{Valid request?}
+  validate -->|no| r400[400 invalid_request]
+  validateDemo -->|no| r400
+  validateDemo -->|yes| demo[Demo model<br/>scripted, no cost]
+  validate -->|yes| limits{Today's limits<br/>in D1}
   limits -->|over| r429[429 visitor_limit<br/>or daily_budget]
   limits -->|under| count[Count the question]
   count --> model[Claude Haiku 5.5]
@@ -29,9 +31,8 @@ flowchart TD
   sources --> render
 ```
 
-The diagram shows the order of the checks. In the code, the request body is
-validated after the key is known to exist and before the limits, so an invalid
-request never counts against a visitor.
+The checks run in this order, so a request that fails validation never counts
+against a visitor's limit.
 
 ## The steps
 
