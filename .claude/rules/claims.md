@@ -2,6 +2,7 @@
 paths:
   - "src/content/**"
   - "src/lib/claims.ts"
+  - "src/lib/claim-id.ts"
   - "tests/unit/claims.test.ts"
 ---
 
