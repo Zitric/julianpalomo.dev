@@ -55,7 +55,7 @@ wrangler commands that change Cloudflare.
 
 - `src/routes/`: file-based routes. `src/routeTree.gen.ts` is generated; never edit it by hand.
 - `src/lib/`: plain TypeScript modules, such as `site.ts`.
-- `src/content/`: personal content, such as `claims.json`. It isn't MIT (`LICENSE`, section 2), and only `src/lib/claims.ts` reads it.
+- `src/content/`: personal content, such as `claims.json`. It isn't MIT (`LICENSE`, section 2), and in `src/` only `src/lib/claims.ts` reads it.
 - `src/styles/tokens.css`: the only place colours are defined.
 - `tests/unit/`: Vitest. `tests/e2e/`: Playwright, against the production build.
 - `.github/workflows/ci.yml`: CI on every pull request to `main`. Deploys aren't here: Cloudflare Workers Builds deploys `main` and comments a preview URL on every PR.
