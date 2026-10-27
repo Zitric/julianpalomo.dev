@@ -19,6 +19,7 @@ import { confirmedClaims } from "../claims";
 import { type ChatErrorCode, chatErrorBody } from "./chat-error";
 import type { ChatUIMessage } from "./chat-message";
 import { parseCitations, type Source } from "./citations";
+import { createDemoModel } from "./demo";
 import { MAX_VISITOR_TEXT } from "./limits";
 import { anthropicOptions, MAX_OUTPUT_TOKENS, MAX_STEPS, MODEL_ID } from "./model";
 import { SYSTEM_PROMPT } from "./prompt";
@@ -35,7 +36,11 @@ const MAX_ANSWER_TEXT = 10_000;
 /** What the stream says when the model fails mid-answer; never the provider's message. */
 export const STREAM_ERROR_TEXT = "Something went wrong. Please try again.";
 
-const envSchema = z.object({ ANTHROPIC_API_KEY: z.string().trim().min(1) });
+// A missing, empty or malformed value reads as unset, never as an error.
+const envSchema = z.object({
+  ANTHROPIC_API_KEY: z.string().trim().min(1).optional().catch(undefined),
+  BOT_DEMO: z.string().optional().catch(undefined),
+});
 
 // What get_claims and search_claims return, read down to the fields a source
 // needs. z.object drops the rest (text, area), so a source never carries them.
@@ -127,6 +132,12 @@ export async function handleChat(
 ): Promise<Response> {
   const parsedEnv = envSchema.safeParse(env);
   if (!parsedEnv.success) return errorResponse(503, "unavailable");
+  const { ANTHROPIC_API_KEY: apiKey, BOT_DEMO } = parsedEnv.data;
+  // With a key the model always answers, whatever BOT_DEMO says, so a
+  // production Worker can never serve the demo. Without a key, BOT_DEMO="1"
+  // turns the demo on; otherwise there is nothing to answer with.
+  const demo = apiKey === undefined && BOT_DEMO === "1";
+  if (apiKey === undefined && !demo) return errorResponse(503, "unavailable");
 
   const json: unknown = await request.json().catch(() => undefined);
   const body = bodySchema.safeParse(json);
@@ -137,7 +148,7 @@ export async function handleChat(
       body.data.messages.filter((message) => message.parts.length > 0),
     );
     const tools = buildTools(confirmedClaims());
-    const model = deps.createModel(parsedEnv.data.ANTHROPIC_API_KEY);
+    const model = apiKey === undefined ? createDemoModel() : deps.createModel(apiKey);
     const onError = (error: unknown) => {
       console.error("chat stream failed", error);
       return STREAM_ERROR_TEXT;
@@ -149,7 +160,7 @@ export async function handleChat(
         // arrived. Only these ids may become sources.
         const sources = new Map<string, Source>();
 
-        writer.write({ type: "start" });
+        writer.write({ type: "start", messageMetadata: demo ? { demo: true } : undefined });
         const result = streamText({
           model,
           // One breakpoint here caches the tools and the system prompt, which

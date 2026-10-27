@@ -364,3 +364,66 @@ describe("citations", () => {
     expect(JSON.stringify(warnLog.mock.calls)).not.toContain("secret visitor words");
   });
 });
+
+describe("demo mode", () => {
+  /** The start chunk, which carries the message metadata. */
+  function startChunk(all: Record<string, unknown>[]) {
+    return all.find((chunk) => chunk.type === "start");
+  }
+
+  it("ignores BOT_DEMO when there is a key, and calls the real model", async () => {
+    const model = new MockLanguageModelV4({ doStream: textAnswer });
+    const createModel = vi.fn(() => model);
+    const response = await handleChat(
+      chatRequest({ messages: [userMessage("Hi")] }),
+      { ANTHROPIC_API_KEY: "test-key", BOT_DEMO: "1" },
+      { createModel },
+    );
+
+    const all = await chunks(response);
+    expect(createModel).toHaveBeenCalledWith("test-key");
+    expect(startChunk(all)).not.toHaveProperty("messageMetadata");
+  });
+
+  it.each([{}, { BOT_DEMO: "0" }, { BOT_DEMO: "true" }, { BOT_DEMO: "" }])(
+    "answers 503 without a key when BOT_DEMO is %j",
+    async (missing) => {
+      const createModel = vi.fn();
+      const response = await handleChat(chatRequest({ messages: [userMessage("Hi")] }), missing, {
+        createModel,
+      });
+      expect(response.status).toBe(503);
+      expect(await response.json()).toEqual({ error: "unavailable" });
+      expect(createModel).not.toHaveBeenCalled();
+    },
+  );
+
+  it("streams a get_claims call and an answer quoting a confirmed claim with its citation", async () => {
+    const warnLog = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const createModel = vi.fn();
+    const response = await handleChat(
+      chatRequest({ messages: [userMessage("What did he do?")] }),
+      { BOT_DEMO: "1" },
+      { createModel },
+    );
+
+    expect(response.status).toBe(200);
+    const all = await chunks(response);
+    expect(createModel).not.toHaveBeenCalled();
+    expect(startChunk(all)).toMatchObject({ messageMetadata: { demo: true } });
+    expect(all).toContainEqual(
+      expect.objectContaining({ type: "tool-input-available", toolName: "get_claims" }),
+    );
+    expect(all.find((chunk) => chunk.type === "data-sources")).toMatchObject({
+      data: { sources: [{ id: sentinel.id }] },
+    });
+    const text = all
+      .filter((chunk) => chunk.type === "text-delta")
+      .map((chunk) => chunk.delta)
+      .join("");
+    expect(text).toContain("Demo answer");
+    expect(text).toContain(`${sentinel.text} [[${sentinel.id}]]`);
+    expect(warnLog).not.toHaveBeenCalled();
+    warnLog.mockRestore();
+  });
+});
