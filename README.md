@@ -18,6 +18,8 @@ What exists around it:
 
 - Biome for lint and format, `tsc` for types, knip for unused code and
   dependencies
+- A data file for the facts the assistant will answer from, still empty, with
+  a Zod schema and a filter that hands out only the facts I've confirmed
 - Vitest for unit tests and Playwright for a smoke test of the home page
 - lefthook, which runs Biome on staged files before each commit
 - GitHub Actions, which run the checks, the unit tests, knip and the smoke test

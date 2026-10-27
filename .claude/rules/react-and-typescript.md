@@ -14,7 +14,7 @@ Compiler.
 
 ## TypeScript
 
-- **Every boundary value starts as `unknown` and is parsed with a Zod schema**: request bodies, server function input, fetch JSON, model output, `localStorage`, environment values. A type annotation is not validation. Zod isn't installed yet; it arrives with the first boundary (ask before `pnpm add`).
+- **Every boundary value starts as `unknown` and is parsed with a Zod schema**: request bodies, server function input, fetch JSON, model output, `localStorage`, environment values. A type annotation is not validation. Zod 4 is installed (`import { z } from "zod"`); `src/lib/claims.ts` is the exemplar, parsing `claims.json` with a strict schema.
 - **`import type`** for type-only imports; `verbatimModuleSyntax` fails `tsc` otherwise.
 - **`noUncheckedIndexedAccess` is on**: handle the `undefined` from `arr[i]` or `record[key]`; don't cast it away.
 - **Discriminated unions over boolean flag pairs**: `{ status: "loading" } | { status: "ready"; data: T }`, not `isLoading` plus `data?`.
