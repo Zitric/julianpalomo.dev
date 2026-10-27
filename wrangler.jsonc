@@ -9,6 +9,8 @@
   // because their defaults differ between wrangler's schema and Cloudflare's docs.
   "workers_dev": true,
   "preview_urls": true,
+  // `wrangler preview` needs this block, even when it is empty.
+  "previews": {},
   "observability": {
     "enabled": true
   }
