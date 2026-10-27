@@ -13,9 +13,12 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
-  // Runs against the production build served by the Workers runtime, not the dev server.
+  // Runs against a production build served by the Workers runtime, not the dev
+  // server. CLOUDFLARE_ENV=e2e builds with wrangler.jsonc's `e2e` environment:
+  // the chat answers in demo mode and no local .dev.vars key reaches the build,
+  // so a test run never calls the real model.
   webServer: {
-    command: `pnpm build && pnpm preview --port ${port} --strictPort`,
+    command: `CLOUDFLARE_ENV=e2e pnpm build && pnpm preview --port ${port} --strictPort`,
     url: `http://localhost:${port}`,
     reuseExistingServer: !isCI,
     timeout: 120_000,
