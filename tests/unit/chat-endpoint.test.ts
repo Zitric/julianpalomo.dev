@@ -42,14 +42,22 @@ function fakeStore(today = { visitorMessages: 0, spentMicroUsd: 0 }) {
 }
 
 let store: ReturnType<typeof fakeStore>;
+/** What the endpoint handed to waitUntil. */
+let waitedFor: Promise<unknown>[];
 
-/** handleChat with the fake store unless a test passes its own. */
+/** handleChat with the fake store and waitUntil unless a test passes its own. */
 function chat(
   request: Request,
   chatEnv: unknown = env,
   deps: Parameters<typeof handleChat>[2] = {},
 ) {
-  return handleChat(request, chatEnv, { createStore: () => store, ...deps });
+  return handleChat(request, chatEnv, {
+    createStore: () => store,
+    waitUntil: (promise) => {
+      waitedFor.push(promise);
+    },
+    ...deps,
+  });
 }
 
 const usage = {
@@ -126,6 +134,7 @@ let errorLog: ReturnType<typeof vi.spyOn>;
 
 beforeEach(() => {
   store = fakeStore();
+  waitedFor = [];
   errorLog = vi.spyOn(console, "error").mockImplementation(() => {});
 });
 
@@ -291,10 +300,11 @@ describe("handleChat", () => {
     expect(prompt).not.toContain("astronaut");
   });
 
-  it("streams a generic error, logs the real one, and never leaks the provider's message", async () => {
+  it("streams a generic error, logs the real one once, and never leaks the provider's message", async () => {
+    const providerError = new Error("provider says: invalid x-api-key sk-ant-secret");
     const model = new MockLanguageModelV4({
       doStream: async () => {
-        throw new Error("provider says: invalid x-api-key sk-ant-secret");
+        throw providerError;
       },
     });
     const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), env, {
@@ -305,7 +315,26 @@ describe("handleChat", () => {
     expect(body).toContain(STREAM_ERROR_TEXT);
     expect(body).not.toContain("x-api-key");
     expect(body).not.toContain("sk-ant-secret");
-    expect(errorLog).toHaveBeenCalled();
+    expect(errorLog).toHaveBeenCalledTimes(1);
+    expect(errorLog).toHaveBeenCalledWith("chat stream failed", providerError);
+  });
+
+  it("logs an error part in the middle of an answer once", async () => {
+    const providerError = new Error("overloaded");
+    const model = new MockLanguageModelV4({
+      doStream: streamOf([
+        { type: "text-start", id: "t1" },
+        { type: "text-delta", id: "t1", delta: "Hel" },
+        { type: "error", error: providerError },
+      ]),
+    });
+    const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), env, {
+      createModel: () => model,
+    });
+
+    expect(await response.text()).toContain(STREAM_ERROR_TEXT);
+    expect(errorLog).toHaveBeenCalledTimes(1);
+    expect(errorLog).toHaveBeenCalledWith("chat stream failed", providerError);
   });
 
   it("answers 500 with the typed error when the model can't be created", async () => {
@@ -543,5 +572,146 @@ describe("limits", () => {
     await response.text();
     expect(response.status).toBe(200);
     expect(createStore).not.toHaveBeenCalled();
+  });
+});
+
+describe("usage", () => {
+  /** One step's usage from the mock: 1 input and 1 output token, which costs 1 micro-dollar. */
+  const oneStep = { input: 1, output: 1, cacheRead: 0, cacheWrite: 0 };
+
+  /** A model whose first step calls get_claims and whose second is `second`. */
+  function afterToolStep(second: () => ReturnType<ReturnType<typeof streamOf>>) {
+    let calls = 0;
+    return new MockLanguageModelV4({
+      doStream: () => {
+        calls += 1;
+        return calls === 1 ? getClaimsCall() : second();
+      },
+    });
+  }
+
+  /** A second step that streams slowly, so a test can stop it halfway. */
+  const slowAnswer = async () => ({
+    stream: simulateReadableStream<StreamPart>({
+      chunkDelayInMs: 10,
+      chunks: [
+        { type: "text-start", id: "t1" },
+        ...Array.from({ length: 50 }, () => ({
+          type: "text-delta" as const,
+          id: "t1",
+          delta: "word ",
+        })),
+        { type: "text-end", id: "t1" },
+        { type: "finish", finishReason: { unified: "stop", raw: undefined }, usage },
+      ],
+    }),
+  });
+
+  /** Reads the response until the second step has started to stream text. */
+  async function readUntilText(reader: ReadableStreamDefaultReader<Uint8Array>) {
+    const decoder = new TextDecoder();
+    let text = "";
+    while (!text.includes('"text-delta"')) {
+      const { done, value } = await reader.read();
+      if (done) throw new Error("the answer ended before any text");
+      text += decoder.decode(value, { stream: true });
+    }
+  }
+
+  it("records a finished answer's usage once, summed over its steps", async () => {
+    const model = afterToolStep(textAnswer);
+    const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), env, {
+      createModel: () => model,
+    });
+    await response.text();
+    await Promise.all(waitedFor);
+
+    // Two steps of 1 + 1 tokens: (2 × 100,000 + 2 × 500,000) / 1,000,000, rounded up.
+    expect(store.addUsage).toHaveBeenCalledTimes(1);
+    expect(store.addUsage).toHaveBeenCalledWith(
+      expect.any(String),
+      { input: 2, output: 2, cacheRead: 0, cacheWrite: 0 },
+      2,
+    );
+  });
+
+  it("records the finished step once when the model fails after a tool step", async () => {
+    const model = afterToolStep(async () => {
+      throw new Error("overloaded");
+    });
+    const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), env, {
+      createModel: () => model,
+    });
+    expect(await response.text()).toContain(STREAM_ERROR_TEXT);
+    await Promise.all(waitedFor);
+
+    expect(store.addUsage).toHaveBeenCalledTimes(1);
+    expect(store.addUsage).toHaveBeenCalledWith(expect.any(String), oneStep, 1);
+  });
+
+  it("records the finished step once when the visitor presses Stop, and cancels the model call", async () => {
+    const stop = new AbortController();
+    const request = new Request(chatRequest({ messages: [userMessage("Hi")] }), {
+      signal: stop.signal,
+    });
+    const model = afterToolStep(slowAnswer);
+    const response = await chat(request, env, { createModel: () => model });
+    const reader = response.body?.getReader();
+    if (reader === undefined) throw new Error("the response has no body");
+
+    await readUntilText(reader);
+    stop.abort();
+    await reader.cancel();
+
+    await vi.waitFor(() => expect(store.addUsage).toHaveBeenCalled());
+    await Promise.all(waitedFor);
+    expect(store.addUsage).toHaveBeenCalledTimes(1);
+    expect(store.addUsage).toHaveBeenCalledWith(expect.any(String), oneStep, 1);
+    expect(model.doStreamCalls.at(-1)?.abortSignal?.aborted).toBe(true);
+  });
+
+  it("finishes the answer on the server and records it once when the visitor disconnects without an abort signal", async () => {
+    const model = afterToolStep(slowAnswer);
+    const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), env, {
+      createModel: () => model,
+    });
+    const reader = response.body?.getReader();
+    if (reader === undefined) throw new Error("the response has no body");
+
+    await readUntilText(reader);
+    await reader.cancel();
+
+    // Nothing stops the model without the signal, so waitUntil keeps reading
+    // the answer to its end and both steps are recorded.
+    await vi.waitFor(() => expect(store.addUsage).toHaveBeenCalled());
+    await Promise.all(waitedFor);
+    expect(store.addUsage).toHaveBeenCalledTimes(1);
+    expect(store.addUsage).toHaveBeenCalledWith(
+      expect.any(String),
+      { input: 2, output: 2, cacheRead: 0, cacheWrite: 0 },
+      2,
+    );
+  });
+
+  it("hands the server's copy of the stream and the usage write to waitUntil", async () => {
+    const model = new MockLanguageModelV4({ doStream: textAnswer });
+    const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), env, {
+      createModel: () => model,
+    });
+    await response.text();
+    await Promise.all(waitedFor);
+    expect(waitedFor).toHaveLength(2);
+  });
+
+  it("logs a failed usage write and still ends the answer", async () => {
+    store.addUsage.mockRejectedValueOnce(new Error("D1 is down"));
+    const model = new MockLanguageModelV4({ doStream: textAnswer });
+    const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), env, {
+      createModel: () => model,
+    });
+
+    expect(await response.text()).toContain("Hello");
+    await Promise.all(waitedFor);
+    expect(errorLog).toHaveBeenCalledWith("chat usage not recorded", expect.any(Error));
   });
 });

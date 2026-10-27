@@ -1,11 +1,13 @@
 /**
  * The chat endpoint's logic: validates the request, streams an answer from
  * the confirmed claims, and turns every failure into a small typed error.
- * The route in src/routes/api/chat.ts only passes in the request and the
- * environment, so this module can be tested with a mock model.
+ * The route in src/routes/api/chat.ts only passes in the request, the
+ * environment and the runtime's waitUntil, so this module can be tested with
+ * a mock model, an in-memory store and a fake waitUntil.
  */
 import { createAnthropic } from "@ai-sdk/anthropic";
 import {
+  consumeStream,
   convertToModelMessages,
   createUIMessageStream,
   createUIMessageStreamResponse,
@@ -119,12 +121,24 @@ const bodySchema = z
 type Deps = {
   createModel: (apiKey: string) => LanguageModel;
   createStore: (db: D1Like) => UsageStore;
+  /** Keeps the Worker running until `promise` settles, even after the visitor has gone. */
+  waitUntil: (promise: Promise<unknown>) => void;
 };
 
 const defaultDeps: Deps = {
   createModel: (apiKey) => createAnthropic({ apiKey })(MODEL_ID),
   createStore: d1UsageStore,
+  // Outside Workers nothing cuts the request short, so the promise just runs.
+  // The route passes the runtime's waitUntil.
+  waitUntil: () => {},
 };
+
+function addTokens(total: TokenUsage, step: TokenUsage): void {
+  total.input += step.input;
+  total.output += step.output;
+  total.cacheRead += step.cacheRead;
+  total.cacheWrite += step.cacheWrite;
+}
 
 /** Who is asking, without keeping their IP. Local dev has no header, so it gets one shared id. */
 const LOCAL_VISITOR_IP = "local";
@@ -196,16 +210,18 @@ export async function handleChat(
     );
     const tools = buildTools(confirmedClaims());
     const model = apiKey === undefined ? createDemoModel() : deps.createModel(apiKey);
-    const onError = (error: unknown) => {
-      console.error("chat stream failed", error);
-      return STREAM_ERROR_TEXT;
-    };
+    const logStreamError = (error: unknown) => console.error("chat stream failed", error);
 
     const stream = createUIMessageStream<ChatUIMessage>({
       execute: ({ writer }) => {
         // The claims tools returned during this answer, in the order they
         // arrived. Only these ids may become sources.
         const sources = new Map<string, Source>();
+        // The tokens of every step that finished, added as each one ends.
+        // Never read onEnd's totalUsage instead: when the model fails as a
+        // later step starts, it comes back empty and the finished steps'
+        // tokens are lost.
+        const spent: TokenUsage = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
 
         writer.write({ type: "start", messageMetadata: demo ? { demo: true } : undefined });
         const result = streamText({
@@ -219,9 +235,15 @@ export async function handleChat(
           },
           messages,
           tools,
+          // Fires when the visitor presses Stop or leaves (enable_request_signal
+          // in wrangler.jsonc), and cancels the model call so it stops spending.
+          abortSignal: request.signal,
           stopWhen: isStepCount(MAX_STEPS),
           maxOutputTokens: MAX_OUTPUT_TOKENS,
           providerOptions: { anthropic: anthropicOptions },
+          // The one log of a model error. Without it the SDK logs the error
+          // itself, and the UI stream below would log it a second time.
+          onError: ({ error }) => logStreamError(error),
           onToolExecutionEnd: ({ toolOutput }) => {
             if (toolOutput.type !== "tool-result") return;
             const output = claimsOutputSchema.safeParse(toolOutput.output);
@@ -238,23 +260,51 @@ export async function handleChat(
               data: { sources: [...sources.values()] },
             });
           },
-          onEnd: async ({ steps, totalUsage }) => {
+          onStepEnd: ({ usage }) => addTokens(spent, tokenUsage(usage)),
+          onEnd: ({ steps }) => {
             const text = steps.map((step) => step.text).join("");
             const { invalid } = parseCitations(text, new Set(sources.keys()));
             // Ids only: the answer can quote the visitor, so its text is never logged.
             if (invalid.length > 0) console.warn("chat: invalid citations", invalid);
-            // The answer has already streamed, so a failed write is logged
-            // rather than turned into an error the visitor would see.
-            await recordUsage?.(tokenUsage(totalUsage)).catch((error: unknown) => {
-              console.error("chat usage not recorded", error);
-            });
           },
         });
-        writer.merge(toUIMessageStream({ stream: result.stream, sendStart: false, onError }));
+        writer.merge(
+          toUIMessageStream({
+            stream: result.stream,
+            sendStart: false,
+            // Already logged by streamText's onError: only turn it into the fixed text.
+            onError: () => STREAM_ERROR_TEXT,
+            // The one place usage is recorded. The SDK calls this once per
+            // answer however it ends: finished, failed, aborted by Stop or
+            // cancelled by the visitor leaving. streamText's onEnd and onAbort
+            // each miss some of those, so never record from them as well.
+            onEnd: async () => {
+              // The answer has already streamed, so a failed write is logged
+              // rather than turned into an error the visitor would see.
+              const write = recordUsage?.({ ...spent }).catch((error: unknown) => {
+                console.error("chat usage not recorded", error);
+              });
+              if (write === undefined) return;
+              deps.waitUntil(write);
+              await write;
+            },
+          }),
+        );
       },
-      onError,
+      // Errors outside the model's stream, which streamText never sees.
+      onError: (error) => {
+        logStreamError(error);
+        return STREAM_ERROR_TEXT;
+      },
     });
-    return createUIMessageStreamResponse({ stream });
+    return createUIMessageStreamResponse({
+      stream,
+      // A copy of the stream read to its end on the server, inside waitUntil,
+      // so the answer still reaches toUIMessageStream's onEnd, and records its
+      // usage, after the visitor has disconnected. Without it Workers may
+      // cancel the rest of the request first, and the usage is never written.
+      consumeSseStream: ({ stream: copy }) => deps.waitUntil(consumeStream({ stream: copy })),
+    });
   } catch (error) {
     console.error("chat request failed", error);
     return errorResponse(500, "failed");

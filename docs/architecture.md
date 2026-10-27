@@ -43,8 +43,8 @@ reads the streamed answer. A counter in
 1,000 characters, so the visitor never hits the endpoint's own limit.
 
 **The route.** [`src/routes/api/chat.ts`](../src/routes/api/chat.ts) accepts
-only `POST` and passes the request and the Worker's environment (vars, secrets
-and the D1 binding) to `handleChat` in
+only `POST` and passes the request, the Worker's environment (vars, secrets
+and the D1 binding) and the runtime's `waitUntil` to `handleChat` in
 [`src/lib/bot/chat.ts`](../src/lib/bot/chat.ts), where every other step
 starts.
 
@@ -65,7 +65,8 @@ today's counts from D1 (the tables are in
 [`src/lib/bot/limits.ts`](../src/lib/bot/limits.ts) decides: 30 questions per
 visitor a day, and $1.00 of estimated spend a day across everyone. A visitor is
 a SHA-256 hash of their IP, the UTC date and a secret salt, so no IP is stored
-and nobody can be followed from one day to the next. Over a limit, the endpoint
+and nobody can be followed from one day to the next. For an IPv6 address the
+hash takes its /64 instead, since one person can rotate through all of it. Over a limit, the endpoint
 answers `429` without calling the model.
 
 **The model and its tools.** Claude Haiku 5.5, set in
@@ -81,8 +82,13 @@ the same `get_claims` tool and quotes the first claim it returns.
 to the browser as one `data-sources` part. The answer cites claims as
 `[[claim-id]]`; when it ends, the server parses the text with
 [`src/lib/bot/citations.ts`](../src/lib/bot/citations.ts) and logs the ids of
-any citation that no tool returned. Then the answer's token usage is added to
-today's estimated spend.
+any citation that no tool returned. Then the token usage of every step that
+finished is added to today's estimated spend, once per answer, however it
+ended: finished, failed, or stopped by the visitor. When the visitor presses
+Stop or leaves, the request's abort signal cancels the model call, and the
+server keeps reading the stream to its end inside `waitUntil`, so the write to
+D1 still lands after they've gone. A
+step cut off halfway isn't counted ([`docs/tech-debt.md`](tech-debt.md)).
 
 **The answer on the page.** [`AssistantMessage.tsx`](../src/components/chat/AssistantMessage.tsx)
 renders the text with the same parser. A citation becomes a numbered marker and
