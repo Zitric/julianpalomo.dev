@@ -4,6 +4,7 @@ paths:
   - "src/routes/api/**"
   - "tests/unit/bot-tools.test.ts"
   - "tests/unit/chat-endpoint.test.ts"
+  - "tests/unit/citations.test.ts"
   - "tests/e2e/bundle.spec.ts"
 ---
 
@@ -20,6 +21,10 @@ must keep doing; the ADRs say why.
 - **Only `confirmedClaims()` feeds the model.** Nothing in the bot imports `claims.json` or `parseClaims`. `tests/unit/chat-endpoint.test.ts` checks that the endpoint's tools are built from `confirmedClaims()`.
 - **Every tool is read-only.** A tool returns pieces of the claims it was built from and never writes, sends or fetches. A claim leaves a tool with `id`, `label`, `org`, `source`, `area` and `text`, never `confirmedByJulian`.
 - **Visitor text is data, never instructions.** Only the text parts of the conversation reach the model: tool results and any other part in the history are dropped, because the visitor controls the history and could forge them. Nothing a visitor sends changes which tools or claims the model sees.
+
+## Citations
+
+- **A citation becomes a source only if a tool returned that claim while producing the same answer.** `src/lib/bot/citations.ts` is the one place `[[claim-id]]` markers are parsed, on the server and in the UI. The endpoint sends those claims as one `data-sources` part, and logs the ids of invalid citations, never the text.
 
 ## Where things live
 
@@ -43,4 +48,4 @@ must keep doing; the ADRs say why.
 
 It is at v7. Check its docs (shipped in `node_modules/ai/docs/` and `node_modules/@ai-sdk/anthropic/docs/`) for every API; v5 and v6 examples look similar and use different names.
 
-If `chat.ts` or `tools.ts` change shape, update this rule.
+If `chat.ts`, `tools.ts` or `citations.ts` change shape, update this rule.
