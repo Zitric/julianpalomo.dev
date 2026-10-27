@@ -31,7 +31,7 @@ must keep doing; the ADRs say why.
 ## The key and the endpoint
 
 - **The API key is read only on the server**, in `chat.ts` through the route. Without it the endpoint answers `503 { "error": "unavailable" }` and never creates a model; that's how previews and production run until the secret exists.
-- `/api/chat` is the one internal route the browser calls with `fetch`, through `useChat`; everything else goes through `createServerFn` (`react-and-typescript.md`).
+- `/api/chat` is the one internal route the browser may call with `fetch`, from `useChat` in the chat UI; everything else goes through `createServerFn` (`react-and-typescript.md`). Nothing in `src/` calls it yet.
 - Errors reach the client as `{ "error": ... }` or a fixed stream message, never a stack trace or the provider's message. The real error goes to `console.error`, which Workers observability keeps.
 - `tests/e2e/bundle.spec.ts` fails if the browser bundle contains `ANTHROPIC_API_KEY` or `confirmedByJulian`.
 
