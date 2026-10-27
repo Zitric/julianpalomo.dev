@@ -27,6 +27,16 @@
       "secrets": { "required": [] }
     }
   },
+  // The chat's daily limits (src/lib/bot/usage.ts). Not repeated under
+  // `previews` or `env.e2e`: there the endpoint has no key, answers in demo
+  // mode or "not available", and never touches D1.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "julianpalomo-dev",
+      "database_id": "da5589f3-a532-476f-a821-b8a86e4153bf"
+    }
+  ],
   "observability": {
     "enabled": true
   }

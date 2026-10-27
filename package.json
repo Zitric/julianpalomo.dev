@@ -11,7 +11,8 @@
     "check": "biome check && tsc",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "knip": "knip"
+    "knip": "knip",
+    "db:migrate:local": "wrangler d1 migrations apply julianpalomo-dev --local"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.88",
