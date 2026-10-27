@@ -1,1 +1,411 @@
-[]
+[
+  {
+    "id": "profile-location",
+    "label": "Location",
+    "text": "Based in Glasgow, UK.",
+    "area": "profile",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "profile-right-to-work",
+    "label": "Right to work",
+    "text": "Settled status: full right to work in the UK, no sponsorship required.",
+    "area": "profile",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "profile-work-mode",
+    "label": "Work mode",
+    "text": "Open to remote roles in the UK, or hybrid in Glasgow. For Edinburgh roles, works mostly remote and can travel sometimes to the office.",
+    "area": "profile",
+    "source": "julian",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "profile-london",
+    "label": "London roles",
+    "text": "For London roles, works mostly remote and can travel to London once a month.",
+    "area": "profile",
+    "source": "julian",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "profile-languages",
+    "label": "Languages",
+    "text": "Spanish (native), English (full professional proficiency).",
+    "area": "profile",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "cazoo-role",
+    "label": "Role",
+    "text": "Senior Frontend Engineer at Cazoo (formerly Motors.co.uk), Glasgow, UK, remote, July 2022 – August 2026.",
+    "area": "role",
+    "org": "Cazoo",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "cazoo-context",
+    "label": "Team and product",
+    "text": "Frontend engineer in a cross-functional squad (backend, QA, design, product manager, engineering manager) on Motors.co.uk, a UK car marketplace with ~250,000 vehicles from 4,000+ dealers and 500–700k monthly users (~1M sessions a month).",
+    "area": "experience",
+    "org": "Cazoo",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "cazoo-react-19",
+    "label": "React 17 → 19",
+    "text": "Upgraded the ASP.NET/React (ReactJS.NET) monolith from React 17 to 19 in two phases: moved rendering to hydrateRoot and refactored the server-rendered views onto a new renderComponent API (70+ files), moved the build to Node 22, upgraded Cypress, and adopted React 19 patterns (use(), no forwardRef) with Sentry error classification.",
+    "area": "experience",
+    "org": "Cazoo",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "cazoo-zustand",
+    "label": "Redux → Zustand",
+    "text": "Replaced Redux entirely with Zustand in the monolith (16 domain slices: search, shortlist, lead forms, account, dealer reviews, vehicle pages; ~240 files) and documented the new store for the team, then adopted the React Compiler and removed manual useMemo/useCallback.",
+    "area": "experience",
+    "org": "Cazoo",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "cazoo-ga4",
+    "label": "GA4",
+    "text": "Moved analytics to GA4 across both web apps: rebuilt the Next.js app's tracking on a single data layer (page, navigation and e-commerce events; 58 files) and removed the legacy Universal Analytics tracking and old GTM container from the monolith (300+ files).",
+    "area": "experience",
+    "org": "Cazoo",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "cazoo-growthbook",
+    "label": "GrowthBook feature flags",
+    "text": "Connected the Next.js app to GrowthBook feature flags served by the monolith, sent experiment exposure events to the GA4 data layer, and built an internal page and debug badge to QA flags before release.",
+    "area": "experience",
+    "org": "Cazoo",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "cazoo-onetrust",
+    "label": "OneTrust lazy-loading",
+    "text": "Lazy-loaded the OneTrust consent banner in the monolith after the page's load event, taking a third-party script out of the initial page load as part of the team's Core Web Vitals work.",
+    "area": "experience",
+    "org": "Cazoo",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "cazoo-modals",
+    "label": "Shared Radix modals",
+    "text": "Migrated the monolith's modals to a shared Modal component built on Radix UI, together with another engineer.",
+    "area": "experience",
+    "org": "Cazoo",
+    "source": "julian",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "cazoo-team",
+    "label": "Cross-functional work",
+    "text": "Worked day to day with backend, QA, design and the product manager from planning to release.",
+    "area": "experience",
+    "org": "Cazoo",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "format-role",
+    "label": "Overview",
+    "text": "Form:at, an offline-first PWA for a Glasgow electronic music collective: personal project, built solo, May 2026 – present. Live at formatglasgow.com; code at github.com/Zitric/form-at.",
+    "area": "project",
+    "org": "Form:at",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "format-offline",
+    "label": "Offline audio",
+    "text": "Designed, built and run in production on my own (500+ commits): a PWA that saves 90-minute mixes (100–220MB each) for playback with no signal, using IndexedDB with a storage-quota pre-flight, a custom service worker that serves HTTP Range requests for seeking, and lock-screen playback through the Media Session API.",
+    "area": "project",
+    "org": "Form:at",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "format-cloudflare",
+    "label": "Cloudflare stack",
+    "text": "Full stack on Cloudflare: TanStack Start (React 19) on Pages/Workers, D1 (SQLite) for the catalogue and analytics, R2 for audio with versioned immutable keys, direct-to-R2 presigned uploads for 220MB files, and Web Push sending that runs on Workers.",
+    "area": "project",
+    "org": "Form:at",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "format-admin",
+    "label": "Admin dashboard",
+    "text": "Admin dashboard behind Cloudflare Access, with server-side JWT verification on every write endpoint; a scheduled Worker archives real-user-monitoring data into D1.",
+    "area": "project",
+    "org": "Form:at",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "format-tooling",
+    "label": "Monorepo and tooling",
+    "text": "pnpm + Turborepo monorepo with a shared design system (Storybook, Chromatic visual tests), Vitest and Playwright tests on Chromium and WebKit, and CI/CD on GitHub Actions; built AI-assisted with Claude Code under a written agent working agreement (CLAUDE.md).",
+    "area": "project",
+    "org": "Form:at",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "oms-lead-role",
+    "label": "Lead role",
+    "text": "Lead Full Stack Developer at Orders Made Simple, Edinburgh, UK, September 2021 – May 2022.",
+    "area": "role",
+    "org": "Orders Made Simple",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "oms-promotion",
+    "label": "Promotion",
+    "text": "Promoted from Full Stack Developer to lead after six months.",
+    "area": "experience",
+    "org": "Orders Made Simple",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "oms-lead",
+    "label": "Technical lead",
+    "text": "Technical lead for a team of 4 developers across web (React), mobile (React Native) and a serverless Node.js backend: owned technical decisions and mentored the junior engineers.",
+    "area": "experience",
+    "org": "Orders Made Simple",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "oms-takeover",
+    "label": "First permanent developer",
+    "text": "First permanent developer at the company: took over the React, React Native and serverless AWS projects (Lambda, API Gateway, S3, Cognito, MongoDB, Netlify, Bitbucket Pipelines) that an outside consultancy had built, and kept developing them as the team grew with permanent hires and contractors.",
+    "area": "experience",
+    "org": "Orders Made Simple",
+    "source": "julian",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "oms-dev-role",
+    "label": "Developer role",
+    "text": "Full Stack Developer at Orders Made Simple, Edinburgh, UK, March 2021 – September 2021.",
+    "area": "role",
+    "org": "Orders Made Simple",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "oms-features",
+    "label": "Web, mobile and backend",
+    "text": "Delivered features across three codebases: React (web), React Native (mobile app) and Node.js (serverless backend).",
+    "area": "experience",
+    "org": "Orders Made Simple",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "oms-handover",
+    "label": "Knowledge transfer",
+    "text": "Inherited three undocumented projects and new-to-me technologies (React Native, Lambda, MongoDB); ran knowledge-transfer sessions so the team no longer depended on one person.",
+    "area": "experience",
+    "org": "Orders Made Simple",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "markup-role",
+    "label": "Role",
+    "text": "Front End Developer at Markup, Glasgow, UK, September 2019 – March 2021.",
+    "area": "role",
+    "org": "Markup",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "markup-gant",
+    "label": "Gant e-commerce",
+    "text": "Built and maintained e-commerce web applications for an international fashion brand (Gant), in a mid-sized agile team.",
+    "area": "experience",
+    "org": "Markup",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "markup-design-system",
+    "label": "Design system",
+    "text": "Built components in a shared design system and component library; modelled content in Contentful; refactored legacy code into modern structures.",
+    "area": "experience",
+    "org": "Markup",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "stampede-role",
+    "label": "Role",
+    "text": "Front End Software Engineer at Stampede (formerly BlackBx), Edinburgh, UK, November 2018 – June 2019.",
+    "area": "role",
+    "org": "Stampede",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "stampede-react",
+    "label": "AngularJS → React",
+    "text": "Refactored legacy AngularJS websites into React with TypeScript, with unit tests in Jest and React Testing Library, working with designers, backend engineers and product owners.",
+    "area": "experience",
+    "org": "Stampede",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "career-transition",
+    "label": "Career transition",
+    "text": "September 2017 – October 2018: self-directed reskilling from enterprise tooling (WebRatio, Groovy, Java) into React, Redux and TypeScript while relocating from Salamanca, Spain to Scotland.",
+    "area": "experience",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "homeria-role",
+    "label": "Role",
+    "text": "Junior Full Stack Developer at Homeria Open Solutions, Cáceres, Spain, October 2014 – July 2017.",
+    "area": "role",
+    "org": "Homeria Open Solutions",
+    "source": "julian",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "homeria-projects",
+    "label": "Client projects",
+    "text": "Worked on client projects across frontend and backend, including Burger King's home-delivery platform.",
+    "area": "experience",
+    "org": "Homeria Open Solutions",
+    "source": "julian",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "looplay-role",
+    "label": "Role",
+    "text": "Web Developer at Looplay Music, Badajoz, Spain, April 2013 – June 2014.",
+    "area": "role",
+    "org": "Looplay Music",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "looplay-web",
+    "label": "Company website",
+    "text": "Designed and built the company blog and corporate website; contributed to architecture and application design decisions.",
+    "area": "experience",
+    "org": "Looplay Music",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "skills-core",
+    "label": "Core skills",
+    "text": "React (7+ years), TypeScript (5 years), JavaScript (10+ years), Node.js (3+ years), Next.js, HTML5, CSS3.",
+    "area": "skill",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "skills-frontend",
+    "label": "Frontend skills",
+    "text": "Zustand, Redux, React Compiler, React Native, TanStack Start, Tailwind CSS, SASS, design systems and component libraries (Storybook).",
+    "area": "skill",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "skills-web-platform",
+    "label": "Web platform skills",
+    "text": "PWA, Service Workers, IndexedDB, Web Push, Media Session API, web performance (Core Web Vitals, Lighthouse).",
+    "area": "skill",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "skills-backend-cloud",
+    "label": "Backend and cloud skills",
+    "text": "Cloudflare (Workers, Pages, D1, R2), AWS (Lambda, API Gateway, S3, Cognito), Node.js, MongoDB, SQL (SQLite), REST, GraphQL (working knowledge), Microsoft Azure.",
+    "area": "skill",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "skills-testing",
+    "label": "Testing and quality skills",
+    "text": "Vitest, Jest, React Testing Library, Playwright, Cypress, Sentry, Knip, Biome.",
+    "area": "skill",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "skills-analytics",
+    "label": "Analytics skills",
+    "text": "Google Analytics 4, GrowthBook, A/B testing, feature flags.",
+    "area": "skill",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "skills-ai",
+    "label": "AI-assisted development",
+    "text": "Claude Code, GitHub Copilot (code review workflow), agent context files (AGENTS.md / CLAUDE.md).",
+    "area": "skill",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "skills-tooling",
+    "label": "Tooling and delivery skills",
+    "text": "pnpm, Turborepo, GitHub Actions, Azure DevOps, Bitbucket Pipelines, Agile/Scrum.",
+    "area": "skill",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "education-degree",
+    "label": "Computer Engineering degree",
+    "text": "Computer Engineering, Universidad de Extremadura, Cáceres, Spain, 2002 – 2009.",
+    "area": "education",
+    "org": "Universidad de Extremadura",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "cert-claude-code-101",
+    "label": "Claude Code 101",
+    "text": "Claude Code 101, Anthropic (Claude Academy), October 2026.",
+    "area": "certification",
+    "org": "Anthropic",
+    "source": "cv",
+    "confirmedByJulian": null
+  },
+  {
+    "id": "cert-azure-fundamentals",
+    "label": "Azure Fundamentals",
+    "text": "Microsoft Certified: Azure Fundamentals, Microsoft, January 2026.",
+    "area": "certification",
+    "org": "Microsoft",
+    "source": "cv",
+    "confirmedByJulian": null
+  }
+]
