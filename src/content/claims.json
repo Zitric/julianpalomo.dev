@@ -5,7 +5,7 @@
     "text": "Based in Glasgow, UK.",
     "area": "profile",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "profile-right-to-work",
@@ -13,7 +13,7 @@
     "text": "Settled status: full right to work in the UK, no sponsorship required.",
     "area": "profile",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "profile-work-mode",
@@ -21,7 +21,7 @@
     "text": "Open to remote roles in the UK, or hybrid in Glasgow. For Edinburgh roles, works mostly remote and can travel sometimes to the office.",
     "area": "profile",
     "source": "julian",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "profile-london",
@@ -29,7 +29,7 @@
     "text": "For London roles, works mostly remote and can travel to London once a month.",
     "area": "profile",
     "source": "julian",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "profile-languages",
@@ -37,7 +37,7 @@
     "text": "Spanish (native), English (full professional proficiency).",
     "area": "profile",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "cazoo-role",
@@ -46,7 +46,7 @@
     "area": "role",
     "org": "Cazoo",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "cazoo-context",
@@ -55,7 +55,7 @@
     "area": "experience",
     "org": "Cazoo",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "cazoo-react-19",
@@ -64,7 +64,7 @@
     "area": "experience",
     "org": "Cazoo",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "cazoo-zustand",
@@ -73,7 +73,7 @@
     "area": "experience",
     "org": "Cazoo",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "cazoo-ga4",
@@ -82,7 +82,7 @@
     "area": "experience",
     "org": "Cazoo",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "cazoo-growthbook",
@@ -91,7 +91,7 @@
     "area": "experience",
     "org": "Cazoo",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "cazoo-onetrust",
@@ -100,7 +100,7 @@
     "area": "experience",
     "org": "Cazoo",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "cazoo-modals",
@@ -109,7 +109,7 @@
     "area": "experience",
     "org": "Cazoo",
     "source": "julian",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "cazoo-team",
@@ -118,7 +118,7 @@
     "area": "experience",
     "org": "Cazoo",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "format-role",
@@ -127,7 +127,7 @@
     "area": "project",
     "org": "Form:at",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "format-offline",
@@ -136,7 +136,7 @@
     "area": "project",
     "org": "Form:at",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "format-cloudflare",
@@ -145,7 +145,7 @@
     "area": "project",
     "org": "Form:at",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "format-admin",
@@ -154,7 +154,7 @@
     "area": "project",
     "org": "Form:at",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "format-tooling",
@@ -163,7 +163,7 @@
     "area": "project",
     "org": "Form:at",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "oms-lead-role",
@@ -172,7 +172,7 @@
     "area": "role",
     "org": "Orders Made Simple",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "oms-promotion",
@@ -181,7 +181,7 @@
     "area": "experience",
     "org": "Orders Made Simple",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "oms-lead",
@@ -190,7 +190,7 @@
     "area": "experience",
     "org": "Orders Made Simple",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "oms-takeover",
@@ -199,7 +199,7 @@
     "area": "experience",
     "org": "Orders Made Simple",
     "source": "julian",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "oms-dev-role",
@@ -208,7 +208,7 @@
     "area": "role",
     "org": "Orders Made Simple",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "oms-features",
@@ -217,7 +217,7 @@
     "area": "experience",
     "org": "Orders Made Simple",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "oms-handover",
@@ -226,7 +226,7 @@
     "area": "experience",
     "org": "Orders Made Simple",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "markup-role",
@@ -235,7 +235,7 @@
     "area": "role",
     "org": "Markup",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "markup-gant",
@@ -244,7 +244,7 @@
     "area": "experience",
     "org": "Markup",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "markup-design-system",
@@ -253,7 +253,7 @@
     "area": "experience",
     "org": "Markup",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "stampede-role",
@@ -262,7 +262,7 @@
     "area": "role",
     "org": "Stampede",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "stampede-react",
@@ -271,7 +271,7 @@
     "area": "experience",
     "org": "Stampede",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "career-transition",
@@ -279,7 +279,7 @@
     "text": "September 2017 – October 2018: self-directed reskilling from enterprise tooling (WebRatio, Groovy, Java) into React, Redux and TypeScript while relocating from Salamanca, Spain to Scotland.",
     "area": "experience",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "homeria-role",
@@ -288,7 +288,7 @@
     "area": "role",
     "org": "Homeria Open Solutions",
     "source": "julian",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "homeria-projects",
@@ -297,7 +297,7 @@
     "area": "experience",
     "org": "Homeria Open Solutions",
     "source": "julian",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "looplay-role",
@@ -306,7 +306,7 @@
     "area": "role",
     "org": "Looplay Music",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "looplay-web",
@@ -315,7 +315,7 @@
     "area": "experience",
     "org": "Looplay Music",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "skills-core",
@@ -323,7 +323,7 @@
     "text": "React (7+ years), TypeScript (5 years), JavaScript (10+ years), Node.js (3+ years), Next.js, HTML5, CSS3.",
     "area": "skill",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "skills-frontend",
@@ -331,7 +331,7 @@
     "text": "Zustand, Redux, React Compiler, React Native, TanStack Start, Tailwind CSS, SASS, design systems and component libraries (Storybook).",
     "area": "skill",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "skills-web-platform",
@@ -339,7 +339,7 @@
     "text": "PWA, Service Workers, IndexedDB, Web Push, Media Session API, web performance (Core Web Vitals, Lighthouse).",
     "area": "skill",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "skills-backend-cloud",
@@ -347,7 +347,7 @@
     "text": "Cloudflare (Workers, Pages, D1, R2), AWS (Lambda, API Gateway, S3, Cognito), Node.js, MongoDB, SQL (SQLite), REST, GraphQL (working knowledge), Microsoft Azure.",
     "area": "skill",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "skills-testing",
@@ -355,7 +355,7 @@
     "text": "Vitest, Jest, React Testing Library, Playwright, Cypress, Sentry, Knip, Biome.",
     "area": "skill",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "skills-analytics",
@@ -363,7 +363,7 @@
     "text": "Google Analytics 4, GrowthBook, A/B testing, feature flags.",
     "area": "skill",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "skills-ai",
@@ -371,7 +371,7 @@
     "text": "Claude Code, GitHub Copilot (code review workflow), agent context files (AGENTS.md / CLAUDE.md).",
     "area": "skill",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "skills-tooling",
@@ -379,7 +379,7 @@
     "text": "pnpm, Turborepo, GitHub Actions, Azure DevOps, Bitbucket Pipelines, Agile/Scrum.",
     "area": "skill",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "education-degree",
@@ -388,7 +388,7 @@
     "area": "education",
     "org": "Universidad de Extremadura",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "cert-claude-code-101",
@@ -397,7 +397,7 @@
     "area": "certification",
     "org": "Anthropic",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   },
   {
     "id": "cert-azure-fundamentals",
@@ -406,6 +406,6 @@
     "area": "certification",
     "org": "Microsoft",
     "source": "cv",
-    "confirmedByJulian": null
+    "confirmedByJulian": "2026-10-27"
   }
 ]
