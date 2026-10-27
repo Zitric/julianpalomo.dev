@@ -122,7 +122,7 @@
   },
   {
     "id": "format-role",
-    "label": "Project",
+    "label": "Overview",
     "text": "Form:at, an offline-first PWA for a Glasgow electronic music collective: personal project, built solo, May 2026 – present. Live at formatglasgow.com; code at github.com/Zitric/form-at.",
     "area": "project",
     "org": "Form:at",
@@ -212,7 +212,7 @@
   },
   {
     "id": "oms-features",
-    "label": "Three codebases",
+    "label": "Web, mobile and backend",
     "text": "Delivered features across three codebases: React (web), React Native (mobile app) and Node.js (serverless backend).",
     "area": "experience",
     "org": "Orders Made Simple",
