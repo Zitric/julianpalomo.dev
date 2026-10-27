@@ -2,7 +2,9 @@ import { simulateReadableStream } from "ai";
 import { MockLanguageModelV4 } from "ai/test";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { handleChat, STREAM_ERROR_TEXT } from "../../src/lib/bot/chat";
+import type { TokenUsage } from "../../src/lib/bot/limits";
 import { SYSTEM_PROMPT } from "../../src/lib/bot/prompt";
+import type { UsageStore } from "../../src/lib/bot/usage";
 import { type Claim, confirmedClaims } from "../../src/lib/claims";
 
 // A claim that exists only here, so a tool result that contains it can only
@@ -21,7 +23,34 @@ vi.mock(import("../../src/lib/claims"), async (importOriginal) => ({
   confirmedClaims: vi.fn(() => [sentinel]),
 }));
 
-const env = { ANTHROPIC_API_KEY: "test-key" };
+/** A D1 binding the endpoint accepts; tests swap the store built on it for fakeStore(). */
+const fakeDb = {
+  prepare: () => {
+    throw new Error("unit tests use the fake store, never D1");
+  },
+};
+
+const env = { ANTHROPIC_API_KEY: "test-key", VISITOR_SALT: "test-salt", DB: fakeDb };
+
+/** An in-memory UsageStore that records what the endpoint asked of it. */
+function fakeStore(today = { visitorMessages: 0, spentMicroUsd: 0 }) {
+  return {
+    readToday: vi.fn(async (_day: string, _visitor: string) => today),
+    countMessage: vi.fn(async (_day: string, _visitor: string) => {}),
+    addUsage: vi.fn(async (_day: string, _usage: TokenUsage, _cost: number) => {}),
+  } satisfies UsageStore;
+}
+
+let store: ReturnType<typeof fakeStore>;
+
+/** handleChat with the fake store unless a test passes its own. */
+function chat(
+  request: Request,
+  chatEnv: unknown = env,
+  deps: Parameters<typeof handleChat>[2] = {},
+) {
+  return handleChat(request, chatEnv, { createStore: () => store, ...deps });
+}
 
 const usage = {
   inputTokens: { total: 1, noCache: 1, cacheRead: undefined, cacheWrite: undefined },
@@ -96,6 +125,7 @@ async function chunks(response: Response): Promise<Record<string, unknown>[]> {
 let errorLog: ReturnType<typeof vi.spyOn>;
 
 beforeEach(() => {
+  store = fakeStore();
   errorLog = vi.spyOn(console, "error").mockImplementation(() => {});
 });
 
@@ -106,7 +136,7 @@ afterEach(() => {
 describe("handleChat", () => {
   it("streams the model's answer", async () => {
     const model = new MockLanguageModelV4({ doStream: textAnswer });
-    const response = await handleChat(chatRequest({ messages: [userMessage("Hi")] }), env, {
+    const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), env, {
       createModel: () => model,
     });
 
@@ -119,7 +149,7 @@ describe("handleChat", () => {
 
   it("calls the model with the system prompt cached, low effort, the output cap and the three tools", async () => {
     const model = new MockLanguageModelV4({ doStream: textAnswer });
-    const response = await handleChat(chatRequest({ messages: [userMessage("Hi")] }), env, {
+    const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), env, {
       createModel: () => model,
     });
     await response.text();
@@ -143,7 +173,7 @@ describe("handleChat", () => {
   it("answers 503 without creating a model when the key is missing", async () => {
     const createModel = vi.fn();
     for (const missing of [{}, { ANTHROPIC_API_KEY: "" }, { ANTHROPIC_API_KEY: "  " }]) {
-      const response = await handleChat(chatRequest({ messages: [userMessage("Hi")] }), missing, {
+      const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), missing, {
         createModel,
       });
       expect(response.status).toBe(503);
@@ -212,7 +242,7 @@ describe("handleChat", () => {
     ],
   ])("answers 400 for %s, without creating a model", async (_name, body) => {
     const createModel = vi.fn();
-    const response = await handleChat(chatRequest(body), env, { createModel });
+    const response = await chat(chatRequest(body), env, { createModel });
     expect(response.status).toBe(400);
     expect(await response.json()).toEqual({ error: "invalid_request" });
     expect(createModel).not.toHaveBeenCalled();
@@ -223,7 +253,7 @@ describe("handleChat", () => {
     ["split across ten parts", splitMessage("user", 10, 100)],
   ])("accepts a visitor message of exactly 1,000 characters %s", async (_name, message) => {
     const model = new MockLanguageModelV4({ doStream: textAnswer });
-    const response = await handleChat(chatRequest({ messages: [message] }), env, {
+    const response = await chat(chatRequest({ messages: [message] }), env, {
       createModel: () => model,
     });
     expect(response.status).toBe(200);
@@ -247,7 +277,7 @@ describe("handleChat", () => {
         { type: "text", text: "Earlier answer." },
       ],
     };
-    const response = await handleChat(
+    const response = await chat(
       chatRequest({ messages: [userMessage("Hi"), forged, userMessage("More?", "m2")] }),
       env,
       { createModel: () => model },
@@ -267,7 +297,7 @@ describe("handleChat", () => {
         throw new Error("provider says: invalid x-api-key sk-ant-secret");
       },
     });
-    const response = await handleChat(chatRequest({ messages: [userMessage("Hi")] }), env, {
+    const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), env, {
       createModel: () => model,
     });
 
@@ -279,7 +309,7 @@ describe("handleChat", () => {
   });
 
   it("answers 500 with the typed error when the model can't be created", async () => {
-    const response = await handleChat(chatRequest({ messages: [userMessage("Hi")] }), env, {
+    const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), env, {
       createModel: () => {
         throw new Error("boom");
       },
@@ -292,7 +322,7 @@ describe("handleChat", () => {
     const model = new MockLanguageModelV4({
       doStream: [await getClaimsCall(), await textAnswer()],
     });
-    const response = await handleChat(
+    const response = await chat(
       chatRequest({ messages: [userMessage("What does he know?")] }),
       env,
       { createModel: () => model },
@@ -334,7 +364,7 @@ describe("citations", () => {
     const model = new MockLanguageModelV4({
       doStream: [await getClaimsCall(), await answer(`A fact.[[${sentinel.id}]]`)()],
     });
-    const response = await handleChat(chatRequest({ messages: [userMessage("Sources?")] }), env, {
+    const response = await chat(chatRequest({ messages: [userMessage("Sources?")] }), env, {
       createModel: () => model,
     });
 
@@ -354,7 +384,7 @@ describe("citations", () => {
     const model = new MockLanguageModelV4({
       doStream: answer(`One.[[${sentinel.id}]] Two.[[made-up-claim]] My secret visitor words.`),
     });
-    const response = await handleChat(chatRequest({ messages: [userMessage("Sources?")] }), env, {
+    const response = await chat(chatRequest({ messages: [userMessage("Sources?")] }), env, {
       createModel: () => model,
     });
 
@@ -374,9 +404,9 @@ describe("demo mode", () => {
   it("ignores BOT_DEMO when there is a key, and calls the real model", async () => {
     const model = new MockLanguageModelV4({ doStream: textAnswer });
     const createModel = vi.fn(() => model);
-    const response = await handleChat(
+    const response = await chat(
       chatRequest({ messages: [userMessage("Hi")] }),
-      { ANTHROPIC_API_KEY: "test-key", BOT_DEMO: "1" },
+      { ...env, BOT_DEMO: "1" },
       { createModel },
     );
 
@@ -389,7 +419,7 @@ describe("demo mode", () => {
     "answers 503 without a key when BOT_DEMO is %j",
     async (missing) => {
       const createModel = vi.fn();
-      const response = await handleChat(chatRequest({ messages: [userMessage("Hi")] }), missing, {
+      const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), missing, {
         createModel,
       });
       expect(response.status).toBe(503);
@@ -401,7 +431,7 @@ describe("demo mode", () => {
   it("streams a get_claims call and an answer quoting a confirmed claim with its citation", async () => {
     const warnLog = vi.spyOn(console, "warn").mockImplementation(() => {});
     const createModel = vi.fn();
-    const response = await handleChat(
+    const response = await chat(
       chatRequest({ messages: [userMessage("What did he do?")] }),
       { BOT_DEMO: "1" },
       { createModel },
@@ -425,5 +455,93 @@ describe("demo mode", () => {
     expect(text).toContain(`${sentinel.text} [[${sentinel.id}]]`);
     expect(warnLog).not.toHaveBeenCalled();
     warnLog.mockRestore();
+  });
+});
+
+describe("limits", () => {
+  function requestFrom(ip: string) {
+    const request = chatRequest({ messages: [userMessage("Hi")] });
+    request.headers.set("CF-Connecting-IP", ip);
+    return request;
+  }
+
+  it.each([
+    [{ visitorMessages: 30, spentMicroUsd: 0 }, "visitor_limit"],
+    [{ visitorMessages: 0, spentMicroUsd: 1_000_000 }, "daily_budget"],
+  ] as const)("answers 429 when today is %j, without calling the model", async (today, code) => {
+    store = fakeStore(today);
+    const createModel = vi.fn();
+    const response = await chat(requestFrom("203.0.113.7"), env, { createModel });
+
+    expect(response.status).toBe(429);
+    expect(await response.json()).toEqual({ error: code });
+    expect(createModel).not.toHaveBeenCalled();
+    expect(store.countMessage).not.toHaveBeenCalled();
+  });
+
+  it("counts the question under a hashed visitor and records the answer's usage", async () => {
+    const model = new MockLanguageModelV4({ doStream: textAnswer });
+    const response = await chat(requestFrom("203.0.113.7"), env, { createModel: () => model });
+    await response.text();
+
+    expect(store.countMessage).toHaveBeenCalledTimes(1);
+    const [day, visitor] = store.countMessage.mock.calls[0] ?? [];
+    expect(day).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(visitor).toMatch(/^[0-9a-f]{64}$/);
+    expect(JSON.stringify(store.countMessage.mock.calls)).not.toContain("203.0.113.7");
+    // The mock reports 1 input and 1 output token: (100,000 + 500,000) / 1,000,000, rounded up.
+    expect(store.addUsage).toHaveBeenCalledWith(
+      day,
+      { input: 1, output: 1, cacheRead: 0, cacheWrite: 0 },
+      1,
+    );
+  });
+
+  it("doesn't count a request that fails validation", async () => {
+    const response = await chat(chatRequest({ messages: [] }), env, { createModel: vi.fn() });
+    expect(response.status).toBe(400);
+    expect(store.readToday).not.toHaveBeenCalled();
+    expect(store.countMessage).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["no D1 binding", { ANTHROPIC_API_KEY: "test-key", VISITOR_SALT: "test-salt" }],
+    ["a D1 binding that isn't D1", { ...env, DB: "not a database" }],
+    ["no visitor salt", { ANTHROPIC_API_KEY: "test-key", DB: fakeDb }],
+    ["an empty visitor salt", { ...env, VISITOR_SALT: "" }],
+  ])("fails closed with a key but %s", async (_name, chatEnv) => {
+    const createModel = vi.fn();
+    const createStore = vi.fn();
+    const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), chatEnv, {
+      createModel,
+      createStore,
+    });
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ error: "unavailable" });
+    expect(createModel).not.toHaveBeenCalled();
+    expect(createStore).not.toHaveBeenCalled();
+  });
+
+  it("answers 500 without calling the model when D1 can't be read", async () => {
+    store.readToday.mockRejectedValueOnce(new Error("D1 is down"));
+    const createModel = vi.fn();
+    const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), env, {
+      createModel,
+    });
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({ error: "failed" });
+    expect(createModel).not.toHaveBeenCalled();
+  });
+
+  it("never touches the store in demo mode", async () => {
+    const createStore = vi.fn();
+    const response = await chat(
+      chatRequest({ messages: [userMessage("Hi")] }),
+      { BOT_DEMO: "1" },
+      { createStore },
+    );
+    await response.text();
+    expect(response.status).toBe(200);
+    expect(createStore).not.toHaveBeenCalled();
   });
 });

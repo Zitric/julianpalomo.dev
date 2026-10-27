@@ -6,7 +6,7 @@
 import { z } from "zod";
 
 export const chatErrorSchema = z.object({
-  error: z.enum(["invalid_request", "unavailable", "failed"]),
+  error: z.enum(["invalid_request", "unavailable", "failed", "visitor_limit", "daily_budget"]),
 });
 
 export type ChatErrorCode = z.infer<typeof chatErrorSchema>["error"];

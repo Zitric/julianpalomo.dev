@@ -98,6 +98,15 @@ describe("chatErrorMessage", () => {
     );
   });
 
+  it("says which daily limit was reached for each 429 body", () => {
+    expect(chatErrorMessage(new Error(JSON.stringify(chatErrorBody("visitor_limit"))))).toBe(
+      "You've reached today's limit for questions.",
+    );
+    expect(chatErrorMessage(new Error(JSON.stringify(chatErrorBody("daily_budget"))))).toBe(
+      "The assistant has reached its daily budget. Try again tomorrow.",
+    );
+  });
+
   it.each([
     JSON.stringify(chatErrorBody("failed")),
     JSON.stringify(chatErrorBody("invalid_request")),
