@@ -1,6 +1,6 @@
 # The Vercel AI SDK with Claude and read-only tools
 
-- **Status:** Accepted
+- **Status:** Accepted. The SDK version (v6) is superseded by `2026-10-27-claude-model-and-ai-sdk-7.md`
 - **Date:** 2026-10-26
 
 ## Context

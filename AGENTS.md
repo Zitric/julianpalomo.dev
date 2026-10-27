@@ -56,6 +56,7 @@ wrangler commands that change Cloudflare.
 
 - `src/routes/`: file-based routes. `src/routeTree.gen.ts` is generated; never edit it by hand.
 - `src/lib/`: plain TypeScript modules, such as `site.ts`.
+- `src/lib/bot/`: the assistant: model settings, the system prompt, the read-only tools and the chat logic. `src/routes/api/chat.ts` is its endpoint, `POST /api/chat`.
 - `src/content/`: personal content, such as `claims.json`. It isn't MIT (`LICENSE`, section 2), and in `src/` only `src/lib/claims.ts` reads it.
 - `src/styles/tokens.css`: the only place colours are defined.
 - `tests/unit/`: Vitest. `tests/e2e/`: Playwright, against the production build.
