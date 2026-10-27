@@ -13,10 +13,13 @@ function todayUtc(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+/** What a claim id looks like: kebab-case, lowercase letters and digits. */
+export const CLAIM_ID_PATTERN = /[a-z0-9]+(?:-[a-z0-9]+)*/;
+
 // Strict on purpose: a misspelt `confirmedByJulian` must fail, not read as an
 // unconfirmed claim with an extra field.
 const claimSchema = z.strictObject({
-  id: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "id must be kebab-case"),
+  id: z.string().regex(new RegExp(`^${CLAIM_ID_PATTERN.source}$`), "id must be kebab-case"),
   label: z.string().trim().min(1),
   text: z.string().trim().min(1),
   area: z.enum(["profile", "role", "experience", "project", "skill", "education", "certification"]),
