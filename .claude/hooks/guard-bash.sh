@@ -33,9 +33,28 @@ want_ask() { [ -z "$ask_reason" ] && ask_reason="$1"; }
 current_branch() { git -C "$repo_dir" rev-parse --abbrev-ref HEAD 2>/dev/null; }
 tracked_changes() { git -C "$repo_dir" status --porcelain --untracked-files=no 2>/dev/null; }
 
+# True when an argument of the `git checkout …` in $1 is an existing path.
+# Paths resolve against the repo root, not against an earlier `cd` or `git -C`;
+# a miss falls through to the branch-switch block, which errs on the safe side.
+names_a_path() {
+  local a
+  set -f
+  for a in $(printf '%s' "$1" | sed -E "s/^git +checkout//; s/[\"']//g"); do
+    case "$a" in -*) continue ;; esac
+    case "$a" in /*) [ -e "$a" ] ;; *) [ -e "$repo_dir/$a" ] ;; esac && {
+      set +f
+      return 0
+    }
+  done
+  set +f
+  return 1
+}
+
 # No attribution in a commit or PR: authorship is the repo owner's git config,
 # and settings.json's `attribution` keeps Claude Code from adding its own.
-attribution_re='co-authored-by|generated with|noreply@anthropic\.com|claude\.com/claude-code|claude\.ai/code/session|🤖'
+# "generated with" must start a word, so "regenerated with" passes. [^a-zA-Z]
+# rather than [^a-z]: BSD and GNU grep don't agree on how -i folds brackets.
+attribution_re='co-authored-by|(^|[^a-zA-Z])generated with|noreply@anthropic\.com|claude\.com/claude-code|claude\.ai/code/session|🤖'
 if printf '%s' "$cmd" | grep -qE '(^|[;&| ])(git( +-C +[^ ]+)* +commit|gh +pr +(create|edit))'; then
   if printf '%s' "$cmd" | grep -qiE "$attribution_re"; then
     block "the commit/PR text contains an attribution line (Co-Authored-By, \"Generated with\", a Claude session link). Commits are authored as the repo owner with no attribution."
@@ -103,6 +122,8 @@ while IFS= read -r raw; do
       want_ask "git checkout -- <path> discards working-tree changes."
     elif printf '%s' "$g" | grep -qE '^git +(checkout +-[bB]|switch +-[cC]|switch +--create)( |$)'; then
       : # Creating a branch keeps the working tree as it is.
+    elif printf '%s' "$g" | grep -qE '^git +checkout( |$)' && names_a_path "$g"; then
+      want_ask "git checkout <path> discards working-tree changes."
     elif [ -n "$(tracked_changes)" ]; then
       block "switching branches with uncommitted tracked changes. Commit them, or use a git worktree for the other branch."
     fi
