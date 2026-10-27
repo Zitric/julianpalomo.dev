@@ -20,6 +20,9 @@
   // mode and never call the model.
   "env": {
     "e2e": {
+      // Empty so this environment never inherits, and never takes over, the
+      // production custom domain.
+      "routes": [],
       "vars": { "BOT_DEMO": "1" },
       "secrets": { "required": [] }
     }
