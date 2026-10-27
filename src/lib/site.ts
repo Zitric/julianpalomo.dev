@@ -1,5 +1,5 @@
 export const site = {
-  name: "Julián Palomo",
+  name: "Julian Palomo",
   role: "Senior Frontend | Full-stack Engineer",
 } as const;
 
