@@ -291,10 +291,11 @@ describe("handleChat", () => {
     expect(prompt).not.toContain("astronaut");
   });
 
-  it("streams a generic error, logs the real one, and never leaks the provider's message", async () => {
+  it("streams a generic error, logs the real one once, and never leaks the provider's message", async () => {
+    const providerError = new Error("provider says: invalid x-api-key sk-ant-secret");
     const model = new MockLanguageModelV4({
       doStream: async () => {
-        throw new Error("provider says: invalid x-api-key sk-ant-secret");
+        throw providerError;
       },
     });
     const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), env, {
@@ -305,7 +306,26 @@ describe("handleChat", () => {
     expect(body).toContain(STREAM_ERROR_TEXT);
     expect(body).not.toContain("x-api-key");
     expect(body).not.toContain("sk-ant-secret");
-    expect(errorLog).toHaveBeenCalled();
+    expect(errorLog).toHaveBeenCalledTimes(1);
+    expect(errorLog).toHaveBeenCalledWith("chat stream failed", providerError);
+  });
+
+  it("logs an error part in the middle of an answer once", async () => {
+    const providerError = new Error("overloaded");
+    const model = new MockLanguageModelV4({
+      doStream: streamOf([
+        { type: "text-start", id: "t1" },
+        { type: "text-delta", id: "t1", delta: "Hel" },
+        { type: "error", error: providerError },
+      ]),
+    });
+    const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), env, {
+      createModel: () => model,
+    });
+
+    expect(await response.text()).toContain(STREAM_ERROR_TEXT);
+    expect(errorLog).toHaveBeenCalledTimes(1);
+    expect(errorLog).toHaveBeenCalledWith("chat stream failed", providerError);
   });
 
   it("answers 500 with the typed error when the model can't be created", async () => {

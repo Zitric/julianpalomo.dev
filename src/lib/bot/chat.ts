@@ -196,10 +196,7 @@ export async function handleChat(
     );
     const tools = buildTools(confirmedClaims());
     const model = apiKey === undefined ? createDemoModel() : deps.createModel(apiKey);
-    const onError = (error: unknown) => {
-      console.error("chat stream failed", error);
-      return STREAM_ERROR_TEXT;
-    };
+    const logStreamError = (error: unknown) => console.error("chat stream failed", error);
 
     const stream = createUIMessageStream<ChatUIMessage>({
       execute: ({ writer }) => {
@@ -222,6 +219,9 @@ export async function handleChat(
           stopWhen: isStepCount(MAX_STEPS),
           maxOutputTokens: MAX_OUTPUT_TOKENS,
           providerOptions: { anthropic: anthropicOptions },
+          // The one log of a model error. Without it the SDK logs the error
+          // itself, and the UI stream below would log it a second time.
+          onError: ({ error }) => logStreamError(error),
           onToolExecutionEnd: ({ toolOutput }) => {
             if (toolOutput.type !== "tool-result") return;
             const output = claimsOutputSchema.safeParse(toolOutput.output);
@@ -250,9 +250,20 @@ export async function handleChat(
             });
           },
         });
-        writer.merge(toUIMessageStream({ stream: result.stream, sendStart: false, onError }));
+        writer.merge(
+          toUIMessageStream({
+            stream: result.stream,
+            sendStart: false,
+            // Already logged by streamText's onError: only turn it into the fixed text.
+            onError: () => STREAM_ERROR_TEXT,
+          }),
+        );
       },
-      onError,
+      // Errors outside the model's stream, which streamText never sees.
+      onError: (error) => {
+        logStreamError(error);
+        return STREAM_ERROR_TEXT;
+      },
     });
     return createUIMessageStreamResponse({ stream });
   } catch (error) {
