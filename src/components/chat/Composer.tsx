@@ -21,7 +21,7 @@ export function Composer({ value, onChange, onSend, onStop, busy }: Props) {
 
   const counterText =
     over > 0
-      ? `${numberFormat.format(over)} characters over the ${numberFormat.format(MAX_VISITOR_TEXT)} limit`
+      ? `${numberFormat.format(over)} ${over === 1 ? "character" : "characters"} over the ${numberFormat.format(MAX_VISITOR_TEXT)} limit`
       : `${numberFormat.format(length)} / ${numberFormat.format(MAX_VISITOR_TEXT)}`;
   const counterClass = over > 0 ? "text-danger" : "text-muted";
 
