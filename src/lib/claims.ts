@@ -50,13 +50,17 @@ export function keepConfirmed(claims: readonly Claim[]): Claim[] {
   return claims.filter((claim) => claim.confirmedByJulian !== null);
 }
 
-// Parsed on load, so an invalid file fails `pnpm test` before it can merge.
-const claims = parseClaims(data);
+// Parsed on first use, inside a request, never at module load. In Workers,
+// `Date` at load time isn't the current time, so the "not in the future" check
+// would reject every confirmed claim and every request would fail. An invalid
+// file still fails `pnpm test`: tests/unit/claims.test.ts parses it directly.
+let confirmed: readonly Claim[] | undefined;
 
 /**
  * The only way callers get claims: confirmed ones, never the rest. Typed
  * read-only so callers treat the list as shared data, not something to edit.
  */
 export function confirmedClaims(): readonly Claim[] {
-  return keepConfirmed(claims);
+  confirmed ??= keepConfirmed(parseClaims(data));
+  return confirmed;
 }
