@@ -20,8 +20,9 @@ Zustand", and a citation only counts if the model looked that fact up while
 answering. Every question goes through two daily limits kept in Cloudflare
 D1: 30 questions per visitor, and about $1 of model spend across everyone.
 Visitors are counted by a hash that changes every day, never by their IP.
-Without an Anthropic API key the chat says it isn't available, which is what
-the live site does for now.
+The live site has its API key and its limits in place, so the chat answers on
+[julianpalomo.dev](https://julianpalomo.dev); without a key it says it isn't
+available.
 
 What exists around it:
 
