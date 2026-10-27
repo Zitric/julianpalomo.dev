@@ -119,12 +119,9 @@ version from `packageManager` in `package.json`.
 
 ## The plan
 
-These are the intended next steps, not a description of something that exists:
-
-- Evals: questions designed to tempt the assistant into overclaiming, graded
-  automatically
-- A job-ad mode: paste a job ad and see which requirements my confirmed facts
-  cover, with the gaps listed as gaps
+The next steps are tracked as
+[GitHub issues](https://github.com/Zitric/julianpalomo.dev/issues), one per
+piece of work.
 
 Each decision is recorded as it's made, one file each, in `docs/adr/`.
 
