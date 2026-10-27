@@ -37,12 +37,67 @@ export function utcDay(now: Date = new Date()): string {
 }
 
 /**
+ * What a visitor is counted by: an IPv4 address as it is, or the /64 an IPv6
+ * address belongs to, because one IPv6 user can rotate through every address
+ * of their /64 and would otherwise get a fresh limit with each. An
+ * IPv4-mapped address (::ffff:203.0.113.7) counts as its IPv4. Anything that
+ * isn't an IPv6 address, such as the local id, passes through unchanged.
+ */
+export function visitorKey(ip: string): string {
+  if (!ip.includes(":")) return ip;
+  const groups = ipv6Groups(ip);
+  if (groups === undefined) return ip;
+  const [hi = 0, lo = 0] = groups.slice(6);
+  if (groups.slice(0, 5).every((group) => group === 0) && groups[5] === 0xffff) {
+    return [hi >> 8, hi & 0xff, lo >> 8, lo & 0xff].join(".");
+  }
+  return `${groups
+    .slice(0, 4)
+    .map((group) => group.toString(16))
+    .join(":")}::/64`;
+}
+
+/** The eight 16-bit groups of an IPv6 address, or undefined if it isn't one. */
+function ipv6Groups(ip: string): number[] | undefined {
+  let text = ip.toLowerCase();
+  // A dotted IPv4 tail (::ffff:203.0.113.7) stands for the last two groups.
+  const tailGroups: number[] = [];
+  const tail = /^(.*:)(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(text);
+  if (tail !== null) {
+    const bytes = tail.slice(2).map(Number);
+    if (bytes.some((byte) => byte > 255)) return undefined;
+    const [b0 = 0, b1 = 0, b2 = 0, b3 = 0] = bytes;
+    tailGroups.push((b0 << 8) | b1, (b2 << 8) | b3);
+    const head = tail[1] ?? "";
+    text = head.endsWith("::") ? head : head.slice(0, -1);
+  }
+
+  const halves = text.split("::");
+  if (halves.length > 2) return undefined;
+  const split = (part: string | undefined) => (part ? part.split(":") : []);
+  const head = split(halves[0]);
+  const wanted = 8 - tailGroups.length;
+  let groups = head;
+  if (halves.length === 2) {
+    const rest = split(halves[1]);
+    // "::" stands for one or more zero groups.
+    const missing = wanted - head.length - rest.length;
+    if (missing < 1) return undefined;
+    groups = [...head, ...Array.from({ length: missing }, () => "0"), ...rest];
+  }
+  if (groups.length !== wanted) return undefined;
+  if (!groups.every((group) => /^[0-9a-f]{1,4}$/.test(group))) return undefined;
+  return [...groups.map((group) => Number.parseInt(group, 16)), ...tailGroups];
+}
+
+/**
  * An anonymous id for one visitor on one day: a SHA-256 of the salt, the day
- * and the IP. The IP is never stored, and with the day in the hash the same
- * person gets a different id tomorrow.
+ * and the visitor's key (visitorKey). Neither the IP nor its /64 is ever
+ * stored, and with the day in the hash the same person gets a different id
+ * tomorrow.
  */
 export async function visitorHash(ip: string, day: string, salt: string): Promise<string> {
-  const bytes = new TextEncoder().encode(`${salt}\n${day}\n${ip}`);
+  const bytes = new TextEncoder().encode(`${salt}\n${day}\n${visitorKey(ip)}`);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }

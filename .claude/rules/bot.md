@@ -37,7 +37,7 @@ must keep doing; the ADRs say why.
 - **Every model call goes through the daily limits.** `handleChat` checks them in D1 before creating the model and answers `429` (`visitor_limit` or `daily_budget`) when one is hit. With a key but no `DB` binding or no `VISITOR_SALT` it answers `503`: never call the model without the limits in front of it. Demo answers cost nothing and skip them.
 - **`limits.ts` stays browser-safe**: the constants, the price table and pure functions only. D1, the visitor hash and anything that reads a secret go in `usage.ts`, which only `chat.ts` imports.
 - **The prices in `limits.ts` belong to the model.** When `MODEL_ID` in `model.ts` changes, change them in the same commit. Money is integer micro-dollars, never floats.
-- A visitor is a SHA-256 of the salt, the UTC day and the IP. Never store the IP, and keep the day in the hash so a visitor can't be followed across days.
+- A visitor is a SHA-256 of the salt, the UTC day and `visitorKey(ip)`: the IPv4 address, or the /64 of an IPv6 one, so rotating through a /64 doesn't reset the limit. Never store the IP or the prefix, and keep the day in the hash so a visitor can't be followed across days.
 - `docs/architecture.md` draws the whole path of a question; update it when a step changes.
 
 ## Demo mode
