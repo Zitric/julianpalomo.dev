@@ -23,8 +23,8 @@ the symlink with a copy.
 
 `.claude/hooks/guard-bash.sh` and `.claude/hooks/check-invariants.sh` enforce
 the git and private-data lines, and `.claude/hooks/guard-claims.sh` (with a
-matching check in `guard-bash.sh`) the `confirmedByJulian` line. When a hook blocks something, change course;
-don't look for another way to run it.
+matching check in `guard-bash.sh`) the `confirmedByJulian` line. When a hook
+blocks something, change course; don't look for another way to run it.
 
 ## 2. Workflow
 

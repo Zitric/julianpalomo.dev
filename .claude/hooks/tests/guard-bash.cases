@@ -90,6 +90,8 @@ block | cat /tmp/out.json | tee src/content/claims.json
 block | git checkout -- src/content/claims.json
 block | git show HEAD:src/content/claims.json > src/content/claims.json
 block | node -e "require('fs').writeFileSync('src/content/claims.json', '[]')"
+block | gh pr create --title "add the first claims to claims.json" --body-file /dev/null
+block | gh pr edit 9 --body "fills claims.json"
 block | git checkout main
 block | git checkout feat/other
 block | git switch main
