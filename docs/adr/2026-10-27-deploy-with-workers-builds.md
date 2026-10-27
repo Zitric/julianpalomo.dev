@@ -49,9 +49,9 @@ is served from.
 - No Cloudflare credentials in GitHub.
 - The build and deploy commands are set in the Cloudflare dashboard, not in
   the repo, so the README lists them. A change there isn't reviewed in a PR.
-- The deploy doesn't wait for CI: a push to `main` deploys straight away. It
-  relies on `main` changing only through PRs that passed CI, and GitHub doesn't
-  enforce that yet (`docs/tech-debt.md`).
+- The deploy doesn't wait for CI: a push to `main` deploys straight away. A
+  ruleset on `main` makes that safe: changes reach it only through a pull
+  request that passed the four CI checks.
 - Adding a Durable Object would stop preview URLs; that needs a new decision.
 - Preview URLs are public. Fine for a public site; anything secret on a branch
   would need Cloudflare Access in front of them.

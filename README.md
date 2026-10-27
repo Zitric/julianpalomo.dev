@@ -79,12 +79,12 @@ no Cloudflare credentials live in GitHub.
 The build settings live in the `julianpalomo-dev` Worker's settings in the
 Cloudflare dashboard, not in the repo:
 
-| What                     | Value                                        |
-| ------------------------ | -------------------------------------------- |
-| Production branch        | `main`                                       |
-| Build command            | `pnpm run build`                             |
-| Deploy command           | `npx wrangler deploy` (Cloudflare's default) |
-| Builds on other branches | On, with Cloudflare's default command        |
+| What                     | Value                                                             |
+| ------------------------ | ----------------------------------------------------------------- |
+| Production branch        | `main`                                                            |
+| Build command            | `pnpm run build`                                                  |
+| Deploy command           | `npx wrangler deploy` (Cloudflare's default)                      |
+| Builds on other branches | On, with `npx wrangler preview` (Cloudflare's default, open beta) |
 
 The build image reads the Node version from `.node-version` and the pnpm
 version from `packageManager` in `package.json`.
