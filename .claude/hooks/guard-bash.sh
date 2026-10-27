@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # PreToolUse hook for the Bash tool. Blocks (exit 2, reason on stderr) the git
-# and GitHub commands AGENTS.md §1 forbids, and returns an "ask" decision for
+# and GitHub commands AGENTS.md §1 forbids and any command that could write
+# src/content/claims.json, and returns an "ask" decision for
 # slow commands, dependency changes and anything wrangler. Everything else exits
 # 0 with no output, which leaves the normal permission flow in charge.
 #
@@ -126,6 +127,19 @@ while IFS= read -r raw; do
       want_ask "git checkout <path> discards working-tree changes."
     elif [ -n "$(tracked_changes)" ]; then
       block "switching branches with uncommitted tracked changes. Commit them, or use a git worktree for the other branch."
+    fi
+  fi
+
+  # ── claims.json ───────────────────────────────────────────────────────────
+  # Agents change claims.json only with the edit tools, where guard-claims.sh
+  # checks every change. A command that names it may only read or stage it, or
+  # mention it in a commit message. 2>&1 and >/dev/null don't write the file;
+  # any other > does.
+  if printf '%s' "$seg" | grep -qE 'claims\.json'; then
+    rest=$(printf '%s' "$g" | sed -E 's/[0-9]*>&[0-9]+//g; s#[0-9]*> */dev/null##g')
+    if printf '%s' "$rest" | grep -q '>' ||
+      ! printf '%s' "$rest" | grep -qE '^(cat|head|tail|grep|jq|git +(diff|log|show|status|ls-files|add|commit))( |$)'; then
+      block "this command names claims.json and could change it. Edit the file with the edit tools, where guard-claims.sh checks the change; in a shell, only read it (cat, head, tail, grep, jq, git diff/log/show) or stage it (git add). Only Julian confirms claims."
     fi
   fi
 
