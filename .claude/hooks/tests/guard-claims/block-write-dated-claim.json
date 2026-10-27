@@ -1,0 +1,7 @@
+{
+  "tool_name": "Write",
+  "tool_input": {
+    "file_path": "__ROOT__/src/content/claims.json",
+    "content": "[\n  {\n    \"id\": \"example-dated\",\n    \"label\": \"Dated example\",\n    \"text\": \"A confirmed example claim.\",\n    \"area\": \"experience\",\n    \"source\": \"cv\",\n    \"confirmedByJulian\": \"2026-10-01\"\n  },\n  {\n    \"id\": \"example-pending\",\n    \"label\": \"Pending example\",\n    \"text\": \"An unconfirmed example claim.\",\n    \"area\": \"skill\",\n    \"source\": \"julian\",\n    \"confirmedByJulian\": null\n  },\n  {\n    \"id\": \"example-new\",\n    \"label\": \"New example\",\n    \"text\": \"A new claim that arrives dated.\",\n    \"area\": \"skill\",\n    \"source\": \"cv\",\n    \"confirmedByJulian\": \"2026-10-20\"\n  }\n]\n"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "tool_name": "MultiEdit",
+  "tool_input": {
+    "file_path": "__ROOT__/src/content/claims.json",
+    "edits": [
+      {
+        "old_string": "An unconfirmed example claim.",
+        "new_string": "An unconfirmed example claim, reworded."
+      },
+      {
+        "old_string": "\"confirmedByJulian\": null",
+        "new_string": "\"confirmedByJulian\": \"2026-10-27\""
+      }
+    ]
+  }
+}
