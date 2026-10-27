@@ -6,6 +6,8 @@ paths:
   - "tests/unit/chat-endpoint.test.ts"
   - "tests/unit/citations.test.ts"
   - "tests/e2e/bundle.spec.ts"
+  - "tests/e2e/chat.spec.ts"
+  - "src/components/chat/**"
 ---
 
 # The bot
@@ -26,6 +28,17 @@ must keep doing; the ADRs say why.
 
 - **A citation becomes a source only if a tool returned that claim while producing the same answer.** `src/lib/bot/citations.ts` is the one place `[[claim-id]]` markers are parsed, on the server and in the UI. The endpoint sends those claims as one `data-sources` part, and logs the ids of invalid citations, never the text.
 
+## Demo mode
+
+- **Demo mode answers only when there is no API key and `BOT_DEMO` is `"1"`.** With a key the flag is ignored, so production can never serve the demo. `BOT_DEMO` is set for previews (`previews.vars` in `wrangler.jsonc`) and for e2e (`env.e2e`, built with `CLOUDFLARE_ENV=e2e`); never set it at the top level.
+- `demo.ts` is a scripted mock model: it calls the real `get_claims` and quotes the first claim it returns, word for word, with its citation. It never writes anything else about Julian. The UI shows its "Demo" label from `metadata.demo`, never from the text.
+- `env.e2e` has `secrets.required: []` so the Vite plugin doesn't copy a local `.dev.vars`, with a real key, into the e2e build, and `routes: []` so it never inherits the production domain. Keep both empty.
+
+## The chat UI
+
+- `src/components/chat/` renders the answer with `parseCitations` and shows a chip only for an id that is both cited in the text and in the answer's `data-sources` part. The pure logic lives in `chat-view.ts`, with unit tests.
+- Code the browser imports must not pull in server code or `claims.json`: share values through client-safe modules (`limits.ts`, `chat-error.ts`, `chat-message.ts`, `../claim-id.ts`), never through `chat.ts` or `claims.ts`.
+
 ## Where things live
 
 - `model.ts` holds the model id and its settings. Never add temperature, `topP` or `topK`: this model rejects non-default values.
@@ -35,17 +48,18 @@ must keep doing; the ADRs say why.
 
 ## The key and the endpoint
 
-- **The API key is read only on the server**, in `chat.ts` through the route. Without it the endpoint answers `503 { "error": "unavailable" }` and never creates a model; that's how previews and production run until the secret exists.
-- `/api/chat` is the one internal route the browser may call with `fetch`, from `useChat` in the chat UI; everything else goes through `createServerFn` (`react-and-typescript.md`). Nothing in `src/` calls it yet.
-- Errors reach the client as `{ "error": ... }` or a fixed stream message, never a stack trace or the provider's message. The real error goes to `console.error`, which Workers observability keeps.
+- **The API key is read only on the server**, in `chat.ts` through the route. Without it, and without demo mode, the endpoint answers `503 { "error": "unavailable" }` and never creates a model; that's how production runs until the secret exists.
+- `/api/chat` is the one internal route the browser calls with `fetch`, from `useChat` in `src/components/chat/Chat.tsx`; everything else goes through `createServerFn` (`react-and-typescript.md`).
+- Errors reach the client as `{ "error": ... }` (built in `chat-error.ts`) or a fixed stream message, never a stack trace or the provider's message. The real error goes to `console.error`, which Workers observability keeps.
 - `tests/e2e/bundle.spec.ts` fails if the browser bundle contains `ANTHROPIC_API_KEY` or `confirmedByJulian`.
 
 ## Tests
 
 - Unit tests never call the real model. They use `MockLanguageModelV4` from `ai/test`, passed in through `handleChat`'s `createModel`.
+- e2e tests run the chat in demo mode. The "not available" test fakes the 503 with `page.route`, using `chatErrorBody` so its body can't drift from the endpoint's.
 
 ## The AI SDK
 
 It is at v7. Check its docs (shipped in `node_modules/ai/docs/` and `node_modules/@ai-sdk/anthropic/docs/`) for every API; v5 and v6 examples look similar and use different names.
 
-If `chat.ts`, `tools.ts` or `citations.ts` change shape, update this rule.
+If `chat.ts`, `tools.ts`, `citations.ts`, `demo.ts` or `src/components/chat/` change shape, update this rule.

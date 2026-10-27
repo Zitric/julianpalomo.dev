@@ -8,17 +8,17 @@ each answer comes from, and say "I don't know" when it doesn't.
 
 ## Status
 
-There is an app skeleton: a single placeholder page with my name and "Coming
-soon". It is a TanStack Start app (React, TypeScript in strict mode, Tailwind
-CSS) that runs on Cloudflare Workers at
-[julianpalomo.dev](https://julianpalomo.dev). There is no design yet.
+The home page has my name, my role and a chat with the assistant. It is a
+TanStack Start app (React, TypeScript in strict mode, Tailwind CSS) that runs
+on Cloudflare Workers at [julianpalomo.dev](https://julianpalomo.dev). There is
+no visual design yet: the page is plain on purpose.
 
-The assistant has its server side but no chat on the page: an endpoint,
-`POST /api/chat`, streams an answer from Claude (Haiku 5.5, through the Vercel
-AI SDK), which can only look up the facts I've confirmed. With each answer it
-sends the facts the model looked up, and a citation only counts as a source if
-it points to one of them. Without an Anthropic API key it answers "not
-available", which is what previews and the live site do for now.
+You ask a question and the answer streams in from Claude (Haiku 5.5, through
+the Vercel AI SDK), which can only look up the facts I've confirmed. Each fact
+an answer cites shows as a source chip, such as "CV · Cazoo · Redux →
+Zustand", and a citation only counts if the model looked that fact up while
+answering. Without an Anthropic API key the chat says it isn't available,
+which is what the live site does for now.
 
 What exists around it:
 
@@ -27,9 +27,9 @@ What exists around it:
 - A data file with those facts (claims), a Zod schema that validates it, and a
   filter that hands out only the facts I've confirmed
 - The chat endpoint, with three read-only tools that hand the model those
-  confirmed facts and nothing else
-- Vitest for unit tests, and Playwright for a smoke test of the home page and
-  a check that the browser bundle holds no API key or claims data
+  confirmed facts and nothing else, and a demo mode for previews and tests
+- Vitest for unit tests, and Playwright for the home page, the chat (in demo
+  mode) and a check that the browser bundle holds no API key or claims data
 - lefthook, which runs Biome on staged files before each commit
 - GitHub Actions, which run the checks, the unit tests, knip and the
   Playwright tests on every pull request to `main`
@@ -69,7 +69,10 @@ pnpm dev
 
 To try the assistant locally, copy `.dev.vars.example` to `.dev.vars` (it's
 gitignored) and put an Anthropic API key in it. Without one, `/api/chat`
-answers "not available".
+answers "not available"; with `BOT_DEMO=1` instead of a key, it answers in demo
+mode, as on previews. `pnpm test:e2e` never uses your key: it builds with
+`wrangler.jsonc`'s `e2e` environment, which loads no secrets and runs in demo
+mode.
 
 The first time you run `pnpm test:e2e`, install the browser with
 `pnpm exec playwright install chromium`. To fix formatting yourself, run
@@ -89,7 +92,9 @@ no Cloudflare credentials live in GitHub.
 - **Previews:** every push to any other branch builds a preview that doesn't
   touch the live site. Cloudflare comments on the pull request with the build
   status and the preview URL, on `workers.dev`, which opens on a phone like any
-  other link. Preview URLs are public.
+  other link. Preview URLs are public. Previews have no API key, so the chat
+  there answers in demo mode: a scripted answer that says it's a demo and
+  quotes one confirmed fact, without calling the model.
 
 The build settings live in the `julianpalomo-dev` Worker's settings in the
 Cloudflare dashboard, not in the repo:
@@ -108,7 +113,6 @@ version from `packageManager` in `package.json`.
 
 These are the intended next steps, not a description of something that exists:
 
-- The chat on the home page, with a source chip for each fact an answer cites
 - Daily spending limits, per visitor and in total
 
 Each decision is recorded as it's made, one file each, in `docs/adr/`.
