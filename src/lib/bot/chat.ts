@@ -20,6 +20,9 @@ import { SYSTEM_PROMPT } from "./prompt";
 import { buildTools } from "./tools";
 
 const MAX_MESSAGES = 20;
+// Limits on the total text of one message, summed over its text parts, so
+// splitting a message into many parts can't get around them. With 20 messages
+// a request carries at most about 110,000 characters.
 const MAX_VISITOR_TEXT = 1_000;
 // A previous answer can be up to MAX_OUTPUT_TOKENS long, well over the
 // visitor's limit, and useChat sends it back with the next question.
@@ -45,17 +48,27 @@ const messageSchema = z
     parts: z.array(partSchema).max(100),
   })
   .superRefine((message, ctx) => {
-    const limit = message.role === "user" ? MAX_VISITOR_TEXT : MAX_ANSWER_TEXT;
+    let total = 0;
     message.parts.forEach((part, index) => {
       if (part.type !== "text") return;
-      if (typeof part.text !== "string" || part.text.length > limit) {
+      if (typeof part.text !== "string") {
         ctx.addIssue({
           code: "custom",
-          message: `text must be a string of at most ${limit} characters`,
+          message: "text must be a string",
           path: ["parts", index, "text"],
         });
+        return;
       }
+      total += part.text.length;
     });
+    const limit = message.role === "user" ? MAX_VISITOR_TEXT : MAX_ANSWER_TEXT;
+    if (total > limit) {
+      ctx.addIssue({
+        code: "custom",
+        message: `a ${message.role} message holds at most ${limit} characters of text`,
+        path: ["parts"],
+      });
+    }
   })
   .transform((message) => ({
     role: message.role,
@@ -66,9 +79,19 @@ const messageSchema = z
     ),
   }));
 
-const bodySchema = z.looseObject({
-  messages: z.array(messageSchema).min(1).max(MAX_MESSAGES),
-});
+// The model answers the visitor's last message, so the conversation has to end
+// with one that has text; anything else would fail at the provider instead.
+const bodySchema = z
+  .looseObject({
+    messages: z.array(messageSchema).min(1).max(MAX_MESSAGES),
+  })
+  .refine(
+    (body) => {
+      const last = body.messages.at(-1);
+      return last?.role === "user" && last.parts.length > 0;
+    },
+    { message: "the last message must be the visitor's, with text", path: ["messages"] },
+  );
 
 type Deps = {
   createModel: (apiKey: string) => LanguageModel;

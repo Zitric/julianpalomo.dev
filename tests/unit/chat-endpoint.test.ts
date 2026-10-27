@@ -63,6 +63,17 @@ function userMessage(text: string, id = "m1") {
   return { id, role: "user", parts: [{ type: "text", text }] };
 }
 
+/** A message made of `count` text parts of `size` characters each. */
+function splitMessage(
+  role: "user" | "assistant",
+  count: number,
+  size: number,
+  id = `${role}-split`,
+) {
+  const parts = Array.from({ length: count }, () => ({ type: "text", text: "x".repeat(size) }));
+  return { id, role, parts };
+}
+
 /** The JSON chunks of a UI message stream response, without the [DONE] marker. */
 async function chunks(response: Response): Promise<Record<string, unknown>[]> {
   const text = await response.text();
@@ -157,6 +168,38 @@ describe("handleChat", () => {
       "a text part that isn't a string",
       { messages: [{ id: "m1", role: "user", parts: [{ type: "text", text: 7 }] }] },
     ],
+    [
+      "a visitor message whose small parts add up to over 1,000 characters",
+      { messages: [splitMessage("user", 11, 100)] },
+    ],
+    [
+      "a previous answer whose small parts add up to over 10,000 characters",
+      {
+        messages: [
+          userMessage("Hi"),
+          splitMessage("assistant", 11, 1_000),
+          userMessage("And?", "m2"),
+        ],
+      },
+    ],
+    [
+      "20 messages of 100 parts each, every part within its old per-part limit",
+      {
+        messages: Array.from({ length: 20 }, (_, i) =>
+          i % 2 === 0
+            ? splitMessage("user", 100, 1_000, `u${i}`)
+            : splitMessage("assistant", 100, 10_000, `a${i}`),
+        ).reverse(),
+      },
+    ],
+    [
+      "a conversation that ends with an answer",
+      { messages: [userMessage("Hi"), splitMessage("assistant", 1, 10)] },
+    ],
+    [
+      "a last visitor message with no text",
+      { messages: [{ id: "m1", role: "user", parts: [{ type: "step-start" }] }] },
+    ],
   ])("answers 400 for %s, without creating a model", async (_name, body) => {
     const createModel = vi.fn();
     const response = await handleChat(chatRequest(body), env, { createModel });
@@ -165,14 +208,16 @@ describe("handleChat", () => {
     expect(createModel).not.toHaveBeenCalled();
   });
 
-  it("accepts a visitor message of exactly 1,000 characters", async () => {
+  it.each([
+    ["in one part", userMessage("x".repeat(1_000))],
+    ["split across ten parts", splitMessage("user", 10, 100)],
+  ])("accepts a visitor message of exactly 1,000 characters %s", async (_name, message) => {
     const model = new MockLanguageModelV4({ doStream: textAnswer });
-    const response = await handleChat(
-      chatRequest({ messages: [userMessage("x".repeat(1_000))] }),
-      env,
-      { createModel: () => model },
-    );
+    const response = await handleChat(chatRequest({ messages: [message] }), env, {
+      createModel: () => model,
+    });
     expect(response.status).toBe(200);
+    await response.text();
   });
 
   it("sends the model only the text of earlier messages, never their tool parts", async () => {
