@@ -12,6 +12,7 @@ way is in `docs/adr/2026-10-26-answers-only-from-confirmed-claims.md`; their
 shape is the schema in `src/lib/claims.ts`, which is the source of truth.
 
 - **Never set or change `confirmedByJulian`.** Only Julian dates a claim, by hand. A proposed claim goes in with `null`.
+- `.claude/hooks/guard-claims.sh` enforces this and the reset rule below on every edit to `claims.json`. When it blocks an edit, change course; don't look for another way to make it.
 - **Never write, reword or improve a claim text.** Take it word for word from the issue. If one looks wrong, ask.
 - **A confirmed claim whose text changes goes back to `null`** in the same edit, so Julian confirms it again.
 - **Nothing else in `src/` reads `claims.json`.** Callers use `confirmedClaims()`, so an unconfirmed claim can't reach the model. Only `tests/unit/claims.test.ts` also reads it, to validate every claim, confirmed or not.

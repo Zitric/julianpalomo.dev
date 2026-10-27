@@ -1,0 +1,18 @@
+[
+  {
+    "id": "example-dated",
+    "label": "Dated example",
+    "text": "A confirmed example claim.",
+    "area": "experience",
+    "source": "cv",
+    "confirmedByJulian": "2026-10-01"
+  },
+  {
+    "id": "example-pending",
+    "label": "Pending example",
+    "text": "An unconfirmed example claim.",
+    "area": "skill",
+    "source": "julian",
+    "confirmedByJulian": null
+  }
+]

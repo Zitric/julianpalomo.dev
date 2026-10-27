@@ -1,0 +1,8 @@
+{
+  "tool_name": "Edit",
+  "tool_input": {
+    "file_path": "__ROOT__/src/content/claims.json",
+    "old_string": "An unconfirmed example claim.",
+    "new_string": "An unconfirmed example claim, reworded."
+  }
+}

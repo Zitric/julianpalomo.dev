@@ -22,7 +22,8 @@ the symlink with a copy.
 - Everything in the repo is in English.
 
 `.claude/hooks/guard-bash.sh` and `.claude/hooks/check-invariants.sh` enforce
-the git and private-data lines. When a hook blocks a command, change course;
+the git and private-data lines, and `.claude/hooks/guard-claims.sh` the
+`confirmedByJulian` line. When a hook blocks something, change course;
 don't look for another way to run it.
 
 ## 2. Workflow

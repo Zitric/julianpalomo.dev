@@ -1,0 +1,8 @@
+{
+  "tool_name": "Edit",
+  "tool_input": {
+    "file_path": "__ROOT__/src/content/claims.json",
+    "old_string": "  }\n]",
+    "new_string": "  },\n  {\n    \"id\": \"example-new\",\n    \"label\": \"New example\",\n    \"text\": \"A new unconfirmed claim.\",\n    \"area\": \"skill\",\n    \"source\": \"cv\",\n    \"confirmedByJulian\": null\n  }\n]"
+  }
+}

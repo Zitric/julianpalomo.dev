@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Runs the hook tests: guard-bash.cases against guard-bash.sh (once with jq,
+# Runs the hook tests: guard-bash.cases against guard-bash.sh and the
+# guard-claims/ fixtures against guard-claims.sh (each once with jq,
 # once with the node fallback), plus fixtures for check-invariants.sh and
 # format-on-edit.sh. Prints one line per failure and a summary; exits 1 if
 # anything failed. Portable between macOS and Linux, like the hooks.
@@ -102,6 +103,53 @@ code=$(input_for Bash command "git status" |
   echo $?)
 [ "$code" -eq 2 ] && got=block || got="exit$code"
 report block "$got" "guard-bash: no jq and no node fails closed"
+
+# ── guard-claims ──────────────────────────────────────────────────────────
+# Each fixture in guard-claims/ is a hook input named <verdict>-<case>.json.
+# __ROOT__ stands for a scratch tree where base.json is copied to
+# src/content/claims.json before every case, so a case can't leak into the next.
+claims_root="$scratch/claims-repo"
+mkdir -p "$claims_root/src/content"
+claims_verdict() { # fixture
+  local code
+  cp "$here/guard-claims/base.json" "$claims_root/src/content/claims.json"
+  sed "s|__ROOT__|$claims_root|g" "$1" | bash "$hooks/guard-claims.sh" >/dev/null 2>&1
+  code=$?
+  case "$code" in 0) echo pass ;; 2) echo block ;; *) echo "error($code)" ;; esac
+}
+
+run_claims_cases() { # label
+  local fixture name
+  for fixture in "$here"/guard-claims/pass-*.json "$here"/guard-claims/block-*.json; do
+    name=$(basename "$fixture" .json)
+    report "${name%%-*}" "$(claims_verdict "$fixture")" "guard-claims ($1): $name"
+  done
+}
+
+if command -v jq >/dev/null 2>&1; then
+  run_claims_cases jq
+else
+  printf 'note: jq not found, the guard-claims jq pass is skipped\n'
+fi
+HOOK_JSON_PARSER=node run_claims_cases node
+
+# With neither jq nor node, or with jq but no node, an edit to claims.json
+# must fail closed. $nobin is the tool-less PATH from the guard-bash section.
+claims_input=$(input_for Edit file_path "$claims_root/src/content/claims.json")
+code=$(printf '%s' "$claims_input" | PATH="$nobin" "$BASH" "$hooks/guard-claims.sh" >/dev/null 2>&1
+  echo $?)
+[ "$code" -eq 2 ] && got=block || got="exit$code"
+report block "$got" "guard-claims: no jq and no node fails closed"
+if command -v jq >/dev/null 2>&1; then
+  jqonly="$scratch/jqonly"
+  mkdir -p "$jqonly"
+  for t in "$nobin"/*; do ln -s "$(readlink "$t")" "$jqonly/$(basename "$t")"; done
+  ln -s "$(command -v jq)" "$jqonly/jq"
+  code=$(printf '%s' "$claims_input" | PATH="$jqonly" "$BASH" "$hooks/guard-claims.sh" >/dev/null 2>&1
+    echo $?)
+  [ "$code" -eq 2 ] && got=block || got="exit$code"
+  report block "$got" "guard-claims: jq but no node fails closed"
+fi
 
 # ── check-invariants ──────────────────────────────────────────────────────
 # Fixture text is assembled here at runtime (X → 9, sk_ → sk-) so this file
