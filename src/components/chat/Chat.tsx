@@ -1,5 +1,5 @@
 import { useChat } from "@ai-sdk/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ChatUIMessage } from "../../lib/bot/chat-message";
 import { ChatErrorNotice } from "./ChatErrorNotice";
 import { Composer } from "./Composer";
@@ -10,13 +10,23 @@ import { Suggestions } from "./Suggestions";
 export function Chat() {
   const { messages, sendMessage, status, stop, error } = useChat<ChatUIMessage>();
   const [input, setInput] = useState("");
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const busy = status === "submitted" || status === "streaming";
   const last = messages.at(-1);
   const streamingId = status === "streaming" && last?.role === "assistant" ? last.id : undefined;
 
+  // Sending swaps Send for Stop, a suggestion removes its own button, and
+  // stopping removes Stop. Each would leave keyboard focus on the page, so it
+  // goes back to the question box instead.
   function send(text: string) {
     void sendMessage({ text });
     setInput("");
+    inputRef.current?.focus();
+  }
+
+  function stopAnswer() {
+    void stop();
+    inputRef.current?.focus();
   }
 
   return (
@@ -28,8 +38,9 @@ export function Chat() {
         value={input}
         onChange={setInput}
         onSend={() => send(input)}
-        onStop={() => void stop()}
+        onStop={stopAnswer}
         busy={busy}
+        ref={inputRef}
       />
     </section>
   );

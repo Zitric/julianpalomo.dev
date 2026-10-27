@@ -36,6 +36,28 @@ test("a suggested question is sent as a message", async ({ page }) => {
   await expect(page.getByRole("article", { name: "Answer" })).toContainText(DEMO_ANSWER_INTRO);
 });
 
+test("focus stays on the question box after sending, with Enter or Send", async ({ page }) => {
+  const input = page.getByLabel("Your question");
+  const answers = page.getByRole("article", { name: "Answer" });
+
+  await input.fill("First question");
+  await input.press("Enter");
+  await expect(answers.nth(0)).toContainText(DEMO_ANSWER_INTRO);
+  await expect(input).toBeFocused();
+
+  await input.fill("Second question");
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(answers.nth(1)).toContainText(DEMO_ANSWER_INTRO);
+  await expect(input).toBeFocused();
+});
+
+test("focus moves to the question box after picking a suggestion", async ({ page }) => {
+  await page.getByRole("button", { name: "What is Form:at?" }).click();
+
+  await expect(page.getByRole("article", { name: "Answer" })).toContainText(DEMO_ANSWER_INTRO);
+  await expect(page.getByLabel("Your question")).toBeFocused();
+});
+
 test("the counter blocks a message over 1,000 characters", async ({ page }) => {
   const input = page.getByLabel("Your question");
   await input.fill("x".repeat(1_001));

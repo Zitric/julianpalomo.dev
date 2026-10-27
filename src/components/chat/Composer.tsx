@@ -1,4 +1,4 @@
-import { type FormEvent, type KeyboardEvent, useId } from "react";
+import { type FormEvent, type KeyboardEvent, type Ref, useId } from "react";
 import { MAX_VISITOR_TEXT } from "../../lib/bot/limits";
 
 type Props = {
@@ -7,12 +7,13 @@ type Props = {
   onSend: () => void;
   onStop: () => void;
   busy: boolean;
+  ref?: Ref<HTMLTextAreaElement>;
 };
 
 const numberFormat = new Intl.NumberFormat("en");
 
 /** The question box: Enter sends, Shift+Enter adds a line, and a counter enforces the limit. */
-export function Composer({ value, onChange, onSend, onStop, busy }: Props) {
+export function Composer({ value, onChange, onSend, onStop, busy, ref }: Props) {
   const inputId = useId();
   const counterId = useId();
   const length = value.length;
@@ -42,12 +43,15 @@ export function Composer({ value, onChange, onSend, onStop, busy }: Props) {
       <label htmlFor={inputId} className="text-sm font-medium">
         Your question
       </label>
+      {/* readOnly, not disabled, while an answer streams: a disabled field drops
+          keyboard focus to the page, and Send is blocked by canSend anyway. */}
       <textarea
+        ref={ref}
         id={inputId}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         onKeyDown={onKeyDown}
-        disabled={busy}
+        readOnly={busy}
         rows={3}
         aria-invalid={over > 0}
         aria-describedby={counterId}
