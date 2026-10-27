@@ -17,3 +17,6 @@ test-results
 
 # Personal Claude Code instructions, never committed
 CLAUDE.local.md
+
+# Branch diff written by the handoff skill for the reviewer subagents
+.diff-dump/

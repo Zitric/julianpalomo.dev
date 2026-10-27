@@ -1,0 +1,149 @@
+#!/usr/bin/env bash
+# PreToolUse hook for the Bash tool. Blocks (exit 2, reason on stderr) the git
+# and GitHub commands AGENTS.md §1 forbids, and returns an "ask" decision for
+# slow commands, dependency changes and anything wrangler. Everything else exits
+# 0 with no output, which leaves the normal permission flow in charge.
+#
+# The command is split on && || ; | and newlines and each segment is checked on
+# its own, so `cd x && git add .` is caught. Attribution is checked on the
+# whole command plus any -F / --body-file file it names.
+#
+# A guard against mistakes, not a security boundary: a command built to dodge
+# these patterns will. Test it with .claude/hooks/tests/run.sh.
+
+set -u
+. "$(dirname "$0")/lib.sh"
+
+block() {
+  printf 'guard-bash blocked this command: %s\n' "$1" >&2
+  exit 2
+}
+
+input=$(cat)
+# Fails closed: without a JSON parser every command would pass unchecked.
+cmd=$(tool_input_field "$input" command) ||
+  block "the hook can't read its input (no jq or node on PATH), so nothing is checked. Install jq or node."
+[ -z "$cmd" ] && exit 0
+
+repo_dir="${CLAUDE_PROJECT_DIR:-$(pwd)}"
+
+ask_reason=""
+want_ask() { [ -z "$ask_reason" ] && ask_reason="$1"; }
+
+current_branch() { git -C "$repo_dir" rev-parse --abbrev-ref HEAD 2>/dev/null; }
+tracked_changes() { git -C "$repo_dir" status --porcelain --untracked-files=no 2>/dev/null; }
+
+# No attribution in a commit or PR: authorship is the repo owner's git config,
+# and settings.json's `attribution` keeps Claude Code from adding its own.
+attribution_re='co-authored-by|generated with|noreply@anthropic\.com|claude\.com/claude-code|claude\.ai/code/session|🤖'
+if printf '%s' "$cmd" | grep -qE '(^|[;&| ])(git( +-C +[^ ]+)* +commit|gh +pr +(create|edit))'; then
+  if printf '%s' "$cmd" | grep -qiE "$attribution_re"; then
+    block "the commit/PR text contains an attribution line (Co-Authored-By, \"Generated with\", a Claude session link). Commits are authored as the repo owner with no attribution."
+  fi
+  for f in $(printf '%s' "$cmd" | sed -nE 's/.*(-F|--file|--body-file)[ =]+([^ ;&|]+).*/\2/p'); do
+    [ "$f" = "-" ] && continue
+    case "$f" in /*) path="$f" ;; *) path="$repo_dir/$f" ;; esac
+    if [ -f "$path" ] && grep -qiE "$attribution_re" "$path"; then
+      block "$f contains an attribution line. Remove it before committing or opening the PR."
+    fi
+  done
+fi
+
+segments=$(printf '%s\n' "$cmd" | sed -E 's/(&&|\|\||;|\|)/\
+/g')
+
+while IFS= read -r raw; do
+  seg=$(printf '%s' "$raw" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//')
+  [ -z "$seg" ] && continue
+
+  # ── Identity ──────────────────────────────────────────────────────────────
+  if printf '%s' "$seg" | grep -qE '^git( +-C +[^ ]+)* +-c +user\.'; then
+    block "git -c user.* changes commit authorship. Commits use the repo owner's git config as it is."
+  fi
+  if printf '%s' "$seg" | grep -qE '(^|[[:space:]])GIT_(AUTHOR|COMMITTER)_(NAME|EMAIL)='; then
+    block "GIT_AUTHOR_* / GIT_COMMITTER_* change commit authorship. Commits use the repo owner's git config as it is."
+  fi
+  # Normalise `git -C <dir> <sub>` to `git <sub>`.
+  g=$(printf '%s' "$seg" | sed -E 's/^git( +-C +[^ ]+)+ /git /')
+
+  if printf '%s' "$g" | grep -qE '^git +commit( |$).*--author'; then
+    block "git commit --author changes authorship. Commits use the repo owner's git config."
+  fi
+  if printf '%s' "$g" | grep -qE '^git +config( |$).*user\.' &&
+    ! printf '%s' "$g" | grep -qE '^git +config +(--get +)?user\.(name|email)$'; then
+    block "git config user.* changes authorship. Read it with \`git config user.email\`; never set it."
+  fi
+
+  # ── History and the working tree ──────────────────────────────────────────
+  case "$g" in
+    git\ stash | git\ stash\ *)
+      block "git stash (any form) hides work in a place nobody looks. Commit it, or use a git worktree for parallel work." ;;
+  esac
+  if printf '%s' "$g" | grep -qE '^git +add( +[^ ]+)* +(-A|--all|\.|:/)( |$)'; then
+    block "git add -A / --all / . sweeps up unrelated work. Stage files by name."
+  fi
+  if printf '%s' "$g" | grep -qE '^git +commit( |$).*--amend'; then
+    block "git commit --amend rewrites history. Make a new commit."
+  fi
+  if printf '%s' "$g" | grep -qE '^git +reset( |$).*--hard'; then
+    block "git reset --hard discards work."
+  fi
+  if printf '%s' "$g" | grep -qE '^git +clean( |$).*-[a-zA-Z]*f'; then
+    block "git clean -f deletes untracked files, which may be someone's work in progress."
+  fi
+  if printf '%s' "$g" | grep -qE '^git +rebase( |$)'; then
+    block "git rebase rewrites history. Merge origin/main into the branch instead."
+  fi
+  if printf '%s' "$g" | grep -qE '^git +restore( |$)' &&
+    ! printf '%s' "$g" | grep -qE '^git +restore +--staged( +[^-][^ ]*)+$'; then
+    want_ask "git restore discards working-tree changes."
+  fi
+  if printf '%s' "$g" | grep -qE '^git +(checkout|switch)( |$)'; then
+    if printf '%s' "$g" | grep -qE '^git +checkout( +[^ ]+)* +(--|\.)( |$)'; then
+      want_ask "git checkout -- <path> discards working-tree changes."
+    elif printf '%s' "$g" | grep -qE '^git +(checkout +-[bB]|switch +-[cC]|switch +--create)( |$)'; then
+      : # Creating a branch keeps the working tree as it is.
+    elif [ -n "$(tracked_changes)" ]; then
+      block "switching branches with uncommitted tracked changes. Commit them, or use a git worktree for the other branch."
+    fi
+  fi
+
+  # ── Pushing and merging ───────────────────────────────────────────────────
+  if printf '%s' "$g" | grep -qE '^git +push( |$)'; then
+    if printf '%s' "$g" | grep -qE '(--force|--force-with-lease| -f( |$)| \+[^ ]+)'; then
+      block "force-push rewrites remote history."
+    fi
+    if printf '%s' "$g" | grep -qE '( |:)main( |$)'; then
+      block "never push to main. Push the feature branch and open a PR."
+    fi
+    if [ "$(current_branch)" = "main" ]; then
+      block "the current branch is main. Create a feat/, fix/, chore/ or docs/ branch."
+    fi
+  fi
+  if printf '%s' "$seg" | grep -qE '^gh +pr +merge( |$)'; then
+    block "PRs are merged by the repo owner, never by an agent (and never with auto-merge)."
+  fi
+  if printf '%s' "$seg" | grep -qE '^gh +api( |$).*/pulls/[0-9]+/merge|^gh +api( |$).*enablePullRequestAutoMerge'; then
+    block "merging or enabling auto-merge through the API is still merging. The repo owner merges."
+  fi
+
+  # ── Slow, dependency-changing or Cloudflare commands: ask ─────────────────
+  if printf '%s' "$seg" | grep -qE '^((npx|pnpm( +exec| +dlx)?) +)?([^ ]*/)?wrangler( |$)'; then
+    want_ask "wrangler talks to Cloudflare or starts its runtime; ask the repo owner first."
+  fi
+  if printf '%s' "$seg" | grep -qE '^pnpm( |$)'; then
+    if printf '%s' "$seg" | grep -qE ' (build|test:e2e)( |$)|exec +(vite +build|playwright +test)( |$)'; then
+      want_ask "builds and e2e runs take minutes; ask the repo owner first."
+    elif printf '%s' "$seg" | grep -qE '^pnpm( +(-C|--dir|--filter|-F) +[^ ]+| +-[^ ]+)* +(add|install|i|update|up|remove|rm|uninstall)( |$)'; then
+      want_ask "this changes dependencies or the lockfile; ask the repo owner first."
+    fi
+  fi
+done <<EOF
+$segments
+EOF
+
+if [ -n "$ask_reason" ]; then
+  printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"%s"}}\n' \
+    "$(json_escape "$ask_reason")"
+fi
+exit 0

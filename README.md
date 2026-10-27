@@ -21,6 +21,17 @@ What exists around it:
 - lefthook, which runs Biome on staged files before each commit
 - GitHub Actions, which run the checks, the unit tests, knip and the smoke test
   on every pull request to `main`
+- Instructions and tooling for AI coding agents: [`AGENTS.md`](AGENTS.md) (also
+  read as `CLAUDE.md`, a symlink to it), plus rules, hooks, skills and reviewer
+  subagents for Claude Code in [`.claude/`](.claude/README.md)
+
+### Working with Claude Code
+
+The repo is built with Claude Code, and the setup is part of the project:
+[`.claude/README.md`](.claude/README.md) explains every piece. If you clone it
+and use Claude Code yourself, you can add a `CLAUDE.local.md` at the root for
+your own preferences, for example "Talk to me in Spanish. Write everything that
+goes into the repo in English." It's gitignored, so it never reaches the repo.
 
 ### Running it
 
@@ -50,7 +61,6 @@ The first time you run `pnpm test:e2e`, install the browser with
 
 These are the intended next steps, not a description of something that exists:
 
-- Instructions and tooling for working on the repo with AI agents
 - Deploys to Cloudflare, with a preview URL for each pull request
 - The Vercel AI SDK with Claude for the assistant
 
@@ -58,6 +68,8 @@ Each decision is recorded as it's made, one file each, in `docs/adr/`.
 
 ## Docs
 
+- [`AGENTS.md`](AGENTS.md): instructions for AI coding agents working on the
+  repo.
 - [Architecture decision records](docs/adr/README.md): what was decided,
   what else was considered, and why.
 - [Tech debt](docs/tech-debt.md): shortcuts taken on purpose, and their status.
