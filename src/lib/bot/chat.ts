@@ -13,33 +13,24 @@ import {
   type LanguageModel,
   streamText,
   toUIMessageStream,
-  type UIMessage,
 } from "ai";
 import { z } from "zod";
 import { confirmedClaims } from "../claims";
+import { type ChatErrorCode, chatErrorBody } from "./chat-error";
+import type { ChatUIMessage } from "./chat-message";
 import { parseCitations, type Source } from "./citations";
+import { MAX_VISITOR_TEXT } from "./limits";
 import { anthropicOptions, MAX_OUTPUT_TOKENS, MAX_STEPS, MODEL_ID } from "./model";
 import { SYSTEM_PROMPT } from "./prompt";
 import { buildTools } from "./tools";
 
 const MAX_MESSAGES = 20;
-// Limits on the total text of one message, summed over its text parts, so
-// splitting a message into many parts can't get around them. With 20 messages
-// a request carries at most about 110,000 characters.
-const MAX_VISITOR_TEXT = 1_000;
-// A previous answer can be up to MAX_OUTPUT_TOKENS long, well over the
-// visitor's limit, and useChat sends it back with the next question.
+// The most text one earlier answer may hold. Like MAX_VISITOR_TEXT it counts a
+// message's text parts together, so splitting a message can't get around
+// either limit; with 20 messages a request carries at most about 110,000
+// characters. It is higher because an answer can be up to MAX_OUTPUT_TOKENS
+// long and useChat sends it back with the next question.
 const MAX_ANSWER_TEXT = 10_000;
-
-/** The JSON body of every error response, so the UI can tell them apart. */
-type ChatError = { error: "invalid_request" | "unavailable" | "failed" };
-
-/**
- * The answer as the UI receives it: the model's text, plus one `data-sources`
- * part listing every claim a tool returned while producing it. The UI shows a
- * citation as a source only when its id is in that list.
- */
-type ChatUIMessage = UIMessage<never, { sources: { sources: Source[] } }>;
 
 /** What the stream says when the model fails mid-answer; never the provider's message. */
 export const STREAM_ERROR_TEXT = "Something went wrong. Please try again.";
@@ -124,8 +115,8 @@ const defaultDeps: Deps = {
   createModel: (apiKey) => createAnthropic({ apiKey })(MODEL_ID),
 };
 
-function errorResponse(status: 400 | 500 | 503, error: ChatError["error"]): Response {
-  return Response.json({ error } satisfies ChatError, { status });
+function errorResponse(status: 400 | 500 | 503, error: ChatErrorCode): Response {
+  return Response.json(chatErrorBody(error), { status });
 }
 
 /** Answers a POST to /api/chat. `env` is the Worker's environment, unparsed. */

@@ -6,7 +6,8 @@
  * A marker is `[[claim-id]]`. It counts only when its id is in the allowed
  * set, which holds the claims a tool returned while producing the answer.
  */
-import { CLAIM_ID_PATTERN, type Claim } from "../claims";
+import { CLAIM_ID_PATTERN } from "../claim-id";
+import type { Claim } from "../claims";
 
 /** What the UI needs to show a claim as a source chip. */
 export type Source = Pick<Claim, "id" | "label" | "org" | "source">;
