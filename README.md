@@ -8,18 +8,19 @@ each answer comes from, and say "I don't know" when it doesn't.
 
 ## Status
 
-There is an app skeleton and nothing more: a single placeholder page with my
-name and "Coming soon". It is a TanStack Start app (React, TypeScript in strict
-mode, Tailwind CSS) that runs on Cloudflare Workers at
+There is an app skeleton: a single placeholder page with my name and "Coming
+soon". It is a TanStack Start app (React, TypeScript in strict mode, Tailwind
+CSS) that runs on Cloudflare Workers at
 [julianpalomo.dev](https://julianpalomo.dev). There is no assistant and no
-design.
+design. The facts the assistant will answer from are in the repo, waiting for
+me to confirm them, but nothing uses them yet.
 
 What exists around it:
 
 - Biome for lint and format, `tsc` for types, knip for unused code and
   dependencies
-- A data file for the facts the assistant will answer from, still empty, with
-  a Zod schema and a filter that hands out only the facts I've confirmed
+- A data file with those facts (claims), a Zod schema that validates it, and a
+  filter that hands out only the facts I've confirmed
 - Vitest for unit tests and Playwright for a smoke test of the home page
 - lefthook, which runs Biome on staged files before each commit
 - GitHub Actions, which run the checks, the unit tests, knip and the smoke test
