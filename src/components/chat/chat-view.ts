@@ -90,6 +90,10 @@ export function chatErrorMessage(error: Error): string {
   switch (code) {
     case "unavailable":
       return "The assistant isn't available here right now.";
+    case "visitor_limit":
+      return "You've reached today's limit for questions.";
+    case "daily_budget":
+      return "The assistant has reached its daily budget. Try again tomorrow.";
     case "invalid_request":
     case "failed":
     case undefined:

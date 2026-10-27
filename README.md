@@ -17,8 +17,11 @@ You ask a question and the answer streams in from Claude (Haiku 5.5, through
 the Vercel AI SDK), which can only look up the facts I've confirmed. Each fact
 an answer cites shows as a source chip, such as "CV · Cazoo · Redux →
 Zustand", and a citation only counts if the model looked that fact up while
-answering. Without an Anthropic API key the chat says it isn't available,
-which is what the live site does for now.
+answering. Every question goes through two daily limits kept in Cloudflare
+D1: 30 questions per visitor, and about $1 of model spend across everyone.
+Visitors are counted by a hash that changes every day, never by their IP.
+Without an Anthropic API key the chat says it isn't available, which is what
+the live site does for now.
 
 What exists around it:
 
@@ -27,7 +30,8 @@ What exists around it:
 - A data file with those facts (claims), a Zod schema that validates it, and a
   filter that hands out only the facts I've confirmed
 - The chat endpoint, with three read-only tools that hand the model those
-  confirmed facts and nothing else, and a demo mode for previews and tests
+  confirmed facts and nothing else, the daily limits in D1, and a demo mode
+  for previews and tests
 - Vitest for unit tests, and Playwright for the home page, the chat (in demo
   mode) and a check that the browser bundle holds no API key or claims data
 - lefthook, which runs Biome on staged files before each commit
@@ -57,20 +61,24 @@ pnpm install
 pnpm dev
 ```
 
-| Command         | What it does                                                                  |
-| --------------- | ----------------------------------------------------------------------------- |
-| `pnpm dev`      | Starts the dev server. Add `--host` to open it from a phone on the same wifi. |
-| `pnpm build`    | Builds the app for production into `dist/`.                                   |
-| `pnpm preview`  | Serves the last build in the local Workers runtime. Run `pnpm build` first.   |
-| `pnpm check`    | Runs Biome (lint and format), then `tsc`.                                     |
-| `pnpm test`     | Runs the unit tests once with Vitest.                                         |
-| `pnpm test:e2e` | Builds, serves and runs the Playwright tests in Chromium.                     |
-| `pnpm knip`     | Reports unused files, exports and dependencies.                               |
+| Command                 | What it does                                                                  |
+| ----------------------- | ----------------------------------------------------------------------------- |
+| `pnpm dev`              | Starts the dev server. Add `--host` to open it from a phone on the same wifi. |
+| `pnpm build`            | Builds the app for production into `dist/`.                                   |
+| `pnpm preview`          | Serves the last build in the local Workers runtime. Run `pnpm build` first.   |
+| `pnpm check`            | Runs Biome (lint and format), then `tsc`.                                     |
+| `pnpm test`             | Runs the unit tests once with Vitest.                                         |
+| `pnpm test:e2e`         | Builds, serves and runs the Playwright tests in Chromium.                     |
+| `pnpm knip`             | Reports unused files, exports and dependencies.                               |
+| `pnpm db:migrate:local` | Applies the D1 migrations to the local database in `.wrangler/state`.         |
 
 To try the assistant locally, copy `.dev.vars.example` to `.dev.vars` (it's
-gitignored) and put an Anthropic API key in it. Without one, `/api/chat`
-answers "not available"; with `BOT_DEMO=1` instead of a key, it answers in demo
-mode, as on previews. `pnpm test:e2e` never uses your key: it builds with
+gitignored), put an Anthropic API key in it, and set `VISITOR_SALT` to any long
+random string (the salt for the visitor hash). Then run `pnpm db:migrate:local`
+once to create the tables in the local D1. With a key but no salt, `/api/chat`
+answers "not available", so the model is never called without its limits.
+Without a key it answers "not available" too; with `BOT_DEMO=1` instead of a
+key, it answers in demo mode, as on previews. `pnpm test:e2e` never uses your key: it builds with
 `wrangler.jsonc`'s `e2e` environment, which loads no secrets and runs in demo
 mode.
 
@@ -111,9 +119,9 @@ version from `packageManager` in `package.json`.
 
 ## The plan
 
-These are the intended next steps, not a description of something that exists:
-
-- Daily spending limits, per visitor and in total
+The next steps are tracked as
+[GitHub issues](https://github.com/Zitric/julianpalomo.dev/issues), one per
+piece of work.
 
 Each decision is recorded as it's made, one file each, in `docs/adr/`.
 
@@ -121,6 +129,8 @@ Each decision is recorded as it's made, one file each, in `docs/adr/`.
 
 - [`AGENTS.md`](AGENTS.md): instructions for AI coding agents working on the
   repo.
+- [How a question is answered](docs/architecture.md): the path of one question
+  through the limits, the model, its tools and the citation check.
 - [Architecture decision records](docs/adr/README.md): what was decided,
   what else was considered, and why.
 - [Tech debt](docs/tech-debt.md): shortcuts taken on purpose, and their status.

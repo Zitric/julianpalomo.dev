@@ -20,10 +20,11 @@ import { type ChatErrorCode, chatErrorBody } from "./chat-error";
 import type { ChatUIMessage } from "./chat-message";
 import { parseCitations, type Source } from "./citations";
 import { createDemoModel } from "./demo";
-import { MAX_VISITOR_TEXT } from "./limits";
+import { checkLimits, estimateCostMicroUsd, MAX_VISITOR_TEXT, type TokenUsage } from "./limits";
 import { anthropicOptions, MAX_OUTPUT_TOKENS, MAX_STEPS, MODEL_ID } from "./model";
 import { SYSTEM_PROMPT } from "./prompt";
 import { buildTools } from "./tools";
+import { type D1Like, d1UsageStore, isD1, type UsageStore, utcDay, visitorHash } from "./usage";
 
 const MAX_MESSAGES = 20;
 // The most text one earlier answer may hold. Like MAX_VISITOR_TEXT it counts a
@@ -40,6 +41,9 @@ export const STREAM_ERROR_TEXT = "Something went wrong. Please try again.";
 const envSchema = z.object({
   ANTHROPIC_API_KEY: z.string().trim().min(1).optional().catch(undefined),
   BOT_DEMO: z.string().optional().catch(undefined),
+  VISITOR_SALT: z.string().trim().min(1).optional().catch(undefined),
+  // Checked with isD1 where it is used. Optional, since previews and demo mode have no D1.
+  DB: z.unknown().optional(),
 });
 
 // What get_claims and search_claims return, read down to the fields a source
@@ -114,13 +118,36 @@ const bodySchema = z
 
 type Deps = {
   createModel: (apiKey: string) => LanguageModel;
+  createStore: (db: D1Like) => UsageStore;
 };
 
 const defaultDeps: Deps = {
   createModel: (apiKey) => createAnthropic({ apiKey })(MODEL_ID),
+  createStore: d1UsageStore,
 };
 
-function errorResponse(status: 400 | 500 | 503, error: ChatErrorCode): Response {
+/** Who is asking, without keeping their IP. Local dev has no header, so it gets one shared id. */
+const LOCAL_VISITOR_IP = "local";
+
+/** The SDK's usage report, in the units the price table charges. */
+function tokenUsage(usage: {
+  inputTokens: number | undefined;
+  inputTokenDetails: {
+    noCacheTokens: number | undefined;
+    cacheReadTokens: number | undefined;
+    cacheWriteTokens: number | undefined;
+  };
+  outputTokens: number | undefined;
+}): TokenUsage {
+  return {
+    input: usage.inputTokenDetails.noCacheTokens ?? usage.inputTokens ?? 0,
+    output: usage.outputTokens ?? 0,
+    cacheRead: usage.inputTokenDetails.cacheReadTokens ?? 0,
+    cacheWrite: usage.inputTokenDetails.cacheWriteTokens ?? 0,
+  };
+}
+
+function errorResponse(status: 400 | 429 | 500 | 503, error: ChatErrorCode): Response {
   return Response.json(chatErrorBody(error), { status });
 }
 
@@ -128,22 +155,42 @@ function errorResponse(status: 400 | 500 | 503, error: ChatErrorCode): Response 
 export async function handleChat(
   request: Request,
   env: unknown,
-  deps: Deps = defaultDeps,
+  overrides: Partial<Deps> = {},
 ): Promise<Response> {
+  const deps: Deps = { ...defaultDeps, ...overrides };
   const parsedEnv = envSchema.safeParse(env);
   if (!parsedEnv.success) return errorResponse(503, "unavailable");
-  const { ANTHROPIC_API_KEY: apiKey, BOT_DEMO } = parsedEnv.data;
+  const { ANTHROPIC_API_KEY: apiKey, BOT_DEMO, VISITOR_SALT: salt, DB } = parsedEnv.data;
   // With a key the model always answers, whatever BOT_DEMO says, so a
   // production Worker can never serve the demo. Without a key, BOT_DEMO="1"
   // turns the demo on; otherwise there is nothing to answer with.
   const demo = apiKey === undefined && BOT_DEMO === "1";
   if (apiKey === undefined && !demo) return errorResponse(503, "unavailable");
+  // Fail closed: a real model call never happens without the limits in front
+  // of it, so a key without D1 or the visitor salt answers like no key at all.
+  if (apiKey !== undefined && (!isD1(DB) || salt === undefined)) {
+    return errorResponse(503, "unavailable");
+  }
 
   const json: unknown = await request.json().catch(() => undefined);
   const body = bodySchema.safeParse(json);
   if (!body.success) return errorResponse(400, "invalid_request");
 
   try {
+    // The limits, checked before the model is created. Demo answers cost
+    // nothing and skip them, so previews and e2e never need D1.
+    let recordUsage: ((usage: TokenUsage) => Promise<void>) | undefined;
+    if (apiKey !== undefined && isD1(DB) && salt !== undefined) {
+      const store = deps.createStore(DB);
+      const day = utcDay();
+      const ip = request.headers.get("CF-Connecting-IP") ?? LOCAL_VISITOR_IP;
+      const visitor = await visitorHash(ip, day, salt);
+      const verdict = checkLimits(await store.readToday(day, visitor));
+      if (!verdict.ok) return errorResponse(429, verdict.limit);
+      await store.countMessage(day, visitor);
+      recordUsage = (usage) => store.addUsage(day, usage, estimateCostMicroUsd(usage));
+    }
+
     const messages = await convertToModelMessages(
       body.data.messages.filter((message) => message.parts.length > 0),
     );
@@ -191,11 +238,16 @@ export async function handleChat(
               data: { sources: [...sources.values()] },
             });
           },
-          onEnd: ({ steps }) => {
+          onEnd: async ({ steps, totalUsage }) => {
             const text = steps.map((step) => step.text).join("");
             const { invalid } = parseCitations(text, new Set(sources.keys()));
             // Ids only: the answer can quote the visitor, so its text is never logged.
             if (invalid.length > 0) console.warn("chat: invalid citations", invalid);
+            // The answer has already streamed, so a failed write is logged
+            // rather than turned into an error the visitor would see.
+            await recordUsage?.(tokenUsage(totalUsage)).catch((error: unknown) => {
+              console.error("chat usage not recorded", error);
+            });
           },
         });
         writer.merge(toUIMessageStream({ stream: result.stream, sendStart: false, onError }));

@@ -1,0 +1,6 @@
+{
+  "$schema": "./node_modules/knip/schema-jsonc.json",
+  // `cloudflare:workers` is a module of the Workers runtime, not an npm
+  // package. knip reads its prefix as a dependency called "cloudflare".
+  "ignoreDependencies": ["cloudflare"]
+}
