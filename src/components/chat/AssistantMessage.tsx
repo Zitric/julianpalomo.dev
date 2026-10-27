@@ -1,12 +1,12 @@
 import type { ChatUIMessage } from "../../lib/bot/chat-message";
 import { chipLabel } from "../../lib/bot/citations";
-import { renderAnswer, toolStatus } from "./chat-view";
+import { messageText, renderAnswer, toolStatus } from "./chat-view";
 
 type Props = { message: ChatUIMessage; streaming: boolean };
 
 /** One answer: its text with numbered citations, the source chips, and a Demo label. */
 export function AssistantMessage({ message, streaming }: Props) {
-  const text = message.parts.flatMap((part) => (part.type === "text" ? [part.text] : [])).join("");
+  const text = messageText(message.parts);
   const sources = message.parts.find((part) => part.type === "data-sources")?.data.sources ?? [];
   const { parts, chips } = renderAnswer(text, sources, streaming);
   const status = streaming ? toolStatus(message.parts) : undefined;

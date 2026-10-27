@@ -14,6 +14,13 @@ export function hideTrailingPartialMarker(text: string): string {
   return text.replace(/\[(?:\[[a-z0-9-]*)?$/, "");
 }
 
+/** A message's text: its text parts joined, in order. */
+export function messageText(parts: readonly { type: string; text?: unknown }[]): string {
+  return parts
+    .flatMap((part) => (part.type === "text" && typeof part.text === "string" ? [part.text] : []))
+    .join("");
+}
+
 type AnswerPart = { type: "text"; text: string } | { type: "citation"; number: number };
 
 /**

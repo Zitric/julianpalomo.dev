@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   chatErrorMessage,
   hideTrailingPartialMarker,
+  messageText,
   renderAnswer,
   toolStatus,
 } from "../../src/components/chat/chat-view";
@@ -105,5 +106,18 @@ describe("chatErrorMessage", () => {
     '{"error":"something-new"}',
   ])("says something went wrong for %j", (message) => {
     expect(chatErrorMessage(new Error(message))).toBe("Something went wrong.");
+  });
+});
+
+describe("messageText", () => {
+  it("joins the text parts in order and skips the rest", () => {
+    expect(
+      messageText([
+        { type: "text", text: "One " },
+        { type: "tool-get_claims" },
+        { type: "step-start" },
+        { type: "text", text: "two." },
+      ]),
+    ).toBe("One two.");
   });
 });

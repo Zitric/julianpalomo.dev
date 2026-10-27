@@ -1,5 +1,6 @@
 import type { ChatUIMessage } from "../../lib/bot/chat-message";
 import { AssistantMessage } from "./AssistantMessage";
+import { messageText } from "./chat-view";
 
 type Props = { messages: ChatUIMessage[]; streamingId: string | undefined };
 
@@ -11,7 +12,7 @@ export function MessageList({ messages, streamingId }: Props) {
         <li key={message.id}>
           {message.role === "user" ? (
             <p className="ml-auto w-fit max-w-[85%] rounded-lg border border-border px-3 py-2 whitespace-pre-wrap break-words">
-              {message.parts.flatMap((part) => (part.type === "text" ? [part.text] : [])).join("")}
+              {messageText(message.parts)}
             </p>
           ) : (
             <AssistantMessage message={message} streaming={message.id === streamingId} />
