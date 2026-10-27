@@ -10,8 +10,9 @@ each answer comes from, and say "I don't know" when it doesn't.
 
 There is an app skeleton and nothing more: a single placeholder page with my
 name and "Coming soon". It is a TanStack Start app (React, TypeScript in strict
-mode, Tailwind CSS) set up to run on Cloudflare Workers, but it isn't deployed
-yet. There is no assistant and no design.
+mode, Tailwind CSS) that runs on Cloudflare Workers at
+[julianpalomo.dev](https://julianpalomo.dev). There is no assistant and no
+design.
 
 What exists around it:
 
@@ -21,6 +22,8 @@ What exists around it:
 - lefthook, which runs Biome on staged files before each commit
 - GitHub Actions, which run the checks, the unit tests, knip and the smoke test
   on every pull request to `main`
+- Cloudflare Workers Builds, which deploys `main` and gives every pull request
+  its own preview URL
 - Instructions and tooling for AI coding agents: [`AGENTS.md`](AGENTS.md) (also
   read as `CLAUDE.md`, a symlink to it), plus rules, hooks, skills and reviewer
   subagents for Claude Code in [`.claude/`](.claude/README.md)
@@ -57,11 +60,39 @@ The first time you run `pnpm test:e2e`, install the browser with
 `pnpm exec playwright install chromium`. To fix formatting yourself, run
 `pnpm exec biome check --write`.
 
+### Deploys and previews
+
+Cloudflare's Git integration for Workers
+([Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/))
+builds the repository on every push. Nothing deploys from GitHub Actions, and
+no Cloudflare credentials live in GitHub.
+[The ADR](docs/adr/2026-10-27-deploy-with-workers-builds.md) explains why.
+
+- **Production:** a merge to `main` runs `wrangler deploy`, which updates
+  [julianpalomo.dev](https://julianpalomo.dev). The custom domain is declared
+  in [`wrangler.jsonc`](wrangler.jsonc).
+- **Previews:** every push to any other branch builds a preview that doesn't
+  touch the live site. Cloudflare comments on the pull request with the build
+  status and the preview URL, on `workers.dev`, which opens on a phone like any
+  other link. Preview URLs are public.
+
+The build settings live in the `julianpalomo-dev` Worker's settings in the
+Cloudflare dashboard, not in the repo:
+
+| What                     | Value                                        |
+| ------------------------ | -------------------------------------------- |
+| Production branch        | `main`                                       |
+| Build command            | `pnpm run build`                             |
+| Deploy command           | `npx wrangler deploy` (Cloudflare's default) |
+| Builds on other branches | On, with Cloudflare's default command        |
+
+The build image reads the Node version from `.node-version` and the pnpm
+version from `packageManager` in `package.json`.
+
 ## The plan
 
 These are the intended next steps, not a description of something that exists:
 
-- Deploys to Cloudflare, with a preview URL for each pull request
 - The Vercel AI SDK with Claude for the assistant
 
 Each decision is recorded as it's made, one file each, in `docs/adr/`.

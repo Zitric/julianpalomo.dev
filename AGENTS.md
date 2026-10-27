@@ -55,7 +55,7 @@ Cloudflare without Julián.
 - `src/lib/`: plain TypeScript modules, such as `site.ts`.
 - `src/styles/tokens.css`: the only place colours are defined.
 - `tests/unit/`: Vitest. `tests/e2e/`: Playwright, against the production build.
-- `.github/workflows/ci.yml`: CI on every pull request to `main`.
+- `.github/workflows/ci.yml`: CI on every pull request to `main`. Deploys aren't here: Cloudflare Workers Builds deploys `main` and comments a preview URL on every PR.
 - `docs/adr/`: one file per decision. `docs/tech-debt.md`: shortcuts taken on purpose.
 - `.claude/`: rules, hooks, skills and subagents for Claude Code; `.claude/README.md` explains them.
 

@@ -16,8 +16,14 @@ older runs.
 - `knip`: `pnpm knip`.
 - `e2e`: installs Chromium, runs `pnpm test:e2e`, uploads the Playwright report on failure.
 
-There is no deploy job yet, and the hook tests in `.claude/hooks/tests/` don't
-run in CI (`docs/tech-debt.md`).
+The hook tests in `.claude/hooks/tests/` don't run in CI (`docs/tech-debt.md`).
+
+## No deploy job
+
+Deploys don't run in GitHub Actions: Cloudflare Workers Builds deploys `main`
+and uploads a preview for every other branch
+(`docs/adr/2026-10-27-deploy-with-workers-builds.md`). Don't add a deploy job
+or Cloudflare secrets to a workflow; that is a new decision.
 
 ## Conventions
 
