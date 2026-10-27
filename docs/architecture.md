@@ -43,8 +43,8 @@ reads the streamed answer. A counter in
 1,000 characters, so the visitor never hits the endpoint's own limit.
 
 **The route.** [`src/routes/api/chat.ts`](../src/routes/api/chat.ts) accepts
-only `POST` and passes the request and the Worker's environment (vars, secrets
-and the D1 binding) to `handleChat` in
+only `POST` and passes the request, the Worker's environment (vars, secrets
+and the D1 binding) and the runtime's `waitUntil` to `handleChat` in
 [`src/lib/bot/chat.ts`](../src/lib/bot/chat.ts), where every other step
 starts.
 
@@ -86,7 +86,8 @@ any citation that no tool returned. Then the token usage of every step that
 finished is added to today's estimated spend, once per answer, however it
 ended: finished, failed, or stopped by the visitor. When the visitor presses
 Stop or leaves, the request's abort signal cancels the model call, and the
-write to D1 goes through `waitUntil` so it still lands after they've gone. A
+server keeps reading the stream to its end inside `waitUntil`, so the write to
+D1 still lands after they've gone. A
 step cut off halfway isn't counted ([`docs/tech-debt.md`](tech-debt.md)).
 
 **The answer on the page.** [`AssistantMessage.tsx`](../src/components/chat/AssistantMessage.tsx)

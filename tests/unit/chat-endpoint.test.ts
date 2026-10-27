@@ -667,11 +667,10 @@ describe("usage", () => {
     await Promise.all(waitedFor);
     expect(store.addUsage).toHaveBeenCalledTimes(1);
     expect(store.addUsage).toHaveBeenCalledWith(expect.any(String), oneStep, 1);
-    expect(waitedFor).toHaveLength(1);
     expect(model.doStreamCalls.at(-1)?.abortSignal?.aborted).toBe(true);
   });
 
-  it("records the finished step once when the visitor disconnects without an abort signal", async () => {
+  it("finishes the answer on the server and records it once when the visitor disconnects without an abort signal", async () => {
     const model = afterToolStep(slowAnswer);
     const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), env, {
       createModel: () => model,
@@ -682,11 +681,26 @@ describe("usage", () => {
     await readUntilText(reader);
     await reader.cancel();
 
+    // Nothing stops the model without the signal, so waitUntil keeps reading
+    // the answer to its end and both steps are recorded.
     await vi.waitFor(() => expect(store.addUsage).toHaveBeenCalled());
     await Promise.all(waitedFor);
     expect(store.addUsage).toHaveBeenCalledTimes(1);
-    expect(store.addUsage).toHaveBeenCalledWith(expect.any(String), oneStep, 1);
-    expect(waitedFor).toHaveLength(1);
+    expect(store.addUsage).toHaveBeenCalledWith(
+      expect.any(String),
+      { input: 2, output: 2, cacheRead: 0, cacheWrite: 0 },
+      2,
+    );
+  });
+
+  it("hands the server's copy of the stream and the usage write to waitUntil", async () => {
+    const model = new MockLanguageModelV4({ doStream: textAnswer });
+    const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), env, {
+      createModel: () => model,
+    });
+    await response.text();
+    await Promise.all(waitedFor);
+    expect(waitedFor).toHaveLength(2);
   });
 
   it("logs a failed usage write and still ends the answer", async () => {

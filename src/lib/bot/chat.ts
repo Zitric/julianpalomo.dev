@@ -1,11 +1,13 @@
 /**
  * The chat endpoint's logic: validates the request, streams an answer from
  * the confirmed claims, and turns every failure into a small typed error.
- * The route in src/routes/api/chat.ts only passes in the request and the
- * environment, so this module can be tested with a mock model.
+ * The route in src/routes/api/chat.ts only passes in the request, the
+ * environment and the runtime's waitUntil, so this module can be tested with
+ * a mock model, an in-memory store and a fake waitUntil.
  */
 import { createAnthropic } from "@ai-sdk/anthropic";
 import {
+  consumeStream,
   convertToModelMessages,
   createUIMessageStream,
   createUIMessageStreamResponse,
@@ -295,7 +297,14 @@ export async function handleChat(
         return STREAM_ERROR_TEXT;
       },
     });
-    return createUIMessageStreamResponse({ stream });
+    return createUIMessageStreamResponse({
+      stream,
+      // A copy of the stream read to its end on the server, inside waitUntil,
+      // so the answer still reaches toUIMessageStream's onEnd, and records its
+      // usage, after the visitor has disconnected. Without it Workers may
+      // cancel the rest of the request first, and the usage is never written.
+      consumeSseStream: ({ stream: copy }) => deps.waitUntil(consumeStream({ stream: copy })),
+    });
   } catch (error) {
     console.error("chat request failed", error);
     return errorResponse(500, "failed");
