@@ -7,14 +7,12 @@
  */
 import { z } from "zod";
 import data from "../content/claims.json";
+import { CLAIM_ID_PATTERN } from "./claim-id";
 
 /** Today's date in UTC as YYYY-MM-DD, which sorts and compares as a string. */
 function todayUtc(): string {
   return new Date().toISOString().slice(0, 10);
 }
-
-/** What a claim id looks like: kebab-case, lowercase letters and digits. */
-export const CLAIM_ID_PATTERN = /[a-z0-9]+(?:-[a-z0-9]+)*/;
 
 // Strict on purpose: a misspelt `confirmedByJulian` must fail, not read as an
 // unconfirmed claim with an extra field.

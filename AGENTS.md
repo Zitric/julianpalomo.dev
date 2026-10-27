@@ -1,10 +1,10 @@
 # AGENTS.md
 
-The source of julianpalomo.dev: Julián Palomo's personal site, with a planned
+The source of julianpalomo.dev: Julián Palomo's personal site, with an
 assistant that answers questions about his experience only from facts he has
 confirmed. A TanStack Start app (React 19, strict TypeScript, Tailwind CSS 4)
-for Cloudflare Workers. Today it is one placeholder page; `README.md` has the
-status and the plan.
+for Cloudflare Workers. Today it is one page with the chat; `README.md` has
+the status and the plan.
 
 This file is the single source of agent instructions. `CLAUDE.md` is a symlink
 to it, so Claude Code and every other agent read the same text. Never replace
@@ -56,10 +56,11 @@ wrangler commands that change Cloudflare.
 
 - `src/routes/`: file-based routes. `src/routeTree.gen.ts` is generated; never edit it by hand.
 - `src/lib/`: plain TypeScript modules, such as `site.ts`.
-- `src/lib/bot/`: the assistant: model settings, the system prompt, the read-only tools, the citation parser and the chat logic. `src/routes/api/chat.ts` is its endpoint, `POST /api/chat`.
+- `src/lib/bot/`: the assistant: model settings, the system prompt, the read-only tools, the citation parser, demo mode and the chat logic. `src/routes/api/chat.ts` is its endpoint, `POST /api/chat`.
+- `src/components/`: React components, one folder per feature, such as `chat/` (the chat on the home page).
 - `src/content/`: personal content, such as `claims.json`. It isn't MIT (`LICENSE`, section 2), and in `src/` only `src/lib/claims.ts` reads it.
 - `src/styles/tokens.css`: the only place colours are defined.
-- `tests/unit/`: Vitest. `tests/e2e/`: Playwright, against the production build.
+- `tests/unit/`: Vitest. `tests/e2e/`: Playwright, against a production build of the `e2e` environment, in demo mode (`.claude/rules/tests.md`).
 - `.github/workflows/ci.yml`: CI on every pull request to `main`. Deploys aren't here: Cloudflare Workers Builds deploys `main` and comments a preview URL on every PR.
 - `docs/adr/`: one file per decision. `docs/tech-debt.md`: shortcuts taken on purpose.
 - `.claude/`: rules, hooks, skills and subagents for Claude Code; `.claude/README.md` explains them.

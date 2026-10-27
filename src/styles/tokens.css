@@ -9,6 +9,8 @@
   --background: oklch(98.5% 0 0);
   --foreground: oklch(21% 0 0);
   --muted: oklch(46% 0 0);
+  --border: oklch(87% 0 0);
+  --danger: oklch(50% 0.19 27);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -17,6 +19,8 @@
     --background: oklch(16% 0 0);
     --foreground: oklch(96% 0 0);
     --muted: oklch(72% 0 0);
+    --border: oklch(34% 0 0);
+    --danger: oklch(72% 0.17 27);
   }
 }
 
@@ -25,11 +29,15 @@
   --background: oklch(16% 0 0);
   --foreground: oklch(96% 0 0);
   --muted: oklch(72% 0 0);
+  --border: oklch(34% 0 0);
+  --danger: oklch(72% 0.17 27);
 }
 
-/* Exposes the tokens as Tailwind utilities: bg-background, text-foreground, text-muted. */
+/* Exposes the tokens as Tailwind utilities: bg-background, text-foreground, text-muted, border-border, text-danger. */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-danger: var(--danger);
 }
