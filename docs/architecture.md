@@ -82,8 +82,12 @@ the same `get_claims` tool and quotes the first claim it returns.
 to the browser as one `data-sources` part. The answer cites claims as
 `[[claim-id]]`; when it ends, the server parses the text with
 [`src/lib/bot/citations.ts`](../src/lib/bot/citations.ts) and logs the ids of
-any citation that no tool returned. Then the answer's token usage is added to
-today's estimated spend.
+any citation that no tool returned. Then the token usage of every step that
+finished is added to today's estimated spend, once per answer, however it
+ended: finished, failed, or stopped by the visitor. When the visitor presses
+Stop or leaves, the request's abort signal cancels the model call, and the
+write to D1 goes through `waitUntil` so it still lands after they've gone. A
+step cut off halfway isn't counted ([`docs/tech-debt.md`](tech-debt.md)).
 
 **The answer on the page.** [`AssistantMessage.tsx`](../src/components/chat/AssistantMessage.tsx)
 renders the text with the same parser. A citation becomes a numbered marker and

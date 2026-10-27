@@ -38,6 +38,8 @@ must keep doing; the ADRs say why.
 - **`limits.ts` stays browser-safe**: the constants, the price table and pure functions only. D1, the visitor hash and anything that reads a secret go in `usage.ts`, which only `chat.ts` imports.
 - **The prices in `limits.ts` belong to the model.** When `MODEL_ID` in `model.ts` changes, change them in the same commit. Money is integer micro-dollars, never floats.
 - A visitor is a SHA-256 of the salt, the UTC day and `visitorKey(ip)`: the IPv4 address, or the /64 of an IPv6 one, so rotating through a /64 doesn't reset the limit. Never store the IP or the prefix, and keep the day in the hash so a visitor can't be followed across days.
+- **Usage is recorded once per answer, however it ends**: from `toUIMessageStream`'s `onEnd`, the one callback the SDK calls for a finished, failed, aborted or cancelled answer. It adds up each finished step in `onStepEnd`; never use `onEnd`'s `totalUsage`, which comes back empty when a later step fails, and never record from `streamText`'s `onEnd` or `onAbort` as well. The write goes through `waitUntil`, so it lands after a visitor has disconnected.
+- `streamText` gets `request.signal` as its `abortSignal`, so Stop cancels the model call. It only fires in Workers with `enable_request_signal` in `wrangler.jsonc`'s `compatibility_flags`; keep the flag.
 - `docs/architecture.md` draws the whole path of a question; update it when a step changes.
 
 ## Demo mode
@@ -56,7 +58,7 @@ must keep doing; the ADRs say why.
 - `model.ts` holds the model id and its settings. Never add temperature, `topP` or `topK`: this model rejects non-default values.
 - `prompt.ts` holds the system prompt, the only copy. Keep it byte-stable (no dates, ids or anything per request), or prompt caching stops working.
 - `tools.ts` builds the tools from an array of claims, so tests can pass fixtures.
-- `chat.ts` validates the request with Zod, checks the key and streams the answer. `src/routes/api/chat.ts` only passes in the request and `env` from `cloudflare:workers`, which, unlike `process.env`, includes the D1 binding.
+- `chat.ts` validates the request with Zod, checks the key and streams the answer. `src/routes/api/chat.ts` only passes in the request, `env` from `cloudflare:workers`, which, unlike `process.env`, includes the D1 binding, and `waitUntil` from the same module.
 
 ## The key and the endpoint
 
@@ -67,7 +69,7 @@ must keep doing; the ADRs say why.
 
 ## Tests
 
-- Unit tests never call the real model. They use `MockLanguageModelV4` from `ai/test`, passed in through `handleChat`'s `createModel`, and an in-memory store through `createStore`, so they never touch D1.
+- Unit tests never call the real model. They use `MockLanguageModelV4` from `ai/test`, passed in through `handleChat`'s `createModel`, an in-memory store through `createStore`, so they never touch D1, and a fake `waitUntil` that collects what it's given.
 - e2e tests run the chat in demo mode. The "not available" test fakes the 503 with `page.route`, using `chatErrorBody` so its body can't drift from the endpoint's.
 
 ## The AI SDK
