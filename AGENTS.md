@@ -46,6 +46,7 @@ blocks something, change course; don't look for another way to run it.
 | `pnpm preview`                    | Serves the last build in the local Workers runtime.           |
 | `pnpm test:e2e`                   | Builds, serves and runs Playwright in Chromium. Ask first.    |
 | `bash .claude/hooks/tests/run.sh` | Tests for the Claude Code hooks.                              |
+| `pnpm db:migrate:local`           | Applies the D1 migrations to the local database only.         |
 
 `pnpm add` and `pnpm install` change the lockfile: ask first. Nothing writes to
 Cloudflare without Julián, except the preview build Workers Builds runs when a
@@ -56,7 +57,8 @@ wrangler commands that change Cloudflare.
 
 - `src/routes/`: file-based routes. `src/routeTree.gen.ts` is generated; never edit it by hand.
 - `src/lib/`: plain TypeScript modules, such as `site.ts`.
-- `src/lib/bot/`: the assistant: model settings, the system prompt, the read-only tools, the citation parser, demo mode and the chat logic. `src/routes/api/chat.ts` is its endpoint, `POST /api/chat`.
+- `src/lib/bot/`: the assistant: model settings, the system prompt, the read-only tools, the citation parser, demo mode, the daily limits and the chat logic. `src/routes/api/chat.ts` is its endpoint, `POST /api/chat`.
+- `migrations/`: D1 migrations for the daily limits. `pnpm db:migrate:local` applies them locally; only Julián applies them to production.
 - `src/components/`: React components, one folder per feature, such as `chat/` (the chat on the home page).
 - `src/content/`: personal content, such as `claims.json`. It isn't MIT (`LICENSE`, section 2), and in `src/` only `src/lib/claims.ts` reads it.
 - `src/styles/tokens.css`: the only place colours are defined.
@@ -68,6 +70,7 @@ wrangler commands that change Cloudflare.
 ## 5. Docs map
 
 - `README.md`: what the project is, its status and the commands. Read first by outsiders.
+- `docs/architecture.md`: how a question is answered, step by step, with a diagram. Update it when a step changes.
 - `docs/adr/README.md`: the index of decisions. Records are history; a change of mind is a new ADR.
 - `docs/tech-debt.md`: add a row when you take a shortcut.
 - `.claude/rules/*.md`: per-area rules. Each starts with a `paths:` list; before editing a file, read every rule whose paths match it.
