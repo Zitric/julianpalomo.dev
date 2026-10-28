@@ -447,10 +447,10 @@
 
 @keyframes landscape-drift {
   from {
-    transform: translateX(-300px);
+    transform: translateX(-900px);
   }
   to {
-    transform: translateX(1400px);
+    transform: translateX(2000px);
   }
 }
 @keyframes landscape-twinkle {

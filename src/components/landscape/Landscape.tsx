@@ -98,7 +98,7 @@ export function Landscape({ sky, at, choreography, paused }: Props) {
   return (
     <svg
       className="landscape absolute inset-0 size-full"
-      viewBox="0 0 1200 320"
+      viewBox="-600 0 2400 320"
       preserveAspectRatio="xMidYMax slice"
       aria-hidden="true"
       focusable="false"
@@ -134,8 +134,8 @@ export function Landscape({ sky, at, choreography, paused }: Props) {
       <Pines />
       <HaarBand band={2} />
       <HaarBand band={3} />
-      <rect className="golden" width="1200" height="320" />
-      <rect className="glow" width="1200" height="320" />
+      <rect className="golden" x="-600" width="2400" height="320" />
+      <rect className="glow" x="-600" width="2400" height="320" />
     </svg>
   );
 }

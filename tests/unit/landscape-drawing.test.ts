@@ -31,8 +31,10 @@ function shapes(svg: string): string[] {
 
 describe("the landscape's drawing", () => {
   it("has every shape of the reference, in the same order and place", () => {
-    const expected = shapes(reference).filter((shape) => !shape.startsWith("rect width=1200"));
-    const actual = shapes(rendered).filter((shape) => !shape.startsWith("rect width=1200"));
+    const expected = shapes(reference).filter(
+      (shape) => !shape.startsWith("rect x=-600 width=2400"),
+    );
+    const actual = shapes(rendered).filter((shape) => !shape.startsWith("rect x=-600 width=2400"));
     expect(expected.length).toBeGreaterThan(200);
     expect(actual).toEqual(expected);
   });
@@ -43,9 +45,15 @@ describe("the landscape's drawing", () => {
     expect(layers(rendered)).toEqual(layers(reference));
   });
 
+  // The scene's 0–1200 band plus 600 units of glen on each side, so a wide
+  // screen is bound by the hero's height and keeps its sky.
+  it("is as wide as the reference", () => {
+    expect(reference).toContain('viewBox="-600 0 2400 320"');
+  });
+
   it("is decoration, hidden from screen readers", () => {
     expect(rendered).toMatch(/^<svg[^>]*aria-hidden="true"/);
-    expect(rendered).toContain('viewBox="0 0 1200 320"');
+    expect(rendered).toContain('viewBox="-600 0 2400 320"');
     expect(rendered).toContain('preserveAspectRatio="xMidYMax slice"');
   });
 });

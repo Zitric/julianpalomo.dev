@@ -243,11 +243,18 @@ near meadow, gorse or heather or bracken patches by season, and a small herd
 of Highland cows grazing. The reference artwork is
 [`docs/design/highland-scene.svg`](docs/design/highland-scene.svg).
 
-It is drawn in a `1200 × 320` viewBox with `preserveAspectRatio="xMidYMax
-slice"`: it always fills the hero, anchored to the bottom centre, and narrow
-screens show the middle (about x 400–800 on a phone). Everything that matters
-on mobile (the loch, the islet, the mother cow and her calf) sits in that
-middle band.
+It is drawn in a `-600 0 2400 320` viewBox with `preserveAspectRatio="xMidYMax
+slice"`: it always fills the hero, anchored to the bottom centre. The scene
+itself is the `0–1200` band; on each side, 600 units of "more glen" (the
+wings) continue the sky, the aurora, the cloud decks, the hills, the meadow,
+the dyke, the snow and the haar, with gentle undulations and no new peaks.
+
+Any hero narrower than 7.5:1 is bound by its height, so nothing is cut from
+the top: a phone shows about x 330–870, a 1280px laptop about x −40 to 1240,
+and a 1920px screen x −360 to 1560, with the sky, the peaks and the sun or the
+moon all in view. Everything that matters on mobile (the loch, the islet, the
+mother cow and her calf) sits in the middle band. Only screens wider than
+2400px lose a little of the sky again.
 
 It is decoration: `aria-hidden`, no focusable parts, and it never intercepts
 a click meant for the controls on top of it.
@@ -318,13 +325,13 @@ dawn and dusk drift rather than tick.
 The weather is four levels from 0 to 10 and two switches. The live values
 come from Glasgow (below); the gear lets visitors set them (section 8).
 
-| Input       | What it does in the scene                                                                                                                                                                                                                                                                                                 |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Clouds 0–10 | Shows `round(n × 1.3)` of the 13 clouds. From 6 a back cloud deck fades in (`(n − 5) / 5`), from 8 a front deck (`(n − 7) / 3 × 0.9`), and every other cloud turns the darker cloud colour. The sky greys by `n × 3.5%`. The sun or moon fades from 7 (`1 − (n − 6) / 3.5`); the stars fade with any cloud (`1 − n / 8`). |
-| Rain 0–10   | The sky greys a further `n × 4%`, the sun or moon fades (`1 − n / 4`), rings ripple on the loch (`0.4 + n × 0.05`), and `n × 10` raindrops fall. Rain also means at least `n + 3` clouds.                                                                                                                                 |
-| Wind 0–10   | Clouds drift `1 + n × 0.45` times faster, pines sway faster (period `max(0.9, 5 − n × 0.45)`s) and harder from 4, particles fall `1 + n × 0.18` times faster, and from 5 the rain slants and leaves blow sideways.                                                                                                        |
-| Snow        | Precipitation falls as `n × 8` snowflakes instead of rain; from level 3, snow settles on the land (a white layer at 62%). Snowcaps show in winter anyway.                                                                                                                                                                 |
-| Haar        | Three bands of sea fog drift across the glen at 80% opacity.                                                                                                                                                                                                                                                              |
+| Input       | What it does in the scene                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Clouds 0–10 | Shows `round(n × 1.3)` of the 13 clouds, each with its twin (a 26-cloud sky for the wide drawing, the twin half a crossing behind and a little higher or lower, larger or smaller). From 6 a back cloud deck fades in (`(n − 5) / 5`), from 8 a front deck (`(n − 7) / 3 × 0.9`), and every other cloud turns the darker cloud colour. The sky greys by `n × 3.5%`. The sun or moon fades from 7 (`1 − (n − 6) / 3.5`); the stars fade with any cloud (`1 − n / 8`). |
+| Rain 0–10   | The sky greys a further `n × 4%`, the sun or moon fades (`1 − n / 4`), rings ripple on the loch (`0.4 + n × 0.05`), and `n × 10` raindrops fall. Rain also means at least `n + 3` clouds.                                                                                                                                                                                                                                                                            |
+| Wind 0–10   | Clouds drift `1 + n × 0.45` times faster, pines sway faster (period `max(0.9, 5 − n × 0.45)`s) and harder from 4, particles fall `1 + n × 0.18` times faster, and from 5 the rain slants and leaves blow sideways.                                                                                                                                                                                                                                                   |
+| Snow        | Precipitation falls as `n × 8` snowflakes instead of rain; from level 3, snow settles on the land (a white layer at 62%). Snowcaps show in winter anyway.                                                                                                                                                                                                                                                                                                            |
+| Haar        | Three bands of sea fog drift across the glen at 80% opacity.                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 ### Live Glasgow weather
 
@@ -538,20 +545,20 @@ text, in both languages, in the pull request that adds it.
 
 ## 11. Motion
 
-| What                              | Duration          | Easing                                             |
-| --------------------------------- | ----------------- | -------------------------------------------------- |
-| UI colours on a theme change      | 0.6s              | `ease`                                             |
-| Theme toggle (sunset or sunrise)  | 1.7s              | Section 6                                          |
-| Theme change at Glasgow's dusk    | about 6s          | Same choreography, stretched                       |
-| Landscape colours (time, weather) | 1.1s              | `ease`                                             |
-| The visitor's bubble appears      | 0.5s              | `cubic-bezier(.3, 1.5, .5, 1)` (a small overshoot) |
-| Source chips rise                 | 0.45s, 80ms apart | `cubic-bezier(.3, 1.4, .5, 1)`                     |
-| A claim opens                     | 0.35s             | `ease`                                             |
-| New text in an answer             | 0.2s              | `ease`                                             |
-| Button press                      | 80ms              | `ease`                                             |
-| The gear spins in                 | 0.6s, after 2s    | Spring-like overshoot, then 3 pulses               |
-| Clouds cross the sky              | 120–190s each     | `linear`                                           |
-| The herd's loops                  | 11s, 16s, 19s     | `ease-in-out`                                      |
+| What                              | Duration                                                 | Easing                                             |
+| --------------------------------- | -------------------------------------------------------- | -------------------------------------------------- |
+| UI colours on a theme change      | 0.6s                                                     | `ease`                                             |
+| Theme toggle (sunset or sunrise)  | 1.7s                                                     | Section 6                                          |
+| Theme change at Glasgow's dusk    | about 6s                                                 | Same choreography, stretched                       |
+| Landscape colours (time, weather) | 1.1s                                                     | `ease`                                             |
+| The visitor's bubble appears      | 0.5s                                                     | `cubic-bezier(.3, 1.5, .5, 1)` (a small overshoot) |
+| Source chips rise                 | 0.45s, 80ms apart                                        | `cubic-bezier(.3, 1.4, .5, 1)`                     |
+| A claim opens                     | 0.35s                                                    | `ease`                                             |
+| New text in an answer             | 0.2s                                                     | `ease`                                             |
+| Button press                      | 80ms                                                     | `ease`                                             |
+| The gear spins in                 | 0.6s, after 2s                                           | Spring-like overshoot, then 3 pulses               |
+| Clouds cross the sky              | 1700 units in 120–190s, over a 2900-unit loop (205–324s) | `linear`                                           |
+| The herd's loops                  | 11s, 16s, 19s                                            | `ease-in-out`                                      |
 
 ### Reduced motion
 
