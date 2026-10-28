@@ -7,8 +7,8 @@ paths:
 # Styling
 
 Tailwind CSS 4 through `@tailwindcss/vite`. `src/styles/app.css` imports
-Tailwind, `tokens.css`, `fonts.css` and `cow.css`; `src/routes/__root.tsx` links
-`app.css`.
+Tailwind, `tokens.css`, `fonts.css`, `landscape.css` and `cow.css`;
+`src/routes/__root.tsx` links `app.css`.
 
 ## Fonts live only in `src/styles/fonts.css`
 
@@ -29,8 +29,14 @@ Tailwind, `tokens.css`, `fonts.css` and `cow.css`; `src/routes/__root.tsx` links
 
 ## The one exception: the illustrations' palette
 
-- The colours of the illustrations (the landscape and the cows) are part of the artwork, not UI, so they are data in `src/lib/scene/palette.ts`, copied from `docs/design/landscape-palettes.json` (`DESIGN.md` section 2). Today it holds `assistantCow`; `tests/unit/assistant-cow.test.ts` keeps it equal to the JSON.
+- The colours of the illustrations (the landscape and the cows) are part of the artwork, not UI, so they are data in `src/lib/scene/palette.ts`, copied from `docs/design/landscape-palettes.json` (`DESIGN.md` section 2): the assistant cow, the five sky moments, the land per season, the herd, the particles, and `sceneFixed` for the few colours the reference SVGs' own stylesheets hold. `tests/unit/assistant-cow.test.ts` and `tests/unit/scene.test.ts` keep it equal to the JSON.
 - Only illustration components read it, and only for their drawing's fills and strokes. A bubble, chip or button on top of an illustration uses tokens like any other UI.
+
+## The landscape's SVG styles live in `src/styles/landscape.css`
+
+- The second exception to "Tailwind utilities only": SVG parts, keyframes and `transform-box` rules, ported from the `<style>` of `docs/design/highland-scene.svg` and `herd-cow.svg`, with keyframes prefixed `landscape-`. It has no colour literals: `src/components/landscape/Landscape.tsx` puts every colour and level on the SVG root as a custom property, computed by `src/lib/scene/`, and switches parts with `data-` attributes (`data-season`, `data-snowy`, `data-haar`, `data-aurora`, `data-choreography`, `data-paused`).
+- Every animation and transition sits inside `prefers-reduced-motion: no-preference`, so with reduced motion nothing in the hero moves and colours change instantly. Loops animate only `transform` and `opacity`; colours transition over 1.1s, and with the timings of `DESIGN.md` section 6 during a theme toggle.
+- `tests/unit/landscape-drawing.test.ts` renders the landscape and checks every shape against the reference, in order. Never redraw a part: copy it from the reference.
 
 ## The assistant cow's motion lives in `src/styles/cow.css`
 
@@ -55,4 +61,4 @@ Tailwind, `tokens.css`, `fonts.css` and `cow.css`; `src/routes/__root.tsx` links
 - Semantic elements first (`main`, `h1`, `nav`, `button`); the e2e test finds the page by role (`tests/e2e/home.spec.ts`).
 - The layout works at 375px wide (small phone) before anything else.
 
-If `tokens.css`, `fonts.css`, `cow.css`, `app.css`, `src/lib/scene/palette.ts` or `src/components/ui/` change shape, update this rule.
+If `tokens.css`, `fonts.css`, `cow.css`, `landscape.css`, `app.css`, `src/lib/scene/palette.ts` or `src/components/ui/` change shape, update this rule.

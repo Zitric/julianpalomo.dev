@@ -14,8 +14,10 @@ Tailwind CSS) that runs on Cloudflare Workers at
 [julianpalomo.dev](https://julianpalomo.dev). [`DESIGN.md`](DESIGN.md)
 describes the visual design, which is being built in steps: the colours, the
 fonts, the layout and the assistant are in, and the theme follows day and
-night in Glasgow unless the visitor picks one with the toggle; the hero is
-still a plain fill where the Highland landscape will go. The assistant is a
+night in Glasgow unless the visitor picks one with the toggle. The hero is a
+live Highland glen: its season follows the date and its sky the sun's real
+height over Glasgow, a small herd grazes, and the sun sets when the visitor
+switches to the dark theme. Live weather comes next. The assistant is a
 Highland cow that greets you and follows the chat: it listens while you type,
 chews while it looks things up, talks while the answer streams, licks its lips
 when it's done and lowers its head when something goes wrong. The site is in

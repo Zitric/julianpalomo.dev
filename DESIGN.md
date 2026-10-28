@@ -212,7 +212,7 @@ night in Glasgow**, wherever the visitor is.
 - **The landscape matches the theme.** Normally it shows Glasgow's real time.
   If the chosen theme disagrees with it (dark during Glasgow's day, or light
   at night), the landscape shows a representative moment instead: today's
-  solar noon for light, 22:00 for dark.
+  solar noon for light, that night's solar midnight for dark.
 
 ### The toggle's choreography
 
