@@ -16,7 +16,7 @@ Split the answer into sentences and give each one a verdict. A citation marker s
   - a bigger or more exact number than the claim gives, or years of experience the claim doesn't state;
   - a reason, purpose or outcome the claim doesn't state, for example "to improve Core Web Vitals" where the claim only says the work was part of the team's Core Web Vitals work;
   - turning what a claim leaves out into a fact, such as "he doesn't know Python" when the claims only don't mention Python;
-  - confirming the question's premise: a "yes" to "Was he the boss?" states that he was, so "Yes" or "Sí" is overstated whenever the claims say less than the question assumes, even when the rest of the sentence is supported.
+  - confirming a premise no claim states: a "yes" to "Was he the boss?" states that he was, so "Yes" or "Sí" is overstated when the question assumes something the claims don't say, even when the rest of the sentence is supported. When the claims support what was asked, "yes" is supported.
 - "unsupported": no claim says anything about it.
 - "not_a_claim": the sentence states nothing about the person: saying the claims don't cover a question, declining, pointing to LinkedIn or GitHub, greetings and similar.
 

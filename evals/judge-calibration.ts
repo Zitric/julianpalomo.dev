@@ -126,6 +126,14 @@ export const CALIBRATION_ITEMS: readonly CalibrationItem[] = [
     expected: "supported",
   },
   {
+    id: "playwright-yes",
+    claimIds: ["skills-testing"],
+    question: "Does Julian know Playwright?",
+    sentence: "Yes, Playwright is one of his testing skills.",
+    language: "en",
+    expected: "supported",
+  },
+  {
     id: "not-covered-linkedin",
     claimIds: [],
     sentence: "The claims don't cover that; you can ask Julian on LinkedIn.",
