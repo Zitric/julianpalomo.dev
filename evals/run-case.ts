@@ -3,20 +3,24 @@
  * model, and collects what came back. The request is built like the
  * browser's, so the validation, the tools, the prompt, the citation check and
  * the limits all run as they do in production. Only `handleChat`'s existing
- * overrides are used; there is no code path for evals in src/.
+ * overrides are used; there is no code path for evals in src/. The model is
+ * wrapped only to notice provider errors (provider-errors.ts).
  */
 import {
   parseJsonEventStream,
   readUIMessageStream,
   type UIMessageChunk,
   uiMessageChunkSchema,
+  wrapLanguageModel,
 } from "ai";
 import { handleChat } from "../src/lib/bot/chat";
 import type { ChatUIMessage } from "../src/lib/bot/chat-message";
 import type { TokenUsage } from "../src/lib/bot/limits";
+import { createBotModel } from "../src/lib/bot/model";
 import type { UsageStore } from "../src/lib/bot/usage";
 import type { EvalCase } from "./cases";
 import type { Answer } from "./checks";
+import { type ProviderErrorKind, providerErrorRecorder } from "./provider-errors";
 
 export type ToolCall = { tool: string; input: unknown; output: unknown };
 
@@ -27,7 +31,11 @@ export type RunResult = Answer & {
   toolCalls: ToolCall[];
   usage: TokenUsage;
   costMicroUsd: number;
+  /** Set when a turn's answer failed because the model API did: the run says nothing about the bot. */
+  providerError: ProviderErrorKind | undefined;
 };
+
+type Model = Parameters<typeof wrapLanguageModel>[0]["model"];
 
 const VISITOR_SALT = "evals-fixed-salt";
 
@@ -131,10 +139,19 @@ function toolCallsOf(message: ChatUIMessage | undefined): ToolCall[] {
  * Asks the case's visitor turns in order, sending the bot's earlier answers
  * back whole, as `useChat` does, and returns the last answer. A fixed earlier
  * answer in the case goes into the history as written. A request that doesn't
- * answer 200 ends the run with that status.
+ * answer 200 ends the run with that status, and a turn whose answer failed
+ * on a provider error ends it with that error: the turns after it would build
+ * on a broken answer. `createModel` is for tests; a run uses `createBotModel`,
+ * the model production answers with.
  */
-export async function runCase(evalCase: EvalCase, apiKey: string): Promise<RunResult> {
+export async function runCase(
+  evalCase: EvalCase,
+  apiKey: string,
+  createModel: (apiKey: string) => Model = createBotModel,
+): Promise<RunResult> {
   const { store, usage, cost } = runStore();
+  const recorder = providerErrorRecorder();
+  let providerError: ProviderErrorKind | undefined;
   const env = { ANTHROPIC_API_KEY: apiKey, VISITOR_SALT, DB: standInDb };
   const history: ChatUIMessage[] = [];
   let last: Answer = { status: 200, text: "", sourceIds: [], streamError: undefined };
@@ -153,6 +170,8 @@ export async function runCase(evalCase: EvalCase, apiKey: string): Promise<RunRe
 
     const pending: Promise<unknown>[] = [];
     const response = await handleChat(chatRequest(history), env, {
+      createModel: (key) =>
+        wrapLanguageModel({ model: createModel(key), middleware: recorder.middleware }),
       createStore: () => store,
       waitUntil: (promise) => {
         pending.push(promise);
@@ -173,11 +192,24 @@ export async function runCase(evalCase: EvalCase, apiKey: string): Promise<RunRe
       streamError,
     };
     toolCalls = toolCallsOf(message);
+    // Both, so a retry that recovered or a stream error with another cause isn't one.
+    const lastCallError = recorder.takeLast();
+    if (streamError !== undefined && lastCallError !== undefined) {
+      providerError = lastCallError;
+      break;
+    }
   }
 
   const earlierTurns = history.slice(0, lastQuestion).map((message) => ({
     role: message.role === "user" ? ("visitor" as const) : ("assistant" as const),
     text: textOf(message),
   }));
-  return { ...last, earlierTurns, toolCalls, usage: { ...usage }, costMicroUsd: cost() };
+  return {
+    ...last,
+    earlierTurns,
+    toolCalls,
+    usage: { ...usage },
+    costMicroUsd: cost(),
+    providerError,
+  };
 }

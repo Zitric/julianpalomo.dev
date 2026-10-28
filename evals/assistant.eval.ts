@@ -7,7 +7,9 @@
  *
  * A wrong calibration item fails beforeAll, so no case runs. The per-case
  * tests never fail on their own: the run's verdict comes from the thresholds
- * in report.ts, and afterAll fails the command when they aren't met.
+ * in report.ts, and afterAll fails the command when they aren't met. A
+ * provider error, in the calibration or in any run, makes the run
+ * inconclusive (provider-errors.ts): the command fails, and never passes.
  */
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { inspect } from "node:util";
@@ -25,6 +27,7 @@ import {
   judgeChecks,
 } from "./judge";
 import { type CalibrationResult, runCalibration } from "./judge-calibration";
+import { providerErrorKind } from "./provider-errors";
 import {
   COST_CAP_MICRO_USD,
   formatCalibration,
@@ -74,6 +77,10 @@ beforeAll(async () => {
   calibration = await runCalibration(judgeModel);
   spentMicroUsd += calibration.reduce((sum, item) => sum + item.costMicroUsd, 0);
   process.stdout.write(`\n${redact(formatCalibration(calibration))}\n`);
+  const verdict = summarize([], calibration);
+  if (verdict.providerErrors.calibrationItems > 0) {
+    throw new Error(`the eval run is inconclusive: ${verdict.reasons[0]}`);
+  }
   const wrong = calibration.filter((item) => !item.pass);
   if (wrong.length > 0) {
     throw new Error(
@@ -121,15 +128,24 @@ async function judge(
           try {
             const result = await runCase(evalCase, apiKey);
             spentMicroUsd += result.costMicroUsd;
-            const verdict = await judge(evalCase, result);
+            // A broken answer isn't worth judging: the run is a provider error either way.
+            const verdict =
+              result.providerError === undefined ? await judge(evalCase, result) : undefined;
             spentMicroUsd += verdict?.costMicroUsd ?? 0;
+            const providerError =
+              result.providerError ??
+              (verdict?.status === "provider-error" ? verdict.providerError : undefined);
             records.push(
               toRecord({
                 ...base,
-                checks: [
-                  ...checkAnswer(result, evalCase.expect),
-                  ...(verdict === undefined ? [] : judgeChecks(verdict)),
-                ],
+                providerError,
+                checks:
+                  providerError !== undefined
+                    ? []
+                    : [
+                        ...checkAnswer(result, evalCase.expect),
+                        ...(verdict === undefined ? [] : judgeChecks(verdict)),
+                      ],
                 text: result.text,
                 toolCalls: result.toolCalls,
                 usage: result.usage,
@@ -140,10 +156,15 @@ async function judge(
             );
           } catch (error) {
             // A runner failure is a failed run with its reason, not a crash of the whole run.
-            const reason = redact(error instanceof Error ? error.message : String(error));
+            const providerError = providerErrorKind(error);
+            const reason =
+              providerError !== undefined
+                ? `provider error: ${providerError}`
+                : redact(error instanceof Error ? error.message : String(error));
             records.push(
               toRecord({
                 ...base,
+                providerError,
                 checks: [{ name: "runner", pass: false, reason }],
                 text: "",
                 toolCalls: [],
@@ -182,5 +203,10 @@ afterAll(() => {
   writeFileSync(file, redact(json));
   process.stdout.write(`Results: ${file}\n`);
 
-  if (!summary.pass) throw new Error(`the eval run failed: ${summary.reasons.join("; ")}`);
+  if (summary.verdict === "inconclusive") {
+    throw new Error(`the eval run is inconclusive: ${summary.reasons.join("; ")}`);
+  }
+  if (summary.verdict === "fail") {
+    throw new Error(`the eval run failed: ${summary.reasons.join("; ")}`);
+  }
 });

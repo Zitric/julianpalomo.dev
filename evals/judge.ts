@@ -17,6 +17,7 @@ import { z } from "zod";
 import type { TokenUsage } from "../src/lib/bot/limits";
 import type { CheckResult } from "./checks";
 import { JUDGE_PROMPT } from "./judge-prompt";
+import { type ProviderErrorKind, providerErrorKind } from "./provider-errors";
 import type { ToolCall } from "./run-case";
 
 /** Julian's choice of judge. It is also the bot's model; the calibration shows it still catches overclaims. */
@@ -81,10 +82,21 @@ export type JudgeInput = {
   rubric: string;
 };
 
-/** What one judge call gave: a verdict, or why there isn't one. Either way it cost something. */
+/**
+ * What one judge call gave: a verdict, or why there isn't one. Either way it
+ * cost something. "provider-error" means the call failed because the model
+ * API did, which says nothing about the judge or the bot; it keeps the kind,
+ * never the provider's message.
+ */
 export type JudgeOutcome =
   | { status: "judged"; verdict: JudgeVerdict; usage: TokenUsage; costMicroUsd: number }
-  | { status: "error"; error: string; usage: TokenUsage; costMicroUsd: number };
+  | { status: "error"; error: string; usage: TokenUsage; costMicroUsd: number }
+  | {
+      status: "provider-error";
+      providerError: ProviderErrorKind;
+      usage: TokenUsage;
+      costMicroUsd: number;
+    };
 
 const toolClaimsSchema = z.object({
   claims: z.array(
@@ -195,6 +207,16 @@ export async function judgeAnswer(input: JudgeInput, model: LanguageModel): Prom
         tokenUsage(error.usage),
       );
     }
+    const providerError = providerErrorKind(error);
+    if (providerError !== undefined) {
+      // The kind only: the provider's message never reaches the report.
+      return {
+        status: "provider-error",
+        providerError,
+        usage: tokenUsage(undefined),
+        costMicroUsd: 0,
+      };
+    }
     return outcomeError(
       `the judge call failed: ${error instanceof Error ? error.message : String(error)}`,
       tokenUsage(undefined),
@@ -213,6 +235,10 @@ function oneLine(text: string): string {
  * failure is one `judge-error` check, kept apart from the bot's failures.
  */
 export function judgeChecks(outcome: JudgeOutcome): CheckResult[] {
+  if (outcome.status === "provider-error") {
+    const reason = `the judge call hit a provider error: ${outcome.providerError}`;
+    return [{ name: "judge-error", pass: false, reason }];
+  }
   if (outcome.status === "error") {
     return [{ name: "judge-error", pass: false, reason: oneLine(outcome.error) }];
   }

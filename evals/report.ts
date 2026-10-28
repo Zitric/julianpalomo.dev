@@ -7,6 +7,7 @@ import type { TokenUsage } from "../src/lib/bot/limits";
 import type { CheckResult } from "./checks";
 import type { JudgeOutcome } from "./judge";
 import type { CalibrationResult } from "./judge-calibration";
+import { PROVIDER_ERROR_KINDS, type ProviderErrorKind } from "./provider-errors";
 import type { ToolCall } from "./run-case";
 
 /** The share of all runs that must pass. Critical cases must pass every run. */
@@ -24,8 +25,13 @@ export type RunRecord = {
   caseId: string;
   critical: boolean;
   run: number;
-  /** "skipped" means the cost cap stopped the run before it started. */
-  outcome: "passed" | "failed" | "skipped";
+  /**
+   * "skipped" means the cost cap stopped the run before it started;
+   * "provider-error" that the model API failed, so the run is neither passed nor failed.
+   */
+  outcome: "passed" | "failed" | "skipped" | "provider-error";
+  /** The kind of provider error, only for a "provider-error" run. */
+  providerError: ProviderErrorKind | undefined;
   checks: CheckResult[];
   text: string;
   toolCalls: ToolCall[];
@@ -40,10 +46,12 @@ export type RunRecord = {
 };
 
 export type Summary = {
-  pass: boolean;
-  /** Why the run fails; empty when it passes. */
+  /** Inconclusive when any run or calibration item hit a provider error, whatever the rest did. */
+  verdict: "pass" | "fail" | "inconclusive";
+  /** Why the run fails or is inconclusive, the provider errors first; empty when it passes. */
   reasons: string[];
   passed: number;
+  /** Runs that passed or failed: never the skipped ones or the provider errors. */
   ran: number;
   skipped: number;
   passRate: number;
@@ -52,6 +60,8 @@ export type Summary = {
   criticalFailures: string[];
   /** Runs the judge itself failed on, counted apart from the bot's failures. */
   judgeErrors: number;
+  /** Runs and calibration items that hit provider errors, and each kind once. */
+  providerErrors: { runs: number; calibrationItems: number; kinds: ProviderErrorKind[] };
   calibration: { passed: number; total: number; wrong: string[] };
   /** The bot's tokens across every run. */
   usage: TokenUsage;
@@ -64,13 +74,48 @@ export type Summary = {
 
 const ZERO_USAGE: TokenUsage = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
 
-/** A run's record: it passes when every check does, the judge's included. */
-export function toRecord(base: Omit<RunRecord, "outcome" | "costMicroUsd">): RunRecord {
+/**
+ * A run's record: it passes when every check does, the judge's included. A
+ * provider error, the bot's or the judge's, makes it "provider-error" whatever
+ * the checks say.
+ */
+export function toRecord(
+  base: Omit<RunRecord, "outcome" | "costMicroUsd" | "providerError"> & {
+    providerError?: ProviderErrorKind | undefined;
+  },
+): RunRecord {
+  const providerError = base.providerError;
   return {
     ...base,
-    outcome: base.checks.every((check) => check.pass) ? "passed" : "failed",
+    outcome:
+      providerError !== undefined
+        ? "provider-error"
+        : base.checks.every((check) => check.pass)
+          ? "passed"
+          : "failed",
+    providerError,
     costMicroUsd: base.botCostMicroUsd + base.judgeCostMicroUsd,
   };
+}
+
+/** Each provider error kind among `entries` once, in PROVIDER_ERROR_KINDS order. */
+function kindsOf(
+  entries: readonly { providerError?: ProviderErrorKind | undefined }[],
+): ProviderErrorKind[] {
+  return PROVIDER_ERROR_KINDS.filter((kind) =>
+    entries.some((entry) => entry.providerError === kind),
+  );
+}
+
+/** "N runs hit provider errors: credit, overload". */
+function providerErrorReason(
+  count: number,
+  unit: "run" | "calibration item",
+  kinds: readonly ProviderErrorKind[],
+): string {
+  const subject =
+    count === 1 ? `1 ${unit} hit a provider error` : `${count} ${unit}s hit provider errors`;
+  return `${subject}: ${kinds.join(", ")}`;
 }
 
 /** The record of a run the cost cap stopped before it started. */
@@ -80,6 +125,7 @@ export function skippedRecord(caseId: string, critical: boolean, run: number): R
     critical,
     run,
     outcome: "skipped",
+    providerError: undefined,
     checks: [],
     text: "",
     toolCalls: [],
@@ -94,15 +140,21 @@ export function skippedRecord(caseId: string, critical: boolean, run: number): R
 /**
  * The verdict: the judge got every calibration item right, every critical case
  * passes every run, at least PASS_RATE of all runs pass, and the cost cap
- * stopped nothing.
+ * stopped nothing. Any provider error makes it inconclusive instead: such a
+ * run or item says nothing about the bot or the judge, so it counts neither in
+ * the pass rate nor toward the critical cases, and the run can't pass without it.
  */
 export function summarize(
   records: readonly RunRecord[],
   calibration: readonly CalibrationResult[] = [],
 ): Summary {
-  const ran = records.filter((record) => record.outcome !== "skipped");
+  const ran = records.filter(
+    (record) => record.outcome === "passed" || record.outcome === "failed",
+  );
   const passed = ran.filter((record) => record.outcome === "passed").length;
-  const skipped = records.length - ran.length;
+  const skipped = records.filter((record) => record.outcome === "skipped").length;
+  const providerRuns = records.filter((record) => record.providerError !== undefined);
+  const providerItems = calibration.filter((item) => item.providerError !== undefined);
   const passRate = ran.length === 0 ? 0 : passed / ran.length;
 
   const byCase = new Map<string, Summary["cases"][number]>();
@@ -134,14 +186,28 @@ export function summarize(
     judgeCostMicroUsd += record.judgeCostMicroUsd;
   }
   const calibrationCostMicroUsd = calibration.reduce((sum, item) => sum + item.costMicroUsd, 0);
-  const wrong = calibration.filter((item) => !item.pass).map((item) => item.id);
+  const wrong = calibration
+    .filter((item) => !item.pass && item.providerError === undefined)
+    .map((item) => item.id);
+  const runKinds = kindsOf(providerRuns);
+  const itemKinds = kindsOf(providerItems);
+  const kinds = PROVIDER_ERROR_KINDS.filter(
+    (kind) => runKinds.includes(kind) || itemKinds.includes(kind),
+  );
   const judgeErrors = ran.filter((record) =>
     record.checks.some((check) => check.name === "judge-error" && !check.pass),
   ).length;
 
   const reasons: string[] = [];
+  if (providerItems.length > 0) {
+    reasons.push(providerErrorReason(providerItems.length, "calibration item", itemKinds));
+  }
+  if (providerRuns.length > 0) {
+    reasons.push(providerErrorReason(providerRuns.length, "run", runKinds));
+  }
+  const inconclusive = reasons.length > 0;
   if (wrong.length > 0) reasons.push(`the judge got calibration items wrong: ${wrong.join(", ")}`);
-  if (ran.length === 0) reasons.push("no case ran");
+  if (ran.length === 0 && !inconclusive) reasons.push("no case ran");
   if (criticalFailures.length > 0) {
     reasons.push(`critical cases failed: ${criticalFailures.join(", ")}`);
   }
@@ -155,7 +221,7 @@ export function summarize(
   }
 
   return {
-    pass: reasons.length === 0,
+    verdict: inconclusive ? "inconclusive" : reasons.length > 0 ? "fail" : "pass",
     reasons,
     passed,
     ran: ran.length,
@@ -164,8 +230,13 @@ export function summarize(
     cases,
     criticalFailures,
     judgeErrors,
+    providerErrors: {
+      runs: providerRuns.length,
+      calibrationItems: providerItems.length,
+      kinds,
+    },
     calibration: {
-      passed: calibration.length - wrong.length,
+      passed: calibration.filter((item) => item.pass).length,
       total: calibration.length,
       wrong,
     },
@@ -177,6 +248,30 @@ export function summarize(
   };
 }
 
+function providerErrorLine({ runs, calibrationItems, kinds }: Summary["providerErrors"]): string {
+  if (runs === 0 && calibrationItems === 0) return "none";
+  const counts = [`${runs} run${runs === 1 ? "" : "s"}`];
+  if (calibrationItems > 0) {
+    counts.push(`${calibrationItems} calibration item${calibrationItems === 1 ? "" : "s"}`);
+  }
+  return `${counts.join(", ")} (${kinds.join(", ")})`;
+}
+
+function resultLine(summary: Summary): string {
+  switch (summary.verdict) {
+    case "pass":
+      return "Result: PASS";
+    case "fail":
+      return `Result: FAIL (${summary.reasons.join("; ")})`;
+    case "inconclusive":
+      return `Result: INCONCLUSIVE (${summary.reasons.join("; ")})`;
+    default: {
+      const unhandled: never = summary.verdict;
+      throw new Error(String(unhandled));
+    }
+  }
+}
+
 function percent(rate: number): string {
   return `${Math.round(rate * 1000) / 10}%`;
 }
@@ -186,13 +281,21 @@ function dollars(microUsd: number): string {
   return `$${(microUsd / 1_000_000).toFixed(4)}`;
 }
 
-/** The calibration's lines: the score, the cost, and each wrong item with what the judge said. */
+/**
+ * The calibration's lines: the score, the cost, each wrong item with what the
+ * judge said, and each item a provider error stopped, with its kind.
+ */
 export function formatCalibration(calibration: readonly CalibrationResult[]): string {
-  const wrong = calibration.filter((item) => !item.pass);
+  const right = calibration.filter((item) => item.pass).length;
   const cost = calibration.reduce((sum, item) => sum + item.costMicroUsd, 0);
   return [
-    `Calibration: ${calibration.length - wrong.length}/${calibration.length} right (${dollars(cost)})`,
-    ...wrong.map((item) => `    WRONG ${item.id}: ${item.reason}`),
+    `Calibration: ${right}/${calibration.length} right (${dollars(cost)})`,
+    ...calibration.flatMap((item) => {
+      if (item.pass) return [];
+      return item.providerError === undefined
+        ? [`    WRONG ${item.id}: ${item.reason}`]
+        : [`    PERR ${item.id}: provider error (${item.providerError})`];
+    }),
   ].join("\n");
 }
 
@@ -211,6 +314,10 @@ export function formatReport(
     const label = `${record.caseId}${record.critical ? " (critical)" : ""} #${record.run}`;
     if (record.outcome === "skipped") {
       lines.push(`SKIP ${label}: stopped by the cost cap`);
+      continue;
+    }
+    if (record.providerError !== undefined) {
+      lines.push(`PERR ${label}: provider error (${record.providerError})`);
       continue;
     }
     lines.push(
@@ -237,9 +344,10 @@ export function formatReport(
     `Passed: ${summary.passed}/${summary.ran} runs (${percent(summary.passRate)})`,
     `Critical failures: ${summary.criticalFailures.length === 0 ? "none" : summary.criticalFailures.join(", ")}`,
     `Judge errors: ${summary.judgeErrors} run${summary.judgeErrors === 1 ? "" : "s"}`,
+    `Provider errors: ${providerErrorLine(summary.providerErrors)}`,
     `Bot tokens: ${input} input, ${output} output, ${cacheRead} cache read, ${cacheWrite} cache write`,
     `Estimated cost: ${dollars(summary.costMicroUsd)} (bot ${dollars(summary.botCostMicroUsd)}, judge ${dollars(summary.judgeCostMicroUsd)}, calibration ${dollars(summary.calibrationCostMicroUsd)})`,
-    summary.pass ? "Result: PASS" : `Result: FAIL (${summary.reasons.join("; ")})`,
+    resultLine(summary),
   );
   return lines.join("\n");
 }

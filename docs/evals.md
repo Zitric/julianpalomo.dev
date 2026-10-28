@@ -27,7 +27,8 @@ answer is worse than "I don't know".
    in the right language and whether it meets the case's rubric.
 4. **Reports a score and a cost.** A run passes when every critical case
    passes every time and at least 90% of all runs pass. It stops at $2 of
-   estimated cost.
+   estimated cost. A run that hit a provider error makes the whole run
+   inconclusive (below).
 
 ## Running them
 
@@ -57,6 +58,28 @@ which is gitignored.
   real regression through, so it stays at 90%.
 
 Lowering either needs Julian's OK (`.claude/rules/evals.md`).
+
+## Provider errors
+
+A provider error is a call to the model API that failed for a reason that says
+nothing about the bot: the account is out of credit, the key is wrong, a rate
+limit, an overload, a 5xx or a connection that never got through. Run 5 below
+shows why it matters: the account ran out of credit partway, and the report
+counted seven runs as the bot failing.
+
+- A run whose bot or judge hit one is `PERR` in the report and
+  `provider-error` in the JSON, with its kind (`credit`, `auth`, `rate-limit`,
+  `overload` or `other`), never the provider's message. It counts neither in
+  the pass rate nor toward the critical cases.
+- If any run, or any calibration item, hit one, the run is **inconclusive**:
+  `pnpm eval` fails with "N runs hit provider errors: <kinds>" and never says
+  `PASS`, since the runs that were lost might have failed. In CI this keeps a
+  provider outage from blocking a pull request for a reason unrelated to its
+  change, without letting it pass either. Run it again once the provider
+  recovers.
+- A request the API rejects because of how it was built (a malformed request,
+  a model id that doesn't exist, a request that's too large) is still a
+  failure of the bot: its code or settings built it.
 
 ## Results
 

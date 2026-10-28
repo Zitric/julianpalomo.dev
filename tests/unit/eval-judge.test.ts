@@ -1,3 +1,4 @@
+import { APICallError } from "ai";
 import { MockLanguageModelV4 } from "ai/test";
 import { describe, expect, it } from "vitest";
 import {
@@ -201,6 +202,48 @@ describe("judgeAnswer", () => {
     expect(outcome).toMatchObject({
       status: "error",
       error: "the judge's request was blocked by a safety classifier",
+    });
+  });
+
+  function failingJudge(error: unknown) {
+    return new MockLanguageModelV4({
+      doGenerate: async () => {
+        throw error;
+      },
+    });
+  }
+
+  it("keeps a provider error's kind, and never its message", async () => {
+    const error = new APICallError({
+      message: "a provider message",
+      url: "https://api.anthropic.com/v1/messages",
+      requestBodyValues: {},
+      statusCode: 401,
+      data: {
+        type: "error",
+        error: { type: "authentication_error", message: "a provider message" },
+      },
+      isRetryable: false,
+    });
+    const outcome = await judgeAnswer(input, failingJudge(error));
+    expect(outcome).toEqual({
+      status: "provider-error",
+      providerError: "auth",
+      usage: zero,
+      costMicroUsd: 0,
+    });
+    expect(judgeChecks(outcome)).toEqual([
+      { name: "judge-error", pass: false, reason: "the judge call hit a provider error: auth" },
+    ]);
+  });
+
+  it("keeps any other failed call a plain judge error", async () => {
+    const outcome = await judgeAnswer(input, failingJudge(new Error("boom")));
+    expect(outcome).toEqual({
+      status: "error",
+      error: "the judge call failed: boom",
+      usage: zero,
+      costMicroUsd: 0,
     });
   });
 });

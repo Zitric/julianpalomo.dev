@@ -2,9 +2,18 @@
  * The model behind the assistant and its settings, in one place. Why this
  * model is in docs/adr/2026-10-28-claude-sonnet-for-the-bot.md.
  */
-import type { AnthropicLanguageModelOptions } from "@ai-sdk/anthropic";
+import { type AnthropicLanguageModelOptions, createAnthropic } from "@ai-sdk/anthropic";
 
 export const MODEL_ID = "claude-sonnet-5-5";
+
+/**
+ * The bot's model, the one `handleChat` answers with. The evals use this same
+ * factory, so they always measure the production model; never build the bot's
+ * model anywhere else.
+ */
+export function createBotModel(apiKey: string) {
+  return createAnthropic({ apiKey })(MODEL_ID);
+}
 
 // Thinking counts toward this cap too; answers are meant to be short.
 export const MAX_OUTPUT_TOKENS = 2000;
