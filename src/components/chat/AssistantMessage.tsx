@@ -14,7 +14,7 @@ export function AssistantMessage({ message, streaming }: Props) {
 
   return (
     <article
-      className="mr-auto flex w-fit max-w-[92%] flex-col gap-2 rounded-[20px] rounded-bl-[6px] bg-tint px-4 py-3"
+      className="flex w-fit max-w-[92%] min-w-0 flex-col gap-2 rounded-[20px] rounded-bl-[6px] bg-tint px-4 py-3"
       aria-label="Answer"
     >
       {isDemo && (

@@ -7,6 +7,8 @@ type Props = {
   onChange: (value: string) => void;
   onSend: () => void;
   onStop: () => void;
+  onFocus: () => void;
+  onBlur: () => void;
   busy: boolean;
   ref?: Ref<HTMLTextAreaElement>;
 };
@@ -14,7 +16,7 @@ type Props = {
 const numberFormat = new Intl.NumberFormat("en");
 
 /** The question box: Enter sends, Shift+Enter adds a line, and a counter enforces the limit. */
-export function Composer({ value, onChange, onSend, onStop, busy, ref }: Props) {
+export function Composer({ value, onChange, onSend, onStop, onFocus, onBlur, busy, ref }: Props) {
   const inputId = useId();
   const counterId = useId();
   const length = value.length;
@@ -57,6 +59,8 @@ export function Composer({ value, onChange, onSend, onStop, busy, ref }: Props) 
           value={value}
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={onKeyDown}
+          onFocus={onFocus}
+          onBlur={onBlur}
           readOnly={busy}
           rows={2}
           aria-invalid={over > 0}
