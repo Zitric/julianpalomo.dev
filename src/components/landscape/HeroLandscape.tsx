@@ -1,12 +1,10 @@
-import { getRouteApi } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { sceneInstant } from "../../lib/scene/moment";
-import { defaultSky, skyFromOverride } from "../../lib/scene/sky-state";
+import { defaultSky, type SkyState } from "../../lib/scene/sky-state";
+import type { LiveWeather } from "../../lib/weather/weather";
 import { useNow } from "../clock/Clock";
 import { useTheme } from "../theme/Theme";
 import { Landscape } from "./Landscape";
-
-const rootRoute = getRouteApi("__root__");
 
 // How long the landscape's half of a theme toggle runs (DESIGN.md section 6).
 // Keep in step with the glow's animation in src/styles/landscape.css.
@@ -14,18 +12,20 @@ const CHOREOGRAPHY_MS = 1700;
 
 type Choreography = "sunset" | "sunrise" | null;
 
-/**
- * The landscape in the hero, fed by the page's clock and theme. `?sky=` sets
- * the scene when SCENE_OVERRIDE allows it, and then the scene holds still:
- * the override is a fixed moment for previews and tests.
- */
-export function HeroLandscape({ skyParam }: { skyParam: string | undefined }) {
-  const { now: firstNow, sceneOverride } = rootRoute.useLoaderData();
+type Props = {
+  /** The sky `?sky=` fixes, which then holds still, or null. */
+  override: SkyState | null;
+  /** Glasgow's live weather, once it arrives. */
+  weather: LiveWeather | null;
+};
+
+/** The landscape in the hero, fed by the page's clock, theme and weather. */
+export function HeroLandscape({ override, weather }: Props) {
   const now = useNow();
   const { theme, change } = useTheme();
 
-  const override = skyFromOverride({ param: skyParam, enabled: sceneOverride, now: firstNow });
-  const sky = override ?? defaultSky(now);
+  const live = defaultSky(now);
+  const sky = override ?? (weather ? { ...live, ...weather } : live);
   const at = override ? override.at.getTime() : sceneInstant(now, theme);
 
   // A toggle starts the landscape's sunset or sunrise; the new `change` object
