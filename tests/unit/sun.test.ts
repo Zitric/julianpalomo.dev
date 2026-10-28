@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { glasgow } from "../../src/lib/glasgow";
-import { type Day, sunPosition, sunTimes } from "../../src/lib/sun";
+import { type Day, glasgow } from "../../src/lib/glasgow";
+import { sunPosition, sunTimes } from "../../src/lib/sun";
 
 // Every expected value comes from the NOAA Solar Calculator
 // (https://gml.noaa.gov/grad/solcalc/) for latitude 55.8642, longitude -4.2518
