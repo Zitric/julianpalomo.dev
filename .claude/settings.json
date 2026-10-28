@@ -32,8 +32,6 @@
       "Read(./.dev.vars.*)"
     ],
     "ask": [
-      "Bash(pnpm build *)",
-      "Bash(pnpm test:e2e *)",
       "Bash(pnpm add *)",
       "Bash(pnpm install *)",
       "Bash(npx wrangler *)",
@@ -68,6 +66,10 @@
       "Bash(pnpm check *)",
       "Bash(pnpm test)",
       "Bash(pnpm knip *)",
+      "Bash(pnpm build)",
+      "Bash(pnpm build *)",
+      "Bash(pnpm test:e2e)",
+      "Bash(pnpm test:e2e *)",
       "Bash(pnpm exec biome check *)",
       "Bash(bash .claude/hooks/tests/run.sh)"
     ]

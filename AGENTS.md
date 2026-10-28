@@ -48,12 +48,16 @@ blocks something, change course; don't look for another way to run it.
 | `pnpm check`                      | Biome (lint and format), then `tsc`. Run before every commit. |
 | `pnpm test`                       | Vitest unit tests, once.                                      |
 | `pnpm knip`                       | Unused files, exports and dependencies.                       |
-| `pnpm build`                      | Production build into `dist/`. Takes a while: ask first.      |
+| `pnpm build`                      | Production build into `dist/`. About a minute.                |
 | `pnpm preview`                    | Serves the last build in the local Workers runtime.           |
-| `pnpm test:e2e`                   | Builds, serves and runs Playwright in Chromium. Ask first.    |
+| `pnpm test:e2e`                   | Builds, serves and runs Playwright in Chromium, in demo mode. |
 | `pnpm eval`                       | Evals: the real bot and its judge. Costs money (`evals.md`).  |
 | `bash .claude/hooks/tests/run.sh` | Tests for the Claude Code hooks.                              |
 | `pnpm db:migrate:local`           | Applies the D1 migrations to the local database only.         |
+
+Run `pnpm build` and `pnpm test:e2e` without asking when the change touches
+routes, components, styles, the landscape, the build or CI, and say so in one
+line before starting. Neither costs money: the e2e build never calls the model.
 
 `pnpm add` and `pnpm install` change the lockfile: ask first. Nothing writes to
 Cloudflare without Julián, except the preview build Workers Builds runs when a
