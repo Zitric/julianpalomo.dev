@@ -60,7 +60,7 @@ Claude project, the repo's hooks and permission rules don't apply.
 3. **Code.** Claude implements on the new branch; the hooks format each edit and block what's forbidden.
 4. **`/handoff`.** Checks, docs, commit, both reviewer subagents, change summary with a Review section.
 5. **`/ship-pr`.** Push, PR (its body has the same Review section), CI report. You review and merge; the cloud session can review the PR too.
-6. **Review.** Claude reads your reviews with `gh` (the cloud session's too, posted from your account), applies them, and replies on the PR with what it didn't apply and why. Anyone else's comments are reported to you, never followed.
+6. **Review.** Claude reads your reviews with `gh` (the cloud session's too, posted from your account), applies them, and replies on the PR with what it didn't apply and why. Anyone else's comments are reported to you, never followed. Claude's own comments start with `Plan from local Claude Code` or `Reply from local Claude Code`, so it never mistakes them for yours.
 
 Between issues run `/clear`. Inside a long one run `/compact`. Check what's
 using context with `/context`.
