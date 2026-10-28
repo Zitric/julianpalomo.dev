@@ -76,7 +76,7 @@ pnpm dev
 | `pnpm check`            | Runs Biome (lint and format), then `tsc`.                                                                                                                   |
 | `pnpm test`             | Runs the unit tests once with Vitest.                                                                                                                       |
 | `pnpm test:e2e`         | Builds, serves and runs the Playwright tests in Chromium.                                                                                                   |
-| `pnpm eval`             | Asks the real assistant the eval cases and has a second model judge the answers. Costs money: about $0.06, then $0.01–0.02 a case. `-t <case-id>` runs one. |
+| `pnpm eval`             | Asks the real assistant the eval cases and has a second model judge the answers. Costs money: about $0.09, then $0.01–0.02 a case. `-t <case-id>` runs one. |
 | `pnpm knip`             | Reports unused files, exports and dependencies.                                                                                                             |
 | `pnpm db:migrate:local` | Applies the D1 migrations to the local database in `.wrangler/state`.                                                                                       |
 

@@ -36,12 +36,12 @@ answer is worse than "I don't know".
 
 | Command                             | What it does                                   | Cost, roughly |
 | ----------------------------------- | ---------------------------------------------- | ------------- |
-| `pnpm eval`                         | Every case once                                | $0.50         |
-| `EVAL_REPEAT=2 pnpm eval`           | Every case twice: a baseline                   | $0.80–0.95    |
-| `pnpm eval -t <case-id>`            | One case (the pattern is a regular expression) | $0.08         |
-| `EVAL_CALIBRATION_ONLY=1 pnpm eval` | Only the judge's calibration                   | $0.07         |
+| `pnpm eval`                         | Every case once                                | $0.70         |
+| `EVAL_REPEAT=2 pnpm eval`           | Every case twice: a baseline                   | $1.30         |
+| `pnpm eval -t <case-id>`            | One case (the pattern is a regular expression) | $0.10         |
+| `EVAL_CALIBRATION_ONLY=1 pnpm eval` | Only the judge's calibration                   | $0.09         |
 
-Almost all of the cost is the judge. Results also go to `evals/results/`,
+About two thirds of the cost is the judge. Results also go to `evals/results/`,
 which is gitignored.
 
 ## Thresholds
