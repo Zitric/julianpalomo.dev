@@ -18,7 +18,7 @@ flowchart TD
   validate -->|yes| limits{Today's limits<br/>in D1}
   limits -->|over| r429[429 visitor_limit<br/>or daily_budget]
   limits -->|under| count[Count the question]
-  count --> model[Claude Haiku 5.5]
+  count --> model[Claude Sonnet 5.5]
   model <-->|read-only tools| tools[list_topics, get_claims,<br/>search_claims]
   demo <-->|get_claims| tools
   tools --> claims[(Confirmed claims)]
@@ -69,7 +69,7 @@ and nobody can be followed from one day to the next. For an IPv6 address the
 hash takes its /64 instead, since one person can rotate through all of it. Over a limit, the endpoint
 answers `429` without calling the model.
 
-**The model and its tools.** Claude Haiku 5.5, set in
+**The model and its tools.** Claude Sonnet 5.5, set in
 [`src/lib/bot/model.ts`](../src/lib/bot/model.ts), answers with the system
 prompt in [`src/lib/bot/prompt.ts`](../src/lib/bot/prompt.ts). It can only
 look things up through three read-only tools in
@@ -94,5 +94,13 @@ step cut off halfway isn't counted ([`docs/tech-debt.md`](tech-debt.md)).
 renders the text with the same parser. A citation becomes a numbered marker and
 a source chip, such as "CV · Cazoo · Redux → Zustand", only when its id is both
 cited in the text and in `data-sources`.
+
+**The evals.** [`evals/run-case.ts`](../evals/run-case.ts) asks the real model
+its questions through `handleChat` itself, with a request shaped like
+`useChat`'s, so every step above runs as it does in production: the
+validation, the limits (with an in-memory store, so a long run never hits
+them), the prompt, the tools and the citation check. There is no code path for
+evals in `src/`. A second model then judges each answer against the claims the
+tools returned. [`docs/evals.md`](evals.md) has how and the scores.
 
 The reasons behind these choices are in [`docs/adr/`](adr/README.md).

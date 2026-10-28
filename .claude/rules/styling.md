@@ -18,12 +18,13 @@ Tailwind, `tokens.css`, `fonts.css` and `cow.css`; `src/routes/__root.tsx` links
 
 ## Colours live only in `src/styles/tokens.css`
 
-- Each colour is a CSS variable, defined three times: the light default on `:root`, dark under `@media (prefers-color-scheme: dark)` guarded by `:root:not([data-theme="light"])`, and dark again under `:root[data-theme="dark"]`. Keep the two dark blocks in step.
-- `@theme inline` exposes each variable as a Tailwind colour (`bg-background`, `text-foreground`, `text-muted`). A new colour is a new variable in all three blocks plus a line in `@theme inline`.
+- Each colour is a CSS variable, defined twice: light on `:root` and dark on `:root[data-theme="dark"]`. The server always renders `<html data-theme>`, from the `theme` cookie or Glasgow's sun (`src/components/theme/Theme.tsx`), so the OS setting plays no part and there is no `prefers-color-scheme` block.
+- Each variable is also registered with `@property` as a `<color>`, so a theme change can transition it. `app.css` transitions every token on `:root` only while `<html data-theme-change>` is set: 0.6s for the toggle, 6s when Glasgow's dusk or dawn arrives, 0.3s under reduced motion. Colours never animate on load or hydration.
+- `@theme inline` exposes each variable as a Tailwind colour (`bg-background`, `text-foreground`, `text-muted`). A new colour is a new variable in both blocks, an `@property`, a name in `app.css`'s `transition-property` list and a line in `@theme inline`.
 - **No colour literals in components**: no hex, `oklch()` or Tailwind palette colours like `text-gray-500`. Use the token utilities.
 - **No `dark:` variants.** Dark mode is the tokens' job; a colour that differs in dark mode is a token.
 - Values are hex (`rgb()` for the translucent `glass`), matching the table in `DESIGN.md` section 2.
-- **Contrast is tested.** `tests/unit/tokens.test.ts` reads `tokens.css` and checks each pair on screen against WCAG AA in both themes (4.5:1 for text, 3:1 for field borders), and that the two dark blocks match. A new pair gets a line in its `pairs` list; a failing pair changes the value, and the `DESIGN.md` table with it.
+- **Contrast is tested.** `tests/unit/tokens.test.ts` reads `tokens.css` and checks each pair on screen against WCAG AA in both themes (4.5:1 for text, 3:1 for field borders), and that every token is registered and transitioned. A new pair gets a line in its `pairs` list; a failing pair changes the value, and the `DESIGN.md` table with it.
 - Fields (the composer, form inputs) are outlined in `field-border`, which reaches 3:1; `border` is for chips and dividers only.
 
 ## The one exception: the illustrations' palette
@@ -44,7 +45,7 @@ Tailwind, `tokens.css`, `fonts.css` and `cow.css`; `src/routes/__root.tsx` links
 
 ## Shared pieces live in `src/components/ui/`
 
-- Small, typed and feature-free. `IconButton` is a round, flat, 44px icon-only button with a required `label` (its accessible name) and a `look`; its press scale (0.92 over 80ms) runs only under `motion-safe`.
+- Small, typed and feature-free. `IconButton` is a round, flat, 44px icon-only button with a required `label` (its accessible name) and a `look`: `accent`, or `glass` (`bg-glass` with a 6px blur) for buttons on the landscape. Its press scale (0.92 over 80ms) runs only under `motion-safe`.
 - A piece, or a new look of one, is added with its first caller, not ahead of it.
 
 ## Markup

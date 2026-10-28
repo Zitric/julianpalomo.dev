@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 // Reads the tokens straight from the stylesheet, so a changed value is measured
 // as it ships.
 const css = readFileSync(new URL("../../src/styles/tokens.css", import.meta.url), "utf8");
+const app = readFileSync(new URL("../../src/styles/app.css", import.meta.url), "utf8");
 
 type Tokens = Record<string, string>;
 
@@ -21,8 +22,7 @@ function block(selector: string): Tokens {
 }
 
 const light = block(":root {");
-const darkFromOs = block(':root:not([data-theme="light"])');
-const darkFromToggle = block(':root[data-theme="dark"]');
+const dark = block(':root[data-theme="dark"]');
 const exposed = block("@theme inline");
 
 /** Relative luminance of a `#rrggbb` colour, as WCAG 2 defines it. */
@@ -66,19 +66,31 @@ const pairs: [string, string, number][] = [
 ];
 
 describe("tokens.css", () => {
-  it("keeps the two dark blocks in step", () => {
-    expect(darkFromToggle).toEqual(darkFromOs);
-  });
-
   it("defines every token in light and dark and exposes it to Tailwind", () => {
     const names = Object.keys(light).filter((name) => name !== "color-scheme");
-    expect(Object.keys(darkFromOs).sort()).toEqual(Object.keys(light).sort());
+    expect(Object.keys(dark).sort()).toEqual(Object.keys(light).sort());
     expect(Object.keys(exposed).sort()).toEqual(names.map((name) => `color-${name}`).sort());
+  });
+
+  // An unregistered token snaps instead of transitioning on a theme change.
+  it("registers every token as a colour", () => {
+    const names = Object.keys(light).filter((name) => name !== "color-scheme");
+    const registered = [...css.matchAll(/@property --([\w-]+)\s*\{\s*syntax:\s*"<color>"/g)].map(
+      ([, name]) => name,
+    );
+    expect(registered.sort()).toEqual(names.sort());
+  });
+
+  it("transitions every token on a theme change", () => {
+    const names = Object.keys(light).filter((name) => name !== "color-scheme");
+    const transition = /:root\[data-theme-change\]\s*\{\s*transition-property:([^;]+);/.exec(app);
+    const transitioned = (transition?.[1] ?? "").split(",").map((name) => name.trim().slice(2));
+    expect(transitioned.sort()).toEqual(names.sort());
   });
 
   for (const [theme, tokens] of [
     ["light", light],
-    ["dark", darkFromOs],
+    ["dark", dark],
   ] as const) {
     describe(`in the ${theme} theme`, () => {
       it.each(pairs)("puts %s on %s at %s:1 or more", (fg, bg, minimum) => {
