@@ -20,7 +20,10 @@ export default defineConfig({
   webServer: {
     command: `CLOUDFLARE_ENV=e2e pnpm build && pnpm preview --port ${port} --strictPort`,
     url: `http://localhost:${port}`,
-    reuseExistingServer: !isCI,
+    // Never reuse a server: several worktrees share port 4173, and reusing one
+    // would test another worktree's build. A run that finds the port taken
+    // fails at once with "already used"; --strictPort covers two runs racing.
+    reuseExistingServer: false,
     timeout: 120_000,
   },
 });
