@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiWeatherRouteImport } from './routes/api/weather'
 import { Route as Char123LocaleChar125IndexRouteImport } from './routes/{-$locale}/index'
 
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWeatherRoute = ApiWeatherRouteImport.update({
+  id: '/api/weather',
+  path: '/api/weather',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Char123LocaleChar125IndexRoute =
@@ -26,27 +32,31 @@ const Char123LocaleChar125IndexRoute =
 
 export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
+  '/api/weather': typeof ApiWeatherRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
 }
 export interface FileRoutesByTo {
   '/api/chat': typeof ApiChatRoute
+  '/api/weather': typeof ApiWeatherRoute
   '/{-$locale}': typeof Char123LocaleChar125IndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/api/chat': typeof ApiChatRoute
+  '/api/weather': typeof ApiWeatherRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/api/chat' | '/{-$locale}/'
+  fullPaths: '/api/chat' | '/api/weather' | '/{-$locale}/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/api/chat' | '/{-$locale}'
-  id: '__root__' | '/api/chat' | '/{-$locale}/'
+  to: '/api/chat' | '/api/weather' | '/{-$locale}'
+  id: '__root__' | '/api/chat' | '/api/weather' | '/{-$locale}/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   ApiChatRoute: typeof ApiChatRoute
+  ApiWeatherRoute: typeof ApiWeatherRoute
   Char123LocaleChar125IndexRoute: typeof Char123LocaleChar125IndexRoute
 }
 
@@ -57,6 +67,13 @@ declare module '@tanstack/react-router' {
       path: '/api/chat'
       fullPath: '/api/chat'
       preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/weather': {
+      id: '/api/weather'
+      path: '/api/weather'
+      fullPath: '/api/weather'
+      preLoaderRoute: typeof ApiWeatherRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/{-$locale}/': {
@@ -71,6 +88,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   ApiChatRoute: ApiChatRoute,
+  ApiWeatherRoute: ApiWeatherRoute,
   Char123LocaleChar125IndexRoute: Char123LocaleChar125IndexRoute,
 }
 export const routeTree = rootRouteImport
