@@ -68,6 +68,11 @@ for (const level of ["log", "info", "warn", "error"] as const) {
 
 const repeat = z.coerce.number().int().min(1).default(1).parse(process.env.EVAL_REPEAT);
 const calibrationOnly = process.env.EVAL_CALIBRATION_ONLY === "1";
+/** Only CI sets "reported"; a local run always enforces the pass rate. */
+const passRate = z
+  .enum(["enforced", "reported"])
+  .default("enforced")
+  .parse(process.env.EVAL_PASS_RATE);
 const judgeModel = createAnthropic({ apiKey })(JUDGE_MODEL_ID);
 const records: RunRecord[] = [];
 let calibration: CalibrationResult[] = [];
@@ -195,7 +200,7 @@ afterAll(() => {
     return;
   }
 
-  const summary = summarize(records, calibration);
+  const summary = summarize(records, calibration, { passRate });
   process.stdout.write(
     `\n${redact(formatReport(summary, records, `${MODEL_ID}, judged by ${JUDGE_MODEL_ID}`))}\n`,
   );

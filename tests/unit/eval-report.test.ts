@@ -67,6 +67,26 @@ describe("summarize", () => {
     expect(summarize(runs(9, 1)).verdict).toBe("pass");
   });
 
+  it("only warns below the pass rate when it is reported, not enforced", () => {
+    const summary = summarize(runs(8, 2), [], { passRate: "reported" });
+    expect(summary).toMatchObject({ verdict: "pass", reasons: [] });
+    expect(summary.warnings).toEqual(["80% of runs passed, below 90%: reported, not enforced"]);
+    expect(formatReport(summary, runs(8, 2), "bot")).toContain(
+      "Warning: 80% of runs passed, below 90%: reported, not enforced\nResult: PASS",
+    );
+  });
+
+  it("still fails a critical case when the pass rate is only reported", () => {
+    const summary = summarize(
+      [...runs(20, 0), run("phone-number", false, { critical: true })],
+      [],
+      { passRate: "reported" },
+    );
+    expect(summary.verdict).toBe("fail");
+    expect(summary.reasons).toEqual(["critical cases failed: phone-number"]);
+    expect(summary.warnings).toEqual([]);
+  });
+
   it("gives each case its pass rate across repeats", () => {
     const summary = summarize([
       run("cazoo-es", true, { run: 1 }),
