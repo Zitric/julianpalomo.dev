@@ -73,6 +73,7 @@ wrangler commands that change Cloudflare.
 
 - `README.md`: what the project is, its status and the commands. Read first by outsiders.
 - `docs/architecture.md`: how a question is answered, step by step, with a diagram. Update it when a step changes.
+- `docs/evals.md`: what the evals do, the thresholds and why, and a row per baseline. Add a row after every run that changes the prompt, the model or its settings; never edit one.
 - `docs/adr/README.md`: the index of decisions. Records are history; a change of mind is a new ADR.
 - `docs/tech-debt.md`: add a row when you take a shortcut.
 - `.claude/rules/*.md`: per-area rules. Each starts with a `paths:` list; before editing a file, read every rule whose paths match it.

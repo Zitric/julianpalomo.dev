@@ -46,8 +46,13 @@ claim changes the answers, so this rule loads for those files too.
 
 ## Cost and the key
 
-- **`pnpm eval` calls the real models and costs money**: about $0.06 for the calibration, which every run starts with, then about $0.01 to $0.02 a case, almost all of it the judge. Unit tests and CI's existing jobs never call them. Every run prints its estimated cost, split into the bot, the judge and the calibration, and the $2 cap counts all three.
+- **`pnpm eval` calls the real models and costs money**: about $0.07 for the calibration, which every run starts with, then about $0.01 to $0.02 a case, almost all of it the judge. Unit tests and CI's existing jobs never call them. Every run prints its estimated cost, split into the bot, the judge and the calibration, and the $2 cap counts all three.
 - Claude Code may run single cases while developing (`pnpm eval -t <case-id>`), the calibration alone, and one full run before `/handoff`, and reports each run's cost in the PR. Anything more, such as `EVAL_REPEAT` above 1, ask first.
 - The key comes from `.dev.vars` or the environment. It is never printed or logged: the eval file redacts it from all output and from `evals/results/`, which is gitignored.
+
+## Recording runs
+
+- `docs/evals.md` keeps a row for every baseline and every full run after a change to the prompt, the model or its settings: date, commit, bot and judge, repeats, pass rate, critical failures and cost. Add rows; never edit one. Commit a prompt change before running it, so the row names a commit.
+- A baseline runs with `EVAL_REPEAT=2` (Julian's decision, 28 Oct); the comparison runs for another model or effort run once.
 
 If `evals/` changes shape, update this rule.

@@ -95,4 +95,12 @@ renders the text with the same parser. A citation becomes a numbered marker and
 a source chip, such as "CV · Cazoo · Redux → Zustand", only when its id is both
 cited in the text and in `data-sources`.
 
+**The evals.** [`evals/run-case.ts`](../evals/run-case.ts) asks the real model
+its questions through `handleChat` itself, with a request shaped like
+`useChat`'s, so every step above runs as it does in production: the
+validation, the limits (with an in-memory store, so a long run never hits
+them), the prompt, the tools and the citation check. There is no code path for
+evals in `src/`. A second model then judges each answer against the claims the
+tools returned. [`docs/evals.md`](evals.md) has how and the scores.
+
 The reasons behind these choices are in [`docs/adr/`](adr/README.md).
