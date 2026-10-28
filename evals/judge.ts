@@ -15,6 +15,7 @@ import {
 } from "ai";
 import { z } from "zod";
 import type { TokenUsage } from "../src/lib/bot/limits";
+import { CLAIM_ID_PATTERN } from "../src/lib/claim-id";
 import type { CheckResult } from "./checks";
 import { JUDGE_PROMPT } from "./judge-prompt";
 import { type ProviderErrorKind, providerErrorKind } from "./provider-errors";
@@ -66,6 +67,39 @@ export type JudgeVerdict = z.infer<typeof verdictSchema>;
 /** Validates the judge's output; throws with Zod's message when it's malformed. */
 export function parseJudgeVerdict(input: unknown): JudgeVerdict {
   return verdictSchema.parse(input);
+}
+
+type JudgedSentence = JudgeVerdict["sentences"][number];
+
+/** One or more `[[claim-id]]` markers and whitespace, nothing else. */
+const MARKERS_ONLY = new RegExp(`^\\s*(?:\\[\\[${CLAIM_ID_PATTERN.source}\\]\\]\\s*)+$`);
+
+/**
+ * The judge's sentences without the entries that aren't sentences: an empty
+ * or whitespace-only one is dropped, and a marker-only one joins the sentence
+ * before it, text and claim ids, or is dropped when it comes first. The prompt
+ * forbids both and the judge still returns them now and then, as an extra
+ * `not_a_claim` that fails a calibration item. Neither states anything about
+ * Julian, so removing them can't hide an overclaim; every other sentence is
+ * kept as it is.
+ */
+export function tidySentences(sentences: readonly JudgedSentence[]): JudgedSentence[] {
+  const tidy: JudgedSentence[] = [];
+  for (const sentence of sentences) {
+    if (sentence.sentence.trim() === "") continue;
+    if (MARKERS_ONLY.test(sentence.sentence)) {
+      const previous = tidy.at(-1);
+      if (previous === undefined) continue;
+      tidy[tidy.length - 1] = {
+        ...previous,
+        sentence: `${previous.sentence} ${sentence.sentence.trim()}`,
+        claimIds: [...new Set([...previous.claimIds, ...sentence.claimIds])],
+      };
+      continue;
+    }
+    tidy.push(sentence);
+  }
+  return tidy;
 }
 
 /** A claim as the judge sees it: the full text, which the tools returned. */
@@ -186,17 +220,18 @@ export async function judgeAnswer(input: JudgeInput, model: LanguageModel): Prom
     if (result.finishReason === "content-filter") {
       return outcomeError("the judge's request was blocked by a safety classifier", usage);
     }
+    const verdict = { ...result.output, sentences: tidySentences(result.output.sentences) };
     // A verdict resting on a claim the judge wasn't given can't be trusted either way.
     const given = new Set(input.claims.map((claim) => claim.id));
-    const foreign = [
-      ...new Set(result.output.sentences.flatMap((sentence) => sentence.claimIds)),
-    ].filter((id) => !given.has(id));
+    const foreign = [...new Set(verdict.sentences.flatMap((sentence) => sentence.claimIds))].filter(
+      (id) => !given.has(id),
+    );
     if (foreign.length > 0) {
       return outcomeError(`the judge cited claims it wasn't given: ${foreign.join(", ")}`, usage);
     }
     return {
       status: "judged",
-      verdict: result.output,
+      verdict,
       usage,
       costMicroUsd: judgeCostMicroUsd(usage),
     };
