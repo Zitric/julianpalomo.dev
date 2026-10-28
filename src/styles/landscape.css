@@ -212,12 +212,16 @@
   opacity: 0.6;
   transform: translateY(-3px);
 }
-.landscape .snowcover path {
-  fill: var(--snow);
+/* The opacity is on the group, not the paths: the five paths overlap, and
+   translucent paths would stack where they do and show their edges. */
+.landscape .snowcover {
   opacity: 0;
 }
-.landscape[data-snowy] .snowcover path {
+.landscape[data-snowy] .snowcover {
   opacity: 0.62;
+}
+.landscape .snowcover path {
+  fill: var(--snow);
 }
 
 /* Haar */
