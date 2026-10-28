@@ -7,13 +7,7 @@ paths:
 # Styling
 
 Tailwind CSS 4 through `@tailwindcss/vite`. `src/styles/app.css` imports
-Tailwind, `tokens.css` and `fonts.css`; `src/routes/__root.tsx` links `app.css`.
-
-## Fonts live only in `src/styles/fonts.css`
-
-- Bricolage Grotesque and Inter, self-hosted from `@fontsource-variable/*`, never from Google Fonts. Only the Latin subset, declared by hand there because Fontsource's own stylesheets declare every subset.
-- `font-sans` (Inter) is the default; `font-display` (Bricolage Grotesque) is for the name, the role, titles and buttons with text. Sizes and weights follow `DESIGN.md` section 3.
-- `src/routes/__root.tsx` preloads the same two `.woff2` files with `?url` imports. A font file changed in one place changes in the other.
+Tailwind and `tokens.css`; `src/routes/__root.tsx` links `app.css`.
 
 ## Colours live only in `src/styles/tokens.css`
 
