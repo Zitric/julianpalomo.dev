@@ -1,6 +1,6 @@
 /**
  * The model behind the assistant and its settings, in one place. Why this
- * model is in docs/adr/2026-10-27-claude-model-and-ai-sdk-7.md.
+ * model is in docs/adr/2026-10-28-claude-sonnet-for-the-bot.md.
  */
 import type { AnthropicLanguageModelOptions } from "@ai-sdk/anthropic";
 

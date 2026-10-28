@@ -74,6 +74,9 @@ its settings, adds a row. Rows are never edited.
 | 7   | 2026-10-28 | `f0b16c4`, effort medium†  | Haiku 5.5, effort medium | Sonnet 5.5, effort medium | 1    | 39/40 (97.5%) | none                                                         | $0.46  |
 | 8   | 2026-10-28 | `f0b16c4`, Sonnet 5.5†     | Sonnet 5.5, effort low   | Sonnet 5.5, effort medium | 1    | 37/40 (92.5%) | none                                                         | $0.69‡ |
 | 9   | 2026-10-28 | `f20f78f`                  | Haiku 5.5, effort medium | Sonnet 5.5, effort medium | 2    | 73/80 (91.3%) | oms-lead-es                                                  | $0.84  |
+| 10  | 2026-10-28 | `bc33e4a`, Sonnet 5.5†     | Sonnet 5.5, effort low   | Sonnet 5.5, effort medium | 2    | 75/80 (93.8%) | none                                                         | $1.32‡ |
+| 11  | 2026-10-28 | `bfbf87d`                  | Sonnet 5.5, effort low   | Sonnet 5.5, effort medium | 2    | 70/80 (87.5%) | none                                                         | $1.33  |
+| 12  | 2026-10-28 | `4bd3587`                  | Sonnet 5.5, effort low   | Sonnet 5.5, effort medium | 2    | 72/80 (90%)   | none                                                         | $1.31  |
 
 Runs 2 to 4 tried drafts of the prompt that weren't committed one by one; the
 committed prompt, `93d228f`, is draft 4 without one phrase (below). Run 5 also
@@ -102,6 +105,22 @@ an answer against $0.0004 for Haiku. The $1.00 daily budget would cover about
 Run 9 confirms run 7 with two repeats, with effort medium committed: it scored
 the same as low, and oms-lead-es failed once ("era responsable de un equipo").
 So medium was set back to low in `3b24af5`.
+
+Run 10 repeats run 8 with two repeats, with `model.ts` changed in the working
+tree only (†). ‡ Its report priced the bot at Haiku's rates; at Sonnet 5.5's
+official prices (input $2, output $10, cache writes $2.50, cache reads $0.10
+per million tokens) the bot cost about $0.47 and the run about $1.32. Row 8's
+note assumed cache reads at 0.1x the input price; the official rate is 0.05x,
+so that run cost about $0.67, not $0.69.
+
+From run 11 the bot is Claude Sonnet 5.5, committed in `594a724` with its
+prices, and every report prices it correctly
+([the ADR](adr/2026-10-28-claude-sonnet-for-the-bot.md)). Run 11 adds the
+judge's premise rule, the general purpose rule and the language line; it fell
+below the threshold, and one of its failures was the premise rule flagging a
+supported "Sí" (remote-es). Run 12 narrows that rule to premises no claim
+states, with a held-out item that must come out supported, and moves the
+no-Markdown rule to its own section with an example. It passes at exactly 90%.
 
 ## What the baseline showed
 
@@ -175,3 +194,27 @@ behind Motors.co.uk, which later took the Cazoo name, and `oms-lead` says
 "Technical lead in a team of 4" and adds that he interviewed candidates for
 hiring. Runs 1 to 9 used the old texts; the rubrics of people-managed and
 oms-lead-es now quote the new wording, with the same expectations.
+
+**The model** (runs 10 to 12). Haiku 5.5 kept failing oms-lead-es in about
+one run in six whatever the prompt or the effort, each time with a new verb
+for a role bigger than "technical lead" ("estaba al frente de" after the
+claims changed). Julian moved the bot to Claude Sonnet 5.5 at low effort; why,
+and what it costs, is in
+[the ADR](adr/2026-10-28-claude-sonnet-for-the-bot.md).
+
+**Findings left as they are after run 12**, all non-critical:
+
+- Markdown lists, 3 of 80 answers (cazoo-overview ×2, cazoo-es), after the
+  rule moved to its own section. Whether the chat renders simple lists is
+  #53; the check doesn't change here.
+- degree answers "What did Julian study?" in Spanish, the same answer every
+  run. The model searches in English and switches after the tool returns
+  "Universidad de Extremadura, Cáceres": the cause is in the data, not the
+  prompt, and the language line doesn't change it.
+- form-at-users ×2: "has run in production since May 2026", joining two
+  claims into a date neither states.
+- company-standards ×1: "documentation for the team, not company-wide
+  standards", an absence turned into a fact.
+- From earlier runs, also single and non-critical: ai-tools ("he built" the
+  Form:at monorepo, run 11) and testing-tools ("wrote unit tests in Jest",
+  run 10). The judge is right about all of them.

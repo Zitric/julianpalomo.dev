@@ -37,7 +37,7 @@ claim changes the answers, so this rule loads for those files too.
 
 ## The judge
 
-- **Claude Sonnet 5.5 at `effort: "medium"`** (`evals/judge.ts`), stronger than the bot's model, so subtle overclaims don't slip past. Never add temperature or sampling settings; its thinking is always adaptive and `effort` is the only control. Changing the model or the effort is Julian's decision.
+- **Claude Sonnet 5.5 at `effort: "medium"`** (`evals/judge.ts`): the bot's model, at a higher effort than the bot's `low`. It is no longer a stronger model than the bot, so the calibration is what shows it still catches subtle overclaims. Never add temperature or sampling settings; its thinking is always adaptive and `effort` is the only control. Changing the model or the effort is Julian's decision.
 - It reads every answer the bot gave, after the code checks: each sentence against the full texts of the claims the tools returned (`supported`, `overstated`, `unsupported`, `not_a_claim`), the language and the case's rubric. A run fails on any `overstated` or `unsupported` sentence, the wrong language or an unmet rubric.
 - **`evals/judge-prompt.ts` is the only copy of its prompt.** Never ask the judge to show or explain its reasoning: Sonnet 5.5 blocks reasoning extraction. Each sentence gets a one-line reason instead.
 - A failure of the judge itself (output that doesn't fit the schema, a safety block, a failed call) is a `judge-error`, counted apart from the bot's failures, never a verdict on the bot.

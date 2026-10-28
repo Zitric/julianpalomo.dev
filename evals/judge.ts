@@ -1,5 +1,5 @@
 /**
- * The judge: a second, stronger model that reads one answer against the
+ * The judge: a second model call, at a higher effort than the bot's, that reads one answer against the
  * claims the bot's tools returned, sentence by sentence, and says whether the
  * answer is in the case's language and meets its rubric. Code can check
  * citations and links; only the judge can tell that "managed a team of four"
@@ -19,7 +19,7 @@ import type { CheckResult } from "./checks";
 import { JUDGE_PROMPT } from "./judge-prompt";
 import type { ToolCall } from "./run-case";
 
-/** Julian's choice of judge: stronger than the bot's model, so subtle overclaims don't slip past. */
+/** Julian's choice of judge. It is also the bot's model; the calibration shows it still catches overclaims. */
 export const JUDGE_MODEL_ID = "claude-sonnet-5-5";
 
 // Set explicitly: this model's API default is `high`. Its thinking is always
