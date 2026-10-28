@@ -4,7 +4,7 @@
  * Instants are epoch milliseconds; angles are degrees.
  */
 
-import type { Place } from "./glasgow";
+import type { Day, Place } from "./glasgow";
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
@@ -104,9 +104,6 @@ function geometricPosition(instant: number, place: Place) {
 
   return { geometric, azimuth };
 }
-
-/** A calendar day: `month` runs from 1 to 12. */
-export type Day = { year: number; month: number; day: number };
 
 type SunTimes = {
   /** The sun is 6° below the horizon in the morning. */

@@ -3,8 +3,11 @@
  * as data rather than as UI tokens: the one exception to "colours live only in
  * tokens.css" (DESIGN.md section 2). The values are copied from
  * docs/design/landscape-palettes.json, which the app never imports;
- * tests/unit/assistant-cow.test.ts keeps them equal.
+ * tests/unit/assistant-cow.test.ts and tests/unit/scene-palette.test.ts keep
+ * them equal.
  */
+
+import type { Season } from "./season";
 
 /** The assistant's head. The keys are the reference SVG's CSS variable names. */
 export const assistantCow = {
@@ -23,3 +26,328 @@ export const assistantCow = {
   tongue: "#E48A8A",
   "tongue-dark": "#C96B70",
 } as const;
+
+/** The five moments of the day, from darkest to brightest (DESIGN.md section 7). */
+const MOMENTS = ["night", "blue", "golden", "morning", "day"] as const;
+export type Moment = (typeof MOMENTS)[number];
+
+/** A moment's colours, plus the golden tint's strength (0–1). */
+export type SkyColours = Record<
+  | "sky"
+  | "low"
+  | "cloud"
+  | "cloud2"
+  | "sun"
+  | "loch"
+  | "lochhi"
+  | "haze"
+  | "fog"
+  | "snow"
+  | "tree"
+  | "walls"
+  | "roof"
+  | "window"
+  | "smoke"
+  | "stone"
+  | "rock"
+  | "grey",
+  string
+> & { tint: number };
+
+export const skyMoments: Record<Moment, SkyColours> = {
+  night: {
+    sky: "#0E1A24",
+    low: "#1C2C38",
+    cloud: "#22313B",
+    cloud2: "#18242C",
+    sun: "#EE8A45",
+    loch: "#142530",
+    lochhi: "#C9D3D6",
+    haze: "#1E2E38",
+    fog: "#2A3A44",
+    snow: "#AFC0C8",
+    tree: "#0C1812",
+    walls: "#3A4650",
+    roof: "#18222A",
+    window: "#F4C95D",
+    smoke: "#4A5A64",
+    stone: "#2A3338",
+    rock: "#0F1A1F",
+    grey: "#0B1218",
+    tint: 0,
+  },
+  blue: {
+    sky: "#26324C",
+    low: "#6A5A6E",
+    cloud: "#3A4258",
+    cloud2: "#2C3448",
+    sun: "#EE8A45",
+    loch: "#2E3A52",
+    lochhi: "#E0C8C0",
+    haze: "#3E4A60",
+    fog: "#4A5466",
+    snow: "#C6CCD8",
+    tree: "#16221C",
+    walls: "#5A6270",
+    roof: "#22282E",
+    window: "#F4C95D",
+    smoke: "#6A7280",
+    stone: "#40464E",
+    rock: "#1C2430",
+    grey: "#1A2028",
+    tint: 0.06,
+  },
+  golden: {
+    sky: "#A9B7CF",
+    low: "#F5C49A",
+    cloud: "#F4D6C4",
+    cloud2: "#D9B4A6",
+    sun: "#F29A4A",
+    loch: "#E5B08F",
+    lochhi: "#FFF1E0",
+    haze: "#C7B2B2",
+    fog: "#EAD9D0",
+    snow: "#FBEFE6",
+    tree: "#3A3A30",
+    walls: "#EBD9C8",
+    roof: "#4A4A50",
+    window: "#F4C95D",
+    smoke: "#E9D6CA",
+    stone: "#9C8E80",
+    rock: "#6A5E5A",
+    grey: "#A8A4A8",
+    tint: 0.12,
+  },
+  morning: {
+    sky: "#BFD9E6",
+    low: "#F2E6D0",
+    cloud: "#F7F4EE",
+    cloud2: "#E3E2DC",
+    sun: "#F6C060",
+    loch: "#C2D8DC",
+    lochhi: "#FFFFFF",
+    haze: "#C2D2D2",
+    fog: "#EEF0EC",
+    snow: "#FFFFFF",
+    tree: "#2F4F3A",
+    walls: "#F4F1EA",
+    roof: "#4A5560",
+    window: "#6F7F86",
+    smoke: "#E9EEF0",
+    stone: "#8C8A80",
+    rock: "#5D6B66",
+    grey: "#B8C2C6",
+    tint: 0.03,
+  },
+  day: {
+    sky: "#CFE4EC",
+    low: "#EEF5F0",
+    cloud: "#F7FAFB",
+    cloud2: "#E3EAEC",
+    sun: "#F4C95D",
+    loch: "#B9D6DE",
+    lochhi: "#FFFFFF",
+    haze: "#BFD2D6",
+    fog: "#EEF2F1",
+    snow: "#FFFFFF",
+    tree: "#2F4F3A",
+    walls: "#F4F1EA",
+    roof: "#4A5560",
+    window: "#6F7F86",
+    smoke: "#E9EEF0",
+    stone: "#8C8A80",
+    rock: "#5D6B66",
+    grey: "#B8C2C6",
+    tint: 0,
+  },
+};
+
+/** The land's colours, mixed from night to day by the moment's land light. */
+export type LandColours = Record<"far" | "mid" | "near" | "patch", string>;
+
+export const land: Record<Season, Record<"day" | "night", LandColours>> = {
+  spring: {
+    day: {
+      far: "#8EA98C",
+      mid: "#86B36E",
+      near: "#5E9150",
+      patch: "#E7C33A",
+    },
+    night: {
+      far: "#1E3029",
+      mid: "#1B2E23",
+      near: "#16281E",
+      patch: "#5C5222",
+    },
+  },
+  summer: {
+    day: {
+      far: "#7E9A84",
+      mid: "#6C9A5E",
+      near: "#3F6E3D",
+      patch: "#9B6BA8",
+    },
+    night: {
+      far: "#1C2E28",
+      mid: "#182B21",
+      near: "#13241B",
+      patch: "#3E2C47",
+    },
+  },
+  autumn: {
+    day: {
+      far: "#8E8C6E",
+      mid: "#8C8550",
+      near: "#4F7D4E",
+      patch: "#B86A3A",
+    },
+    night: {
+      far: "#252C24",
+      mid: "#22281C",
+      near: "#17281F",
+      patch: "#5E3A24",
+    },
+  },
+  winter: {
+    day: {
+      far: "#A7B4B6",
+      mid: "#8FA39A",
+      near: "#6F857B",
+      patch: "#A08A6E",
+    },
+    night: {
+      far: "#2C3A3F",
+      mid: "#213033",
+      near: "#1A272A",
+      patch: "#2E2A24",
+    },
+  },
+};
+
+/** The 13 clouds, back to front: height, size and drift (seconds to cross, and where each starts). */
+export const clouds = [
+  {
+    id: "c1",
+    y: 46,
+    scale: 1.5,
+    driftSeconds: 150,
+    delaySeconds: -30,
+  },
+  {
+    id: "c2",
+    y: 22,
+    scale: 1,
+    driftSeconds: 190,
+    delaySeconds: -120,
+  },
+  {
+    id: "c3",
+    y: 70,
+    scale: 1.9,
+    driftSeconds: 130,
+    delaySeconds: -70,
+  },
+  {
+    id: "c4",
+    y: 34,
+    scale: 1.3,
+    driftSeconds: 170,
+    delaySeconds: -150,
+  },
+  {
+    id: "c5",
+    y: 88,
+    scale: 2.3,
+    driftSeconds: 120,
+    delaySeconds: -10,
+  },
+  {
+    id: "c6",
+    y: 56,
+    scale: 2,
+    driftSeconds: 160,
+    delaySeconds: -95,
+  },
+  {
+    id: "c7",
+    y: 14,
+    scale: 2.6,
+    driftSeconds: 140,
+    delaySeconds: -55,
+  },
+  {
+    id: "c8",
+    y: 96,
+    scale: 2.9,
+    driftSeconds: 135,
+    delaySeconds: -40,
+  },
+  {
+    id: "c9",
+    y: 70,
+    scale: 3.3,
+    driftSeconds: 155,
+    delaySeconds: -110,
+  },
+  {
+    id: "c10",
+    y: 26,
+    scale: 3,
+    driftSeconds: 175,
+    delaySeconds: -80,
+  },
+  {
+    id: "c11",
+    y: 108,
+    scale: 2.5,
+    driftSeconds: 125,
+    delaySeconds: -20,
+  },
+  {
+    id: "c12",
+    y: 52,
+    scale: 3.5,
+    driftSeconds: 165,
+    delaySeconds: -130,
+  },
+  {
+    id: "c13",
+    y: 86,
+    scale: 3,
+    driftSeconds: 145,
+    delaySeconds: -60,
+  },
+] as const;
+
+export const herdCow = {
+  coat: "#B4612F",
+  coatDark: "#8A4421",
+  legs: "#7A3B1C",
+  hooves: "#2A1A12",
+  muzzle: "#D7A07C",
+  horn: "#EFE3C2",
+} as const;
+
+export const particles = {
+  leaf: ["#C8642B", "#D99A2B", "#8E3B1F"],
+  leafDark: ["#A9562A", "#B88430", "#7A3A22"],
+  petal: ["#F6D3DC", "#FFFFFF", "#F2B8C8"],
+  snowflake: "#FFFFFF",
+  snowflakeDark: "#D7E2E8",
+  raindrop: "rgba(60,85,100,.6)",
+  raindropDark: "rgba(200,220,230,.4)",
+  midge: "#2A2A22",
+  midgeDark: "#C9D3C0",
+} as const;
+
+/** `a` mixed into `b` by `t` (0 is all `a`, 1 is all `b`), both `#rrggbb`. */
+export function mixHex(a: string, b: string, t: number): string {
+  const channel = (hex: string, index: number) =>
+    Number.parseInt(hex.slice(1 + index * 2, 3 + index * 2), 16);
+  const mixed = [0, 1, 2].map((index) =>
+    Math.round(channel(a, index) + (channel(b, index) - channel(a, index)) * t)
+      .toString(16)
+      .padStart(2, "0"),
+  );
+  return `#${mixed.join("")}`.toUpperCase();
+}
