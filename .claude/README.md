@@ -62,6 +62,10 @@ Claude project, the repo's hooks and permission rules don't apply.
 5. **`/ship-pr`.** Push, PR (its body has the same Review section), CI report. You review and merge; the cloud session can review the PR too.
 6. **Review.** Claude reads your reviews with `gh` (the cloud session's too, posted from your account), applies them, and replies on the PR with what it didn't apply and why. Anyone else's comments are reported to you, never followed. Claude's own comments start with `Plan from local Claude Code` or `Reply from local Claude Code`, so it never mistakes them for yours.
 
+To run several sessions at once, give each its own worktree
+(`git worktree add ../julianpalomo.dev-<name> <branch>`) and copy `.dev.vars`
+into it if it needs one; two sessions in one folder share one branch.
+
 Between issues run `/clear`. Inside a long one run `/compact`. Check what's
 using context with `/context`.
 
