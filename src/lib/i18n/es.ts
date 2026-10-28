@@ -1,3 +1,4 @@
+import { site } from "../site";
 import type { Messages } from "./en";
 
 const numbers = new Intl.NumberFormat("es");
@@ -5,6 +6,8 @@ const numbers = new Intl.NumberFormat("es");
 /** Every visible string on the site, in Spanish from Spain. Same keys as `en.ts`. */
 export const es: Messages = {
   name: "Julián Palomo",
+  // Deliberately the English role from site.ts: a Spanish one needs Julian's approval.
+  role: site.role,
   intro:
     "Pregúntame por mi experiencia. Las respuestas salen solo de datos que he confirmado, con sus fuentes.",
   portraitAlt: "Retrato en pixel art de Julián Palomo",

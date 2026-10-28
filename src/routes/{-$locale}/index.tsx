@@ -31,7 +31,7 @@ export const Route = createFileRoute("/{-$locale}/")({
     const locale = localeFromParam(params.locale);
     return {
       meta: [
-        { title: pageTitle(undefined, t(locale, "name")) },
+        { title: pageTitle(undefined, { name: t(locale, "name"), role: t(locale, "role") }) },
         { name: "description", content: t(locale, "metaDescription") },
       ],
       links: [
@@ -79,7 +79,9 @@ function Home() {
           <h1 className="mt-4 font-display text-[34px] leading-tight font-extrabold tracking-[-0.02em] sm:text-[44px]">
             {t(locale, "name")}
           </h1>
-          <p className="mt-1 font-display text-lg font-bold text-accent lg:text-xl">{site.role}</p>
+          <p className="mt-1 font-display text-lg font-bold text-accent lg:text-xl">
+            {t(locale, "role")}
+          </p>
           <p className="mt-3 text-muted">{t(locale, "intro")}</p>
         </div>
       </header>

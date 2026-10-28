@@ -5,10 +5,13 @@
  * it in its own way.
  */
 
+import { site } from "../site";
+
 const numbers = new Intl.NumberFormat("en");
 
 export const en = {
   name: "Julian Palomo",
+  role: site.role,
   intro:
     "Ask about my experience. Answers come only from facts I've confirmed, with their sources.",
   portraitAlt: "Pixel-art portrait of Julian Palomo",

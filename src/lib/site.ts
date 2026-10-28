@@ -10,9 +10,12 @@ export const site = {
 
 /**
  * The document title: name and role on the home page, "Page · Name" on any
- * other page. `name` is the page language's spelling ("Julián" in Spanish).
+ * other page. `who` is the page language's name and role ("Julián" in Spanish).
  */
-export function pageTitle(page?: string, name: string = site.name): string {
+export function pageTitle(
+  page?: string,
+  who: { name: string; role: string } = { name: site.name, role: site.role },
+): string {
   const label = page?.trim();
-  return label ? `${label} · ${name}` : `${name} · ${site.role}`;
+  return label ? `${label} · ${who.name}` : `${who.name} · ${who.role}`;
 }
