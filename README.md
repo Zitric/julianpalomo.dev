@@ -18,7 +18,9 @@ night in Glasgow unless the visitor picks one with the toggle; the hero is
 still a plain fill where the Highland landscape will go. The assistant is a
 Highland cow that greets you and follows the chat: it listens while you type,
 chews while it looks things up, talks while the answer streams, licks its lips
-when it's done and lowers its head when something goes wrong.
+when it's done and lowers its head when something goes wrong. The site is in
+English at `/` and Spanish at `/es`: visitors in Spain get Spanish by default,
+everyone else English, and the language toggle always wins.
 
 You ask a question and the answer streams in from Claude (Sonnet 5.5, through
 the Vercel AI SDK), which can only look up the facts I've confirmed. Each fact
