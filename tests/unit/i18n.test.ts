@@ -35,6 +35,7 @@ describe("t", () => {
 
   it("formats numbers for the page's language", () => {
     expect(t("en", "counterOver")(1, 1000)).toBe("1 character over the 1,000 limit");
-    expect(t("es", "counterOver")(2, 1000)).toBe("2 caracteres por encima del límite de 1000");
+    expect(t("es", "counterOver")(1, 1000)).toBe("1 carácter de más (máximo 1000)");
+    expect(t("es", "counterOver")(2, 1000)).toBe("2 caracteres de más (máximo 1000)");
   });
 });

@@ -40,13 +40,13 @@ export const es: Messages = {
   stop: "Parar",
   counter: (length, limit) => `${numbers.format(length)} / ${numbers.format(limit)}`,
   counterOver: (over, limit) =>
-    `${numbers.format(over)} ${over === 1 ? "carácter" : "caracteres"} por encima del límite de ${numbers.format(limit)}`,
+    `${numbers.format(over)} ${over === 1 ? "carácter" : "caracteres"} de más (máximo ${numbers.format(limit)})`,
 
   errorUnavailable: "El asistente no está disponible ahora mismo.",
   errorVisitorLimit: "Has llegado al límite de preguntas de hoy.",
-  errorDailyBudget: "El asistente ha llegado a su presupuesto diario. Vuelve a intentarlo mañana.",
+  errorDailyBudget: "El asistente ha agotado su presupuesto de hoy. Vuelve a intentarlo mañana.",
   errorGeneric: "Algo ha salido mal.",
-  contact: { before: "Aún puedes encontrarme en", between: "o", after: "." },
+  contact: { before: "También puedes escribirme por", between: "o", after: "." },
 
   patTheCow: "Acaricia a la vaca",
   moo: "¡Muu!",
