@@ -4,7 +4,7 @@
  */
 import type { AnthropicLanguageModelOptions } from "@ai-sdk/anthropic";
 
-export const MODEL_ID = "claude-haiku-5-5";
+export const MODEL_ID = "claude-sonnet-5-5";
 
 // Thinking counts toward this cap too; answers are meant to be short.
 export const MAX_OUTPUT_TOKENS = 2000;
@@ -12,7 +12,7 @@ export const MAX_OUTPUT_TOKENS = 2000;
 /** The most model calls one answer may take, tool calls included. */
 export const MAX_STEPS = 5;
 
-// Effort is set explicitly because this model defaults to `medium`. Never add
+// Effort is set explicitly so the API's default never decides it. Never add
 // temperature, topP or topK: the model rejects non-default values.
 export const anthropicOptions = {
   effort: "low",

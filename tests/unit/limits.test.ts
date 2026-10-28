@@ -48,8 +48,8 @@ describe("checkLimits", () => {
 });
 
 describe("estimateCostMicroUsd", () => {
-  it("prices each kind of token at Haiku 5.5's rate", () => {
-    // A million of each: $0.10 + $0.50 + $0.125 + $0.01.
+  it("prices each kind of token at Sonnet 5.5's rate", () => {
+    // A million of each: $2 + $10 + $2.50 + $0.10.
     expect(
       estimateCostMicroUsd({
         input: 1_000_000,
@@ -57,19 +57,20 @@ describe("estimateCostMicroUsd", () => {
         cacheWrite: 1_000_000,
         cacheRead: 1_000_000,
       }),
-    ).toBe(735_000);
+    ).toBe(14_600_000);
   });
 
   it("prices a typical answer with a cache read", () => {
     // 200 input, 300 output and 1,500 cached tokens:
-    // (200 × 100,000 + 300 × 500,000 + 1,500 × 10,000) / 1,000,000 = 185.
+    // (200 × 2,000,000 + 300 × 10,000,000 + 1,500 × 100,000) / 1,000,000 = 3,550.
     expect(estimateCostMicroUsd({ input: 200, output: 300, cacheWrite: 0, cacheRead: 1_500 })).toBe(
-      185,
+      3_550,
     );
   });
 
   it("rounds a fraction of a micro-dollar up, never down", () => {
-    expect(estimateCostMicroUsd({ input: 1, output: 0, cacheWrite: 0, cacheRead: 0 })).toBe(1);
+    // One cache read is 0.1 micro-dollars.
+    expect(estimateCostMicroUsd({ input: 0, output: 0, cacheWrite: 0, cacheRead: 1 })).toBe(1);
     expect(estimateCostMicroUsd({ input: 0, output: 0, cacheWrite: 0, cacheRead: 0 })).toBe(0);
   });
 });

@@ -518,11 +518,11 @@ describe("limits", () => {
     expect(day).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(visitor).toMatch(/^[0-9a-f]{64}$/);
     expect(JSON.stringify(store.countMessage.mock.calls)).not.toContain("203.0.113.7");
-    // The mock reports 1 input and 1 output token: (100,000 + 500,000) / 1,000,000, rounded up.
+    // The mock reports 1 input and 1 output token: (2,000,000 + 10,000,000) / 1,000,000.
     expect(store.addUsage).toHaveBeenCalledWith(
       day,
       { input: 1, output: 1, cacheRead: 0, cacheWrite: 0 },
-      1,
+      12,
     );
   });
 
@@ -626,12 +626,12 @@ describe("usage", () => {
     await response.text();
     await Promise.all(waitedFor);
 
-    // Two steps of 1 + 1 tokens: (2 × 100,000 + 2 × 500,000) / 1,000,000, rounded up.
+    // Two steps of 1 + 1 tokens: (2 × 2,000,000 + 2 × 10,000,000) / 1,000,000.
     expect(store.addUsage).toHaveBeenCalledTimes(1);
     expect(store.addUsage).toHaveBeenCalledWith(
       expect.any(String),
       { input: 2, output: 2, cacheRead: 0, cacheWrite: 0 },
-      2,
+      24,
     );
   });
 
@@ -646,7 +646,7 @@ describe("usage", () => {
     await Promise.all(waitedFor);
 
     expect(store.addUsage).toHaveBeenCalledTimes(1);
-    expect(store.addUsage).toHaveBeenCalledWith(expect.any(String), oneStep, 1);
+    expect(store.addUsage).toHaveBeenCalledWith(expect.any(String), oneStep, 12);
   });
 
   it("records the finished step once when the visitor presses Stop, and cancels the model call", async () => {
@@ -666,7 +666,7 @@ describe("usage", () => {
     await vi.waitFor(() => expect(store.addUsage).toHaveBeenCalled());
     await Promise.all(waitedFor);
     expect(store.addUsage).toHaveBeenCalledTimes(1);
-    expect(store.addUsage).toHaveBeenCalledWith(expect.any(String), oneStep, 1);
+    expect(store.addUsage).toHaveBeenCalledWith(expect.any(String), oneStep, 12);
     expect(model.doStreamCalls.at(-1)?.abortSignal?.aborted).toBe(true);
   });
 
@@ -689,7 +689,7 @@ describe("usage", () => {
     expect(store.addUsage).toHaveBeenCalledWith(
       expect.any(String),
       { input: 2, output: 2, cacheRead: 0, cacheWrite: 0 },
-      2,
+      24,
     );
   });
 

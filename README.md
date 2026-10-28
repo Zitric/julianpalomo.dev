@@ -13,7 +13,7 @@ TanStack Start app (React, TypeScript in strict mode, Tailwind CSS) that runs
 on Cloudflare Workers at [julianpalomo.dev](https://julianpalomo.dev). There is
 no visual design yet: the page is plain on purpose.
 
-You ask a question and the answer streams in from Claude (Haiku 5.5, through
+You ask a question and the answer streams in from Claude (Sonnet 5.5, through
 the Vercel AI SDK), which can only look up the facts I've confirmed. Each fact
 an answer cites shows as a source chip, such as "CV · Cazoo · Redux →
 Zustand", and a citation only counts if the model looked that fact up while

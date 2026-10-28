@@ -18,7 +18,7 @@ flowchart TD
   validate -->|yes| limits{Today's limits<br/>in D1}
   limits -->|over| r429[429 visitor_limit<br/>or daily_budget]
   limits -->|under| count[Count the question]
-  count --> model[Claude Haiku 5.5]
+  count --> model[Claude Sonnet 5.5]
   model <-->|read-only tools| tools[list_topics, get_claims,<br/>search_claims]
   demo <-->|get_claims| tools
   tools --> claims[(Confirmed claims)]
@@ -69,7 +69,7 @@ and nobody can be followed from one day to the next. For an IPv6 address the
 hash takes its /64 instead, since one person can rotate through all of it. Over a limit, the endpoint
 answers `429` without calling the model.
 
-**The model and its tools.** Claude Haiku 5.5, set in
+**The model and its tools.** Claude Sonnet 5.5, set in
 [`src/lib/bot/model.ts`](../src/lib/bot/model.ts), answers with the system
 prompt in [`src/lib/bot/prompt.ts`](../src/lib/bot/prompt.ts). It can only
 look things up through three read-only tools in
