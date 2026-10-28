@@ -14,10 +14,12 @@ run and keeps every baseline. Every run calls the real models and costs money.
 A change that touches any of these needs one full run:
 
 - `src/lib/bot/**`, `src/lib/claims.ts`, `src/content/claims.json`
+- `src/lib/claim-id.ts` (citation ids) and `src/lib/site.ts` (the name and links in the prompt)
 - `evals/**`, `vitest.evals.config.ts`
 - `package.json`, `pnpm-lock.yaml` (an `ai` upgrade can change answers)
 
-CI's `evals` job runs on the same paths, so keep the two lists in step.
+CI's `changes` job and `.claude/rules/evals.md` list the same paths: keep the
+three in step. A new file the bot or `evals/` imports from `src/` joins all three.
 
 ## 2. Run
 

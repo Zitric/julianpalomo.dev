@@ -48,10 +48,11 @@ which is gitignored.
 ## In CI
 
 The `evals` job in [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)
-runs `pnpm eval` once on every pull request that changes `src/lib/bot/`,
-`src/lib/claims.ts`, `src/content/claims.json`, `evals/`,
-`vitest.evals.config.ts`, `package.json` or `pnpm-lock.yaml`; a dependency
-upgrade, such as the AI SDK's, can change the answers. On any other pull
+runs `pnpm eval` once on every pull request that changes the assistant's
+code or anything it reads (the site's name and links, how claim ids look),
+the claims, the evals, or the dependencies, since an upgrade such as the AI
+SDK's can change the answers. The exact list is in
+[`.claude/rules/evals.md`](../.claude/rules/evals.md). On any other pull
 request the job shows as skipped.
 
 - It runs on a separate Anthropic key, Julian's `EVALS_ANTHROPIC_API_KEY`
@@ -84,8 +85,8 @@ Lowering either needs Julian's OK (`.claude/rules/evals.md`).
 answers, where one answer moves the rate by 2.5 points, and the current
 baseline (run 12) sits at exactly 90%. Enforcing it there would fail about
 every other bot pull request from noise alone. So the job sets
-`EVAL_PASS_RATE=reported`: a rate below 90% shows as a warning in its summary,
-and the critical cases, the calibration, provider errors and the cost cap
+`EVAL_PASS_RATE=reported`: a rate below 90% shows as a warning in its summary
+and as an annotation on the run, and the critical cases, the calibration, provider errors and the cost cap
 still fail it. A local `pnpm eval` and every run recorded below enforce it.
 Why, and what else was considered:
 [evals in CI](adr/2026-10-28-evals-in-ci.md).

@@ -101,7 +101,8 @@ jobs:
         run: |
           set +e
           git diff --quiet HEAD^1 HEAD -- \
-            src/lib/bot src/lib/claims.ts src/content/claims.json \
+            src/lib/bot src/lib/claims.ts src/lib/claim-id.ts src/lib/site.ts \
+            src/content/claims.json \
             evals vitest.evals.config.ts package.json pnpm-lock.yaml
           status=$?
           set -e

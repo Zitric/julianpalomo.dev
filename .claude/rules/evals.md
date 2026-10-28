@@ -53,10 +53,10 @@ claim changes the answers, so this rule loads for those files too.
 
 ## In CI
 
-- **When:** the `evals` job in `.github/workflows/ci.yml` runs on every pull request that changes `src/lib/bot/**`, `src/lib/claims.ts`, `src/content/claims.json`, `evals/**`, `vitest.evals.config.ts`, `package.json` or `pnpm-lock.yaml`. On any other pull request it shows as skipped. The same list is in the `changes` job and in `.claude/skills/run-evals/SKILL.md`: keep the three in step.
+- **When:** the `evals` job in `.github/workflows/ci.yml` runs on every pull request that changes `src/lib/bot/**`, `src/lib/claims.ts`, `src/lib/claim-id.ts`, `src/lib/site.ts`, `src/content/claims.json`, `evals/**`, `vitest.evals.config.ts`, `package.json` or `pnpm-lock.yaml`. On any other pull request it shows as skipped. The same list is in the `changes` job and in `.claude/skills/run-evals/SKILL.md`: keep the three in step. A new file the bot or `evals/` imports from `src/` joins all three (`git grep 'from "\.\./' -- src/lib/bot evals` finds them).
 - **What:** `pnpm eval` once (`EVAL_REPEAT=1`), about $0.70 a push. A new push cancels the running job, so only the latest commit spends.
 - **The key is Julian's:** the `EVALS_ANTHROPIC_API_KEY` Actions secret, separate from the site's key. Agents never see, set or handle it. Pull requests from forks get no secrets, so there the job says so and passes; never switch the trigger to `pull_request_target`, which would run a fork's code with the key.
-- **What fails it:** a critical case, a wrong calibration item, a provider error (inconclusive) or the cost cap. The job sets `EVAL_PASS_RATE=reported`, so a pass rate below `PASS_RATE` shows as a warning in the job summary instead of failing it (`docs/adr/2026-10-28-evals-in-ci.md`). A local `pnpm eval` always enforces it. Never set `EVAL_PASS_RATE` anywhere else.
+- **What fails it:** a critical case, a wrong calibration item, a provider error (inconclusive) or the cost cap. The job sets `EVAL_PASS_RATE=reported`, so a pass rate below `PASS_RATE` shows as a warning in the job summary and as an annotation on the run, instead of failing it (`docs/adr/2026-10-28-evals-in-ci.md`). A local `pnpm eval` always enforces it. Never set `EVAL_PASS_RATE` anywhere else.
 - **The results are public.** The job uploads `evals/results/` as the `eval-results` artifact, and the repo is public. It holds the answers and the claims they cite, which are public anyway, and never the key. Never add anything private to the results file.
 
 ## Recording runs
