@@ -13,9 +13,12 @@ assistant. It is a TanStack Start app (React, TypeScript in strict mode,
 Tailwind CSS) that runs on Cloudflare Workers at
 [julianpalomo.dev](https://julianpalomo.dev). [`DESIGN.md`](DESIGN.md)
 describes the visual design, which is being built in steps: the colours, the
-fonts and the layout are in, and the theme follows day and night in Glasgow
-unless the visitor picks one with the toggle; the hero is still a plain fill
-where the Highland landscape will go.
+fonts, the layout and the assistant are in, and the theme follows day and
+night in Glasgow unless the visitor picks one with the toggle; the hero is
+still a plain fill where the Highland landscape will go. The assistant is a
+Highland cow that greets you and follows the chat: it listens while you type,
+chews while it looks things up, talks while the answer streams, licks its lips
+when it's done and lowers its head when something goes wrong.
 
 You ask a question and the answer streams in from Claude (Sonnet 5.5, through
 the Vercel AI SDK), which can only look up the facts I've confirmed. Each fact

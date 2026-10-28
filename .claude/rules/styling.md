@@ -7,7 +7,8 @@ paths:
 # Styling
 
 Tailwind CSS 4 through `@tailwindcss/vite`. `src/styles/app.css` imports
-Tailwind, `tokens.css` and `fonts.css`; `src/routes/__root.tsx` links `app.css`.
+Tailwind, `tokens.css`, `fonts.css` and `cow.css`; `src/routes/__root.tsx` links
+`app.css`.
 
 ## Fonts live only in `src/styles/fonts.css`
 
@@ -26,6 +27,17 @@ Tailwind, `tokens.css` and `fonts.css`; `src/routes/__root.tsx` links `app.css`.
 - **Contrast is tested.** `tests/unit/tokens.test.ts` reads `tokens.css` and checks each pair on screen against WCAG AA in both themes (4.5:1 for text, 3:1 for field borders), and that every token is registered and transitioned. A new pair gets a line in its `pairs` list; a failing pair changes the value, and the `DESIGN.md` table with it.
 - Fields (the composer, form inputs) are outlined in `field-border`, which reaches 3:1; `border` is for chips and dividers only.
 
+## The one exception: the illustrations' palette
+
+- The colours of the illustrations (the landscape and the cows) are part of the artwork, not UI, so they are data in `src/lib/scene/palette.ts`, copied from `docs/design/landscape-palettes.json` (`DESIGN.md` section 2). Today it holds `assistantCow`; `tests/unit/assistant-cow.test.ts` keeps it equal to the JSON.
+- Only illustration components read it, and only for their drawing's fills and strokes. A bubble, chip or button on top of an illustration uses tokens like any other UI.
+
+## The assistant cow's motion lives in `src/styles/cow.css`
+
+- Its keyframes come from the `<style>` of `docs/design/assistant-cow.svg`, prefixed `cow-`, and are keyed by the `data-state` and `data-pat` that `src/components/cow/AssistantCow.tsx` sets. Only the latest cow has `.cow-live`, so only it moves.
+- Every rule that moves it sits inside `prefers-reduced-motion: no-preference`, so with reduced motion it's the still drawing in every state. Only `transform` and `opacity` animate.
+- The lick lasts 1.6s here and in `LICK_MS` (`src/lib/cow-state.ts`); keep the two in step.
+
 ## Focus
 
 - `app.css` gives every `:focus-visible` element a 3px `accent` outline 2px away (`DESIGN.md` section 15). Never remove it without a replacement.
@@ -43,4 +55,4 @@ Tailwind, `tokens.css` and `fonts.css`; `src/routes/__root.tsx` links `app.css`.
 - Semantic elements first (`main`, `h1`, `nav`, `button`); the e2e test finds the page by role (`tests/e2e/home.spec.ts`).
 - The layout works at 375px wide (small phone) before anything else.
 
-If `tokens.css`, `fonts.css`, `app.css` or `src/components/ui/` change shape, update this rule.
+If `tokens.css`, `fonts.css`, `cow.css`, `app.css`, `src/lib/scene/palette.ts` or `src/components/ui/` change shape, update this rule.

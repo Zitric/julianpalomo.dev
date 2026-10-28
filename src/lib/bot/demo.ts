@@ -45,10 +45,17 @@ function firstClaimIn(prompt: readonly unknown[]): { id: string; text: string } 
   return undefined;
 }
 
+// Paced like a real answer, so a preview shows the cow thinking during the
+// lookup and talking while the words arrive, instead of skipping both.
+const LOOKUP_DELAY_MS = 600;
+const WORD_DELAY_MS = 40;
+
+/** The answer one word at a time, each word with the spaces after it. */
 function textAnswer(text: string): StreamPart[] {
+  const words = text.match(/\S+\s*/g) ?? [];
   return [
     { type: "text-start", id: "demo" },
-    { type: "text-delta", id: "demo", delta: text },
+    ...words.map((delta): StreamPart => ({ type: "text-delta", id: "demo", delta })),
     { type: "text-end", id: "demo" },
     { type: "finish", finishReason: { unified: "stop", raw: undefined }, usage },
   ];
@@ -65,6 +72,7 @@ export function createDemoModel(): MockLanguageModelV4 {
       const claim = firstClaimIn(prompt);
       const hasLookedUp = prompt.some((message) => message.role === "tool");
       let chunks: StreamPart[];
+      let initialDelayInMs = 0;
       if (claim) {
         chunks = textAnswer(
           `${DEMO_ANSWER_INTRO} Here is a claim as an example: ${claim.text} [[${claim.id}]]`,
@@ -76,8 +84,11 @@ export function createDemoModel(): MockLanguageModelV4 {
           { type: "tool-call", toolCallId: "demo-call", toolName: "get_claims", input: "{}" },
           { type: "finish", finishReason: { unified: "tool-calls", raw: undefined }, usage },
         ];
+        initialDelayInMs = LOOKUP_DELAY_MS;
       }
-      return { stream: simulateReadableStream({ chunks }) };
+      return {
+        stream: simulateReadableStream({ chunks, initialDelayInMs, chunkDelayInMs: WORD_DELAY_MS }),
+      };
     },
   });
 }

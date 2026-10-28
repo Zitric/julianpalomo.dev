@@ -1,0 +1,252 @@
+/*
+ * The assistant cow's motion (DESIGN.md section 9), from the <style> of
+ * docs/design/assistant-cow.svg. src/components/cow/AssistantCow.tsx sets
+ * `data-state` and, while a pat plays, `data-pat`; only the latest cow has
+ * `.cow-live`, so earlier ones stay still. Everything animates only transform
+ * and opacity.
+ *
+ * The SVG's own `transform="scale(0)"` and `opacity="0"` hide the tongue and
+ * the open mouth; never set `transform` or `opacity` on those groups outside
+ * an animation, or they show.
+ */
+
+.cow .tilt,
+.cow .jaw,
+.cow .lick-r,
+.cow .lick-l {
+  transform-box: view-box;
+}
+.cow .tilt {
+  transform-origin: 100px 130px;
+}
+.cow .lick-r {
+  transform-origin: 104px 148px;
+}
+.cow .lick-l {
+  transform-origin: 96px 148px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cow-live .tilt {
+    transition: transform 0.4s ease;
+  }
+
+  /* Idle: a 12s loop, tilting one way, licking right, tilting the other way, licking left. */
+  .cow-live[data-state="idle"] .tilt {
+    animation: cow-idle 12s ease-in-out infinite;
+  }
+  .cow-live[data-state="idle"] .lick-r {
+    animation: cow-idle-lick-r 12s ease-in-out infinite;
+  }
+  .cow-live[data-state="idle"] .lick-l {
+    animation: cow-idle-lick-l 12s ease-in-out infinite;
+  }
+  .cow-live[data-state="idle"] .lick-mouth {
+    animation: cow-idle-mouth 12s step-end infinite;
+  }
+
+  /* Listening: holds its head tilted. */
+  .cow-live[data-state="listening"] .tilt {
+    transform: rotate(-7deg);
+  }
+
+  /* Thinking: chews with a slight thoughtful tilt. */
+  .cow-live[data-state="thinking"] .tilt {
+    animation: cow-think 2.4s ease-in-out infinite;
+  }
+  .cow-live[data-state="thinking"] .jaw {
+    animation: cow-chew 0.55s ease-in-out infinite alternate;
+  }
+
+  /* Talking: the mouth opens and closes, irregularly. */
+  .cow-live[data-state="talking"] .talk {
+    animation: cow-talk 1.8s step-end infinite;
+  }
+
+  /* Satisfied, and a pat: one lick to the right. Its 1.6s is LICK_MS in src/lib/cow-state.ts. */
+  .cow-live:is([data-state="satisfied"], [data-pat]) .lick-r {
+    animation: cow-lick 1.6s ease-in-out;
+  }
+  .cow-live:is([data-state="satisfied"], [data-pat]) .lick-mouth {
+    animation: cow-lick-mouth 1.6s step-end;
+  }
+  .cow-live[data-pat] .lick-l {
+    animation: none;
+  }
+
+  /* Sorry: lowers its head and stays still. */
+  .cow-live[data-state="sorry"] .tilt {
+    transform: translateY(6px);
+    transition-duration: 0.6s;
+  }
+
+  /* Hover, only where a pointer hovers: tilts from side to side. */
+  @media (hover: hover) {
+    .cow-live:hover .tilt {
+      animation: cow-tilt 4s ease-in-out infinite;
+    }
+  }
+}
+
+@keyframes cow-idle {
+  0%,
+  14% {
+    transform: rotate(0deg);
+  }
+  18%,
+  26% {
+    transform: rotate(-7deg);
+  }
+  30%,
+  62% {
+    transform: rotate(0deg);
+  }
+  66%,
+  70% {
+    transform: rotate(6deg);
+  }
+  74%,
+  100% {
+    transform: rotate(0deg);
+  }
+}
+@keyframes cow-idle-lick-r {
+  0%,
+  44% {
+    transform: scale(0);
+  }
+  48%,
+  54% {
+    transform: scale(1);
+  }
+  58%,
+  100% {
+    transform: scale(0);
+  }
+}
+@keyframes cow-idle-lick-l {
+  0%,
+  76% {
+    transform: scale(0);
+  }
+  80%,
+  86% {
+    transform: scale(1);
+  }
+  90%,
+  100% {
+    transform: scale(0);
+  }
+}
+@keyframes cow-idle-mouth {
+  0% {
+    opacity: 0;
+  }
+  43% {
+    opacity: 1;
+  }
+  59% {
+    opacity: 0;
+  }
+  75% {
+    opacity: 1;
+  }
+  91% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes cow-think {
+  0%,
+  100% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(-4deg);
+  }
+}
+@keyframes cow-chew {
+  from {
+    transform: translate(-2px, 0);
+  }
+  to {
+    transform: translate(2px, 2px);
+  }
+}
+@keyframes cow-talk {
+  0% {
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  20% {
+    opacity: 0;
+  }
+  28% {
+    opacity: 1;
+  }
+  44% {
+    opacity: 0;
+  }
+  52% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 0;
+  }
+  70% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+/* The reference's `lickr`, whose lick fills the first 42% of a 5s loop, played once. */
+@keyframes cow-lick {
+  0%,
+  19% {
+    transform: scale(0);
+  }
+  43%,
+  76% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+@keyframes cow-lick-mouth {
+  0% {
+    opacity: 0;
+  }
+  17% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes cow-tilt {
+  0%,
+  12% {
+    transform: rotate(0deg);
+  }
+  28%,
+  44% {
+    transform: rotate(-10deg);
+  }
+  62%,
+  78% {
+    transform: rotate(10deg);
+  }
+  94%,
+  100% {
+    transform: rotate(0deg);
+  }
+}

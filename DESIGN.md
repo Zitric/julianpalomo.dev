@@ -95,9 +95,8 @@ the landscape's palette module (`src/lib/scene/palette.ts`), taken from
 [`docs/design/landscape-palettes.json`](docs/design/landscape-palettes.json).
 The same goes for the two cows' colours, which are part of their artwork.
 
-This is the one exception to "colours live only in `tokens.css`"; the
-landscape issue adds it to `.claude/rules/styling.md`. UI components still
-never use a colour literal.
+This is the one exception to "colours live only in `tokens.css`", recorded
+in `.claude/rules/styling.md`. UI components still never use a colour literal.
 
 ## 3. Type
 
@@ -473,13 +472,16 @@ through.
 | Satisfied            | The answer just finished                    | Licks once (1.6s), then goes back to idle                                                                                 |
 | Sorry                | An error or the daily limit                 | Lowers its head and stays still                                                                                           |
 | Hover (pointer only) | The pointer is over it                      | Tilts and says "Moo!" in a small speech bubble                                                                            |
-| Tap                  | It's tapped                                 | Licks and, if sound is on, moos softly (at most once every 3s)                                                            |
+| Tap                  | It's tapped                                 | Licks and, if sound is on, moos softly (at most once every 3s). While it talks it only moos: a lick would cover the mouth |
 - Only the cow next to the **latest** assistant message is animated. Earlier
   ones stay still, so a long conversation doesn't become a field of moving
-  heads.
+  heads. Before the first answer that's the greeting's cow; while a question
+  waits for its answer, a cow alone where the answer will appear; after an
+  error, the cow beside the message.
 - **Sizes:** 66px wide next to the greeting, 58px next to answers.
-- The cow next to messages is decorative (`aria-hidden`). The tap and hover
-  are extras; nothing depends on them.
+- The earlier, still cows are decorative (`aria-hidden`). The latest cow is a
+  button labelled "Pat the cow", for the tap. The tap and hover are extras;
+  nothing depends on them.
 - With reduced motion it's a still drawing in every state.
 
 ## 10. The chat
@@ -632,8 +634,9 @@ centred and the background left exactly as it is: no blur, no fade.
   element, including on top of the landscape.
 - Everything works with the keyboard alone; dialogs and the gear's panel trap
   focus while open and give it back when they close.
-- The landscape, the particles, the herd and the cows next to messages are
-  `aria-hidden`. The weather chip has an accessible name ("Weather in Glasgow:
+- The landscape, the particles, the herd and the earlier cows next to
+  messages are `aria-hidden`; the latest cow is the "Pat the cow" button.
+  The weather chip has an accessible name ("Weather in Glasgow:
   9°C, drizzle. Play with the sky").
 - `lang` on `<html>` matches the page's language, and each page links its
   other language with `hreflang`.
