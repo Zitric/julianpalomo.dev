@@ -3,6 +3,7 @@ import interUrl from "@fontsource-variable/inter/files/inter-latin-wght-normal.w
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { ClockProvider } from "../components/clock/Clock";
+import { useLocale } from "../components/i18n/useLocale";
 import { ThemeDocument } from "../components/theme/Theme";
 import { getFirstRender } from "../lib/first-render";
 import { pageTitle } from "../lib/site";
@@ -10,9 +11,9 @@ import appCss from "../styles/app.css?url";
 
 export const Route = createRootRoute({
   loader: () => getFirstRender(),
-  // The HTML depends on the visitor's cookie and the time, so no cache may
-  // keep it and serve it to someone else.
-  headers: () => ({ "Cache-Control": "private, no-store" }),
+  // The HTML depends on the visitor's cookies (theme, language) and the time,
+  // so no cache may keep it and serve it to someone else.
+  headers: () => ({ "Cache-Control": "private, no-store", Vary: "Cookie" }),
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -40,9 +41,10 @@ export const Route = createRootRoute({
 // Glasgow's sun (docs/adr/2026-10-28-visual-direction.md).
 function RootDocument({ children }: { children: ReactNode }) {
   const { choice, now } = Route.useLoaderData();
+  const locale = useLocale();
   return (
     <ClockProvider start={now}>
-      <ThemeDocument initialChoice={choice}>
+      <ThemeDocument initialChoice={choice} lang={locale}>
         <head>
           <HeadContent />
         </head>

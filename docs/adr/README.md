@@ -33,4 +33,5 @@ files are the answer, written down at the time instead of remembered later.
 | 2026-10-27 | [Claude Haiku 5.5 at low effort, on AI SDK 7](2026-10-27-claude-model-and-ai-sdk-7.md)               |
 | 2026-10-28 | [The visual direction: a live Highland landscape and a cow](2026-10-28-visual-direction.md)          |
 | 2026-10-28 | [Claude Sonnet 5.5 for the bot, at low effort](2026-10-28-claude-sonnet-for-the-bot.md)              |
+| 2026-10-28 | [One URL per language: / in English, /es in Spanish](2026-10-28-language-urls.md)                    |
 | 2026-10-28 | [Evals in CI, with the pass rate reported, not enforced](2026-10-28-evals-in-ci.md)                  |

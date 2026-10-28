@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { type CowState, LICK_MS } from "../../lib/cow-state";
+import { t } from "../../lib/i18n/t";
 import { assistantCow as cow } from "../../lib/scene/palette";
+import { useLocale } from "../i18n/useLocale";
 
 type Props = {
   state: CowState;
@@ -21,6 +23,7 @@ const mooBubble =
  * cow gets them.
  */
 export function AssistantCow({ state, size, animated, onMoo }: Props) {
+  const locale = useLocale();
   const [patting, setPatting] = useState(false);
 
   useEffect(() => {
@@ -46,14 +49,14 @@ export function AssistantCow({ state, size, animated, onMoo }: Props) {
   return (
     <button
       type="button"
-      aria-label="Pat the cow"
+      aria-label={t(locale, "patTheCow")}
       data-state={state}
       data-pat={patting ? "" : undefined}
       onClick={pat}
       className="cow cow-live group relative inline-flex shrink-0 cursor-pointer rounded-[14px]"
     >
       <span aria-hidden="true" className={mooBubble}>
-        Moo!
+        {t(locale, "moo")}
       </span>
       <CowDrawing size={size} />
     </button>

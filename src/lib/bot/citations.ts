@@ -48,22 +48,13 @@ export function parseCitations(
   return { segments, invalid };
 }
 
-function sourceName(source: Source["source"]): string {
-  switch (source) {
-    case "cv":
-      return "CV";
-    case "julian":
-      return "Julian";
-    default: {
-      const unhandled: never = source;
-      throw new Error(String(unhandled));
-    }
-  }
-}
-
-/** The chip text: "CV · Cazoo · Redux → Zustand", or "Julian · Right to work" without an org. */
-export function chipLabel(source: Source): string {
-  return [sourceName(source.source), source.org, source.label]
+/**
+ * The chip text: "CV · Cazoo · Redux → Zustand", or "Julian · Right to work"
+ * without an org. The source's name comes in the page's language; the claim's
+ * org and label are English, like every claim.
+ */
+export function chipLabel(source: Source, names: Record<Source["source"], string>): string {
+  return [names[source.source], source.org, source.label]
     .filter((part) => part !== undefined)
     .join(" · ");
 }

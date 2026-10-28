@@ -1,6 +1,8 @@
 import type { ChatUIMessage } from "../../lib/bot/chat-message";
 import type { CowSlot, CowState } from "../../lib/cow-state";
+import { t } from "../../lib/i18n/t";
 import { AssistantCow } from "../cow/AssistantCow";
+import { useLocale } from "../i18n/useLocale";
 import { AssistantMessage } from "./AssistantMessage";
 import { messageText } from "./chat-view";
 
@@ -14,8 +16,13 @@ type Props = {
 
 /** The conversation in order. Answers are announced politely as they stream. */
 export function MessageList({ messages, streamingId, cowSlot, cowState }: Props) {
+  const locale = useLocale();
   return (
-    <ol aria-live="polite" aria-label="Conversation" className="flex flex-col gap-6">
+    <ol
+      aria-live="polite"
+      aria-label={t(locale, "conversationLabel")}
+      className="flex flex-col gap-6"
+    >
       {messages.map((message) => {
         if (message.role === "user") {
           return (

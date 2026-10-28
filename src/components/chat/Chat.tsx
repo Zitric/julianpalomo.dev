@@ -2,7 +2,9 @@ import { useChat } from "@ai-sdk/react";
 import { useRef, useState } from "react";
 import type { ChatUIMessage } from "../../lib/bot/chat-message";
 import { liveCowSlot } from "../../lib/cow-state";
+import { t } from "../../lib/i18n/t";
 import { useCowState } from "../cow/use-cow-state";
+import { useLocale } from "../i18n/useLocale";
 import { ChatErrorNotice } from "./ChatErrorNotice";
 import { Composer } from "./Composer";
 import { messageText, toolStatus } from "./chat-view";
@@ -12,6 +14,7 @@ import { Suggestions } from "./Suggestions";
 
 /** The chat with the assistant. useChat posts to /api/chat, its default endpoint. */
 export function Chat() {
+  const locale = useLocale();
   const { messages, sendMessage, status, stop, error } = useChat<ChatUIMessage>();
   const [input, setInput] = useState("");
   const [composerFocused, setComposerFocused] = useState(false);
@@ -26,7 +29,7 @@ export function Chat() {
   const cowState = useCowState({
     status,
     answerHasText: messageText(streamingParts).length > 0,
-    toolRunning: toolStatus(streamingParts) !== undefined,
+    toolRunning: toolStatus(streamingParts, locale) !== undefined,
     stopped,
     composer: { hasText: input.length > 0, focused: composerFocused },
   });
@@ -48,7 +51,7 @@ export function Chat() {
   }
 
   return (
-    <section aria-label="Chat" className="flex flex-col gap-6">
+    <section aria-label={t(locale, "chatLabel")} className="flex flex-col gap-6">
       <Greeting cowState={cowSlot.kind === "greeting" ? cowState : undefined} />
       {messages.length === 0 && <Suggestions onPick={send} />}
       {messages.length > 0 && (

@@ -27,7 +27,8 @@ Compiler.
 - **Follow the Rules of React**: pure render, no mutation of props or state, hooks at the top level.
 - **Effects only sync with outside systems** (timers, listeners, the DOM outside React). A value derived from props or state is computed during render; work caused by an event goes in its handler.
 - **`ref` is a plain prop** in React 19; don't add `forwardRef`.
-- A route file owns its component, like `src/routes/index.tsx`. Extract a component on its second use or when the file gets hard to scan.
+- A route file owns its component, like `src/routes/{-$locale}/index.tsx`. Extract a component on its second use or when the file gets hard to scan.
+- **Visible strings come from `src/lib/i18n/`**, never inline: text, labels, placeholders, `aria-label`s and alt text. A new string is a key in `en.ts` and `es.ts` (a missing key fails `tsc`), read with `t(useLocale(), key)`.
 
 ## TanStack Start and the server
 

@@ -1,4 +1,6 @@
 import { useId } from "react";
+import { t } from "../../lib/i18n/t";
+import { useLocale } from "../i18n/useLocale";
 import { IconButton } from "../ui/IconButton";
 import { useTheme } from "./Theme";
 
@@ -16,10 +18,11 @@ const RAY_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
 /** Switches between the light and dark themes, and remembers the choice. */
 export function ThemeToggle() {
   const { theme, toggle } = useTheme();
+  const locale = useLocale();
   const maskId = useId();
   const isDark = theme === "dark";
 
-  const label = isDark ? "Switch to light theme" : "Switch to dark theme";
+  const label = t(locale, isDark ? "themeToLight" : "themeToDark");
   const sun = isDark ? "opacity-0 motion-safe:scale-50 motion-safe:rotate-90" : "opacity-100";
   const sunRays = isDark ? "motion-safe:scale-0" : "";
   const moon = isDark ? "opacity-100" : "opacity-0 motion-safe:scale-50 motion-safe:-rotate-90";

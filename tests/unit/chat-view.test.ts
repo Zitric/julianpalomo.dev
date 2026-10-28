@@ -77,33 +77,47 @@ describe("renderAnswer", () => {
 
 describe("toolStatus", () => {
   it("names the running tool in plain words", () => {
-    expect(toolStatus([{ type: "tool-get_claims", state: "input-available" }])).toBe(
+    expect(toolStatus([{ type: "tool-get_claims", state: "input-available" }], "en")).toBe(
       "Looking up claims…",
     );
-    expect(toolStatus([{ type: "tool-list_topics", state: "input-streaming" }])).toBe(
+    expect(toolStatus([{ type: "tool-list_topics", state: "input-streaming" }], "en")).toBe(
       "Checking what topics exist…",
     );
   });
 
+  it("speaks the page's language", () => {
+    expect(toolStatus([{ type: "tool-search_claims", state: "input-available" }], "es")).toBe(
+      "Buscando en los datos confirmados…",
+    );
+  });
+
   it("says nothing once tools are done or when there are none", () => {
-    expect(toolStatus([{ type: "tool-get_claims", state: "output-available" }])).toBeUndefined();
-    expect(toolStatus([{ type: "text" }])).toBeUndefined();
+    expect(
+      toolStatus([{ type: "tool-get_claims", state: "output-available" }], "en"),
+    ).toBeUndefined();
+    expect(toolStatus([{ type: "text" }], "en")).toBeUndefined();
   });
 });
 
 describe("chatErrorMessage", () => {
   it("says the assistant isn't available for the endpoint's 503 body", () => {
-    expect(chatErrorMessage(new Error(JSON.stringify(chatErrorBody("unavailable"))))).toBe(
+    expect(chatErrorMessage(new Error(JSON.stringify(chatErrorBody("unavailable"))), "en")).toBe(
       "The assistant isn't available here right now.",
     );
   });
 
   it("says which daily limit was reached for each 429 body", () => {
-    expect(chatErrorMessage(new Error(JSON.stringify(chatErrorBody("visitor_limit"))))).toBe(
+    expect(chatErrorMessage(new Error(JSON.stringify(chatErrorBody("visitor_limit"))), "en")).toBe(
       "You've reached today's limit for questions.",
     );
-    expect(chatErrorMessage(new Error(JSON.stringify(chatErrorBody("daily_budget"))))).toBe(
+    expect(chatErrorMessage(new Error(JSON.stringify(chatErrorBody("daily_budget"))), "en")).toBe(
       "The assistant has reached its daily budget. Try again tomorrow.",
+    );
+  });
+
+  it("speaks the page's language", () => {
+    expect(chatErrorMessage(new Error(JSON.stringify(chatErrorBody("visitor_limit"))), "es")).toBe(
+      "Has llegado al límite de preguntas de hoy.",
     );
   });
 
@@ -114,7 +128,7 @@ describe("chatErrorMessage", () => {
     "Failed to fetch",
     '{"error":"something-new"}',
   ])("says something went wrong for %j", (message) => {
-    expect(chatErrorMessage(new Error(message))).toBe("Something went wrong.");
+    expect(chatErrorMessage(new Error(message), "en")).toBe("Something went wrong.");
   });
 });
 

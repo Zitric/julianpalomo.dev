@@ -71,15 +71,26 @@ describe("parseCitations", () => {
 });
 
 describe("chipLabel", () => {
+  const names = { cv: "CV", julian: "Julian" };
+
   it("joins source, org and label", () => {
-    expect(chipLabel({ id: "a", source: "cv", org: "Cazoo", label: "Redux → Zustand" })).toBe(
-      "CV · Cazoo · Redux → Zustand",
-    );
+    expect(
+      chipLabel({ id: "a", source: "cv", org: "Cazoo", label: "Redux → Zustand" }, names),
+    ).toBe("CV · Cazoo · Redux → Zustand");
   });
 
   it("leaves the org out when the claim has none", () => {
-    expect(chipLabel({ id: "b", source: "julian", label: "Right to work" })).toBe(
+    expect(chipLabel({ id: "b", source: "julian", label: "Right to work" }, names)).toBe(
       "Julian · Right to work",
     );
+  });
+
+  it("names the source in the page's language and keeps the claim's own words", () => {
+    expect(
+      chipLabel(
+        { id: "b", source: "julian", label: "Right to work" },
+        { cv: "CV", julian: "Julián" },
+      ),
+    ).toBe("Julián · Right to work");
   });
 });
