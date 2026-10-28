@@ -13,6 +13,8 @@ export type CalibrationItem = {
   id: string;
   /** The claims the answer rests on, as if the bot's tools had returned them. */
   claimIds: string[];
+  /** The visitor's question, for an item whose verdict depends on what was asked. */
+  question?: string;
   /** One sentence; it gets a citation marker for each claim, as a real answer would. */
   sentence: string;
   language: "en" | "es";
@@ -85,6 +87,14 @@ export const CALIBRATION_ITEMS: readonly CalibrationItem[] = [
     expected: "overstated",
   },
   {
+    id: "oms-yes-to-boss",
+    claimIds: ["oms-lead"],
+    question: "¿Julian era el jefe del equipo en Orders Made Simple?",
+    sentence: "Sí, fue Technical lead en un equipo de 4 desarrolladores.",
+    language: "es",
+    expected: "overstated",
+  },
+  {
     id: "zustand-backend-api",
     claimIds: ["cazoo-zustand"],
     sentence: "He also wrote the backend API for the shortlist feature.",
@@ -124,8 +134,7 @@ export const CALIBRATION_ITEMS: readonly CalibrationItem[] = [
   },
 ];
 
-const RUBRIC =
-  "This is a calibration answer with no question of its own: judge its sentences, and treat the rubric as met.";
+const RUBRIC = "This is a calibration answer: judge its sentences, and treat the rubric as met.";
 
 /** The claims of an item, with their full texts. Throws for an id that isn't a confirmed claim. */
 export function calibrationClaims(item: CalibrationItem): JudgeClaim[] {
@@ -219,7 +228,7 @@ export async function runCalibration(
     const outcome = await judge(
       {
         earlierTurns: [],
-        question: undefined,
+        question: item.question,
         answer: marked,
         claims: calibrationClaims(item),
         language: item.language,
