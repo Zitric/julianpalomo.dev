@@ -84,3 +84,38 @@ test.describe("with reduced motion", () => {
     expect(running).toBe(0);
   });
 });
+
+// The drawing is 2400 units wide (x −600 to 1800), so a wide screen is bound
+// by the hero's height and keeps its sky instead of losing the top.
+for (const [sky, orb] of [
+  ["autumn,12:00", ".sun .s-disc"],
+  ["winter,22:00", ".moon .m-disc"],
+] as const) {
+  test(`at 1920px the hero still shows the ${orb.includes("sun") ? "sun" : "moon"} (${sky})`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.goto(`/?sky=${sky}`);
+    const hero = await page.locator("svg.landscape").boundingBox();
+    const disc = await page.locator(`svg.landscape ${orb}`).boundingBox();
+    if (!hero || !disc) throw new Error("No hero or no disc");
+    expect(disc.y).toBeGreaterThanOrEqual(hero.y);
+    expect(disc.y + disc.height).toBeLessThanOrEqual(hero.y + hero.height);
+    expect(disc.x).toBeGreaterThanOrEqual(hero.x);
+    expect(disc.x + disc.width).toBeLessThanOrEqual(hero.x + hero.width);
+  });
+}
+
+test("a phone still sees the scene's middle band, about x 329 to 871", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 800 });
+  await page.goto("/?sky=summer,15:00");
+  const band = await page.locator("svg.landscape").evaluate((svg) => {
+    const box = svg.getBoundingClientRect();
+    const matrix = (svg as SVGSVGElement).getScreenCTM();
+    if (!matrix) throw new Error("No screen matrix");
+    const toUser = (screenX: number) => (screenX - matrix.e) / matrix.a;
+    return { left: toUser(box.left), right: toUser(box.right) };
+  });
+  expect(Math.abs(band.left - 329)).toBeLessThanOrEqual(2);
+  expect(Math.abs(band.right - 871)).toBeLessThanOrEqual(2);
+});
