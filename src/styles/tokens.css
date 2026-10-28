@@ -61,7 +61,7 @@
   --live: #e5484d;
 }
 
-/* Exposes the tokens as Tailwind utilities: bg-background, text-foreground, text-muted, border-border, text-danger. */
+/* Exposes every token as a Tailwind colour: bg-background, text-accent, border-field-border and so on. */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
