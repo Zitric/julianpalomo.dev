@@ -11,7 +11,7 @@ export function MessageList({ messages, streamingId }: Props) {
       {messages.map((message) => (
         <li key={message.id}>
           {message.role === "user" ? (
-            <p className="ml-auto w-fit max-w-[85%] rounded-lg border border-border px-3 py-2 whitespace-pre-wrap break-words">
+            <p className="ml-auto w-fit max-w-[85%] rounded-[20px] rounded-br-[6px] bg-user px-4 py-2.5 whitespace-pre-wrap break-words text-on-user">
               {messageText(message.parts)}
             </p>
           ) : (

@@ -25,6 +25,16 @@ Tailwind, `tokens.css` and `fonts.css`; `src/routes/__root.tsx` links `app.css`.
 - **Contrast is tested.** `tests/unit/tokens.test.ts` reads `tokens.css` and checks each pair on screen against WCAG AA in both themes (4.5:1 for text, 3:1 for field borders), and that the two dark blocks match. A new pair gets a line in its `pairs` list; a failing pair changes the value, and the `DESIGN.md` table with it.
 - Fields (the composer, form inputs) are outlined in `field-border`, which reaches 3:1; `border` is for chips and dividers only.
 
+## Focus
+
+- `app.css` gives every `:focus-visible` element a 3px `accent` outline 2px away (`DESIGN.md` section 15). Never remove it without a replacement.
+- A field shows focus on its box instead: the border turns `accent` with a 4px `ring-accent/22` glow, and the field keeps a transparent 2px outline, which is what Windows high-contrast mode paints when it drops the glow. `src/components/chat/Composer.tsx` is the exemplar.
+
+## Shared pieces live in `src/components/ui/`
+
+- Small, typed and feature-free. `IconButton` is a round, flat, 44px icon-only button with a required `label` (its accessible name) and a `look`; its press scale (0.92 over 80ms) runs only under `motion-safe`.
+- A piece, or a new look of one, is added with its first caller, not ahead of it.
+
 ## Markup
 
 - Tailwind utilities only. No inline `style` except genuinely dynamic values.
@@ -32,4 +42,4 @@ Tailwind, `tokens.css` and `fonts.css`; `src/routes/__root.tsx` links `app.css`.
 - Semantic elements first (`main`, `h1`, `nav`, `button`); the e2e test finds the page by role (`tests/e2e/home.spec.ts`).
 - The layout works at 375px wide (small phone) before anything else.
 
-If `tokens.css` or `app.css` change shape, update this rule.
+If `tokens.css`, `fonts.css`, `app.css` or `src/components/ui/` change shape, update this rule.

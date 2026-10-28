@@ -1,3 +1,11 @@
 @import "tailwindcss";
 @import "./tokens.css";
 @import "./fonts.css";
+
+/* The focus ring on every interactive element: 3px of accent, 2px away (DESIGN.md section 15). */
+@layer base {
+  :focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}

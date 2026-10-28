@@ -10,7 +10,7 @@ they are the source of truth. The decision record is
 [`docs/adr/2026-10-28-visual-direction.md`](docs/adr/2026-10-28-visual-direction.md).
 
 **Status:** agreed with Julian on 28 October 2026. Until the epic's issues are
-closed, the live site is still the plain page from phase 4.
+closed, the live site shows only the parts already built.
 
 ## Contents
 
