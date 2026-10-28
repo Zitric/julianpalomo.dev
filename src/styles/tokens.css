@@ -2,35 +2,63 @@
  * Colour tokens: the only place colours are defined.
  * Light is the default. Dark follows the OS, and `data-theme` on <html> will
  * override either way once a theme toggle exists.
+ * tests/unit/tokens.test.ts measures every text pair against WCAG AA.
  */
 
 :root {
   color-scheme: light;
-  --background: oklch(98.5% 0 0);
-  --foreground: oklch(21% 0 0);
-  --muted: oklch(46% 0 0);
-  --border: oklch(87% 0 0);
-  --danger: oklch(50% 0.19 27);
+  --background: #f6f8f3;
+  --foreground: #13201a;
+  --muted: #4f5e55;
+  --border: #dce5da;
+  --accent: #2b6f4a;
+  --on-accent: #ffffff;
+  --tint: #e6f0e6;
+  --field: #ffffff;
+  --field-border: #7f9184;
+  --user: #2b6f4a;
+  --on-user: #ffffff;
+  --glass: rgb(246 248 243 / 86%);
+  --danger: #b7191c;
+  --live: #e5484d;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --background: oklch(16% 0 0);
-    --foreground: oklch(96% 0 0);
-    --muted: oklch(72% 0 0);
-    --border: oklch(34% 0 0);
-    --danger: oklch(72% 0.17 27);
+    --background: #0e1511;
+    --foreground: #e8efe9;
+    --muted: #9eb0a4;
+    --border: #24332a;
+    --accent: #7fcb98;
+    --on-accent: #0e1511;
+    --tint: #18241d;
+    --field: #121b16;
+    --field-border: #587060;
+    --user: #2b6f4a;
+    --on-user: #ffffff;
+    --glass: rgb(14 21 17 / 80%);
+    --danger: #fd7468;
+    --live: #e5484d;
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --background: oklch(16% 0 0);
-  --foreground: oklch(96% 0 0);
-  --muted: oklch(72% 0 0);
-  --border: oklch(34% 0 0);
-  --danger: oklch(72% 0.17 27);
+  --background: #0e1511;
+  --foreground: #e8efe9;
+  --muted: #9eb0a4;
+  --border: #24332a;
+  --accent: #7fcb98;
+  --on-accent: #0e1511;
+  --tint: #18241d;
+  --field: #121b16;
+  --field-border: #587060;
+  --user: #2b6f4a;
+  --on-user: #ffffff;
+  --glass: rgb(14 21 17 / 80%);
+  --danger: #fd7468;
+  --live: #e5484d;
 }
 
 /* Exposes the tokens as Tailwind utilities: bg-background, text-foreground, text-muted, border-border, text-danger. */
@@ -39,5 +67,14 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-tint: var(--tint);
+  --color-field: var(--field);
+  --color-field-border: var(--field-border);
+  --color-user: var(--user);
+  --color-on-user: var(--on-user);
+  --color-glass: var(--glass);
   --color-danger: var(--danger);
+  --color-live: var(--live);
 }
