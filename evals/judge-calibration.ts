@@ -30,7 +30,7 @@ export const CALIBRATION_ITEMS: readonly CalibrationItem[] = [
   {
     id: "oms-lead-technical-lead",
     claimIds: ["oms-lead"],
-    sentence: "At Orders Made Simple he was the technical lead for a team of four developers.",
+    sentence: "At Orders Made Simple he was the technical lead in a team of four developers.",
     language: "en",
     expected: "supported",
   },

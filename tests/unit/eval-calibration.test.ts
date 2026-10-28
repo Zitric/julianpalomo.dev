@@ -110,7 +110,7 @@ describe("runCalibration", () => {
     expect(results.map((result) => result.id)).toEqual(CALIBRATION_ITEMS.map((entry) => entry.id));
     const managed = inputs.find((input) => input.answer.startsWith("Julian managed"));
     expect(managed?.answer).toBe(`${item.sentence} [[oms-lead]]`);
-    expect(managed?.claims[0]?.text).toContain("Technical lead for a team of 4 developers");
+    expect(managed?.claims[0]?.text).toContain("Technical lead in a team of 4 developers");
     const none = inputs.find((input) => input.claims.length === 0);
     expect(none?.answer).toBe("The claims don't cover that; you can ask Julian on LinkedIn.");
   });
