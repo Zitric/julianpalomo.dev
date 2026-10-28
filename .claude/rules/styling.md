@@ -37,6 +37,7 @@ Tailwind, `tokens.css`, `fonts.css`, `landscape.css` and `cow.css`;
 - The second exception to "Tailwind utilities only": SVG parts, keyframes and `transform-box` rules, ported from the `<style>` of `docs/design/highland-scene.svg` and `herd-cow.svg`, with keyframes prefixed `landscape-`. It has no colour literals: `src/components/landscape/Landscape.tsx` puts every colour and level on the SVG root as a custom property, computed by `src/lib/scene/`, and switches parts with `data-` attributes (`data-season`, `data-snowy`, `data-haar`, `data-aurora`, `data-choreography`, `data-paused`).
 - Every animation and transition sits inside `prefers-reduced-motion: no-preference`, so with reduced motion nothing in the hero moves and colours change instantly. Loops animate only `transform` and `opacity`; colours transition over 1.1s, and with the timings of `DESIGN.md` section 6 during a theme toggle.
 - `tests/unit/landscape-drawing.test.ts` renders the landscape and checks every shape against the reference, in order. Never redraw a part: copy it from the reference.
+- The particles (`src/components/landscape/Particles.tsx`) live there too: HTML elements in a size container over the hero, so `cqh` is the hero's height and a scene coordinate x sits at `50% + (x − 600) × 100cqh / 320`. Each particle's position, size, timing and colour arrive as custom properties computed by `src/lib/scene/particles.ts`. With reduced motion the layer isn't shown at all.
 
 ## The assistant cow's motion lives in `src/styles/cow.css`
 
