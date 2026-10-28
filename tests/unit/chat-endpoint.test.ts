@@ -156,7 +156,7 @@ describe("handleChat", () => {
     expect(deltas.join("")).toBe("Hello there");
   });
 
-  it("calls the model with the system prompt cached, low effort, the output cap and the three tools", async () => {
+  it("calls the model with the system prompt cached, medium effort, the output cap and the three tools", async () => {
     const model = new MockLanguageModelV4({ doStream: textAnswer });
     const response = await chat(chatRequest({ messages: [userMessage("Hi")] }), env, {
       createModel: () => model,
@@ -169,7 +169,7 @@ describe("handleChat", () => {
       content: SYSTEM_PROMPT,
       providerOptions: { anthropic: { cacheControl: { type: "ephemeral" } } },
     });
-    expect(call?.providerOptions).toEqual({ anthropic: { effort: "low" } });
+    expect(call?.providerOptions).toEqual({ anthropic: { effort: "medium" } });
     expect(call?.maxOutputTokens).toBe(2000);
     expect(call?.temperature).toBeUndefined();
     expect(call?.tools?.map((tool) => tool.name)).toEqual([
