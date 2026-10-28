@@ -12,9 +12,8 @@ export const MAX_OUTPUT_TOKENS = 2000;
 /** The most model calls one answer may take, tool calls included. */
 export const MAX_STEPS = 5;
 
-// `medium` is this model's default, but it is set explicitly so a change of
-// default can't change the answers without an eval run. Never add
+// Effort is set explicitly because this model defaults to `medium`. Never add
 // temperature, topP or topK: the model rejects non-default values.
 export const anthropicOptions = {
-  effort: "medium",
+  effort: "low",
 } as const satisfies AnthropicLanguageModelOptions;
