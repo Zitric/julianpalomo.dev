@@ -60,7 +60,7 @@ wrangler commands that change Cloudflare.
 - `src/lib/`: plain TypeScript modules, such as `site.ts`.
 - `src/lib/bot/`: the assistant: model settings, the system prompt, the read-only tools, the citation parser, demo mode, the daily limits and the chat logic. `src/routes/api/chat.ts` is its endpoint, `POST /api/chat`.
 - `migrations/`: D1 migrations for the daily limits. `pnpm db:migrate:local` applies them locally; only Julián applies them to production.
-- `src/components/`: React components, one folder per feature, such as `chat/` (the chat on the home page).
+- `src/components/`: React components, one folder per feature, such as `chat/` (the chat on the home page); shared pieces such as `IconButton` live in `ui/`.
 - `src/content/`: personal content, such as `claims.json`. It isn't MIT (`LICENSE`, section 2), and in `src/` only `src/lib/claims.ts` reads it.
 - `src/styles/tokens.css`: the only place colours are defined.
 - `evals/`: the evals: cases, code checks, the judge and its calibration, the runner and its report, run by `pnpm eval` with `vitest.evals.config.ts` (`.claude/rules/evals.md`).
@@ -73,6 +73,7 @@ wrangler commands that change Cloudflare.
 
 - `README.md`: what the project is, its status and the commands. Read first by outsiders.
 - `docs/architecture.md`: how a question is answered, step by step, with a diagram. Update it when a step changes.
+- `DESIGN.md`: how the site looks, moves and sounds, with reference artwork in `docs/design/`. A visual change starts there.
 - `docs/evals.md`: what the evals do, the thresholds and why, and a row per baseline. Add a row after every run that changes the prompt, the model or its settings; never edit one.
 - `docs/adr/README.md`: the index of decisions. Records are history; a change of mind is a new ADR.
 - `docs/tech-debt.md`: add a row when you take a shortcut.

@@ -13,11 +13,16 @@ export function AssistantMessage({ message, streaming }: Props) {
   const isDemo = message.metadata?.demo === true;
 
   return (
-    <article className="flex flex-col gap-2" aria-label="Answer">
+    <article
+      className="mr-auto flex w-fit max-w-[92%] flex-col gap-2 rounded-[20px] rounded-bl-[6px] bg-tint px-4 py-3"
+      aria-label="Answer"
+    >
       {isDemo && (
-        <p className="w-fit rounded border border-border px-1.5 text-xs text-muted">Demo</p>
+        <p className="w-fit rounded-full border border-border px-2 text-xs font-semibold text-muted">
+          Demo
+        </p>
       )}
-      {status && <p className="text-sm text-muted">{status}</p>}
+      {status && <p className="text-[12.5px] font-medium text-muted">{status}</p>}
       <p className="whitespace-pre-wrap break-words">
         {parts.map((part, index) =>
           part.type === "text" ? (
@@ -26,7 +31,7 @@ export function AssistantMessage({ message, streaming }: Props) {
             <span key={index}>{part.text}</span>
           ) : (
             // biome-ignore lint/suspicious/noArrayIndexKey: see above
-            <sup key={index} className="text-muted">
+            <sup key={index} className="font-semibold text-accent">
               [{part.number}]
             </sup>
           ),
@@ -37,7 +42,7 @@ export function AssistantMessage({ message, streaming }: Props) {
           {chips.map(({ number, source }) => (
             <li
               key={source.id}
-              className="rounded-full border border-border px-2.5 py-0.5 text-sm break-words"
+              className="rounded-full border-[1.5px] border-border bg-field px-3 py-1 text-[13px] font-medium break-words"
             >
               [{number}] {chipLabel(source)}
             </li>

@@ -1,5 +1,6 @@
 import { type FormEvent, type KeyboardEvent, type Ref, useId } from "react";
 import { MAX_VISITOR_TEXT } from "../../lib/bot/limits";
+import { IconButton } from "../ui/IconButton";
 
 type Props = {
   value: string;
@@ -40,45 +41,66 @@ export function Composer({ value, onChange, onSend, onStop, busy, ref }: Props) 
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-2">
-      <label htmlFor={inputId} className="text-sm font-medium">
+      <label htmlFor={inputId} className="text-[12.5px] font-semibold text-muted">
         Your question
       </label>
-      {/* readOnly, not disabled, while an answer streams: a disabled field drops
-          keyboard focus to the page, and Send is blocked by canSend anyway. */}
-      <textarea
-        ref={ref}
-        id={inputId}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        onKeyDown={onKeyDown}
-        readOnly={busy}
-        rows={3}
-        aria-invalid={over > 0}
-        aria-describedby={counterId}
-        className="w-full resize-y rounded-lg border border-border bg-background px-3 py-2"
-      />
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p id={counterId} className={`text-sm ${counterClass}`}>
-          {counterText}
-        </p>
+      {/* The box, not the textarea, shows focus: its border turns accent with a
+          glow, in place of the outline ring. */}
+      <div className="flex items-end gap-2 rounded-[24px] border-2 border-field-border bg-field p-1.5 pl-4 focus-within:border-accent focus-within:ring-4 focus-within:ring-accent/22">
+        {/* readOnly, not disabled, while an answer streams: a disabled field drops
+            keyboard focus to the page, and Send is blocked by canSend anyway.
+            The transparent outline is what Windows high-contrast mode paints
+            when it drops the glow. */}
+        <textarea
+          ref={ref}
+          id={inputId}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          onKeyDown={onKeyDown}
+          readOnly={busy}
+          rows={2}
+          aria-invalid={over > 0}
+          aria-describedby={counterId}
+          className="min-w-0 flex-1 resize-none self-center bg-transparent py-2 text-base focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-transparent"
+        />
         {busy ? (
-          <button
-            type="button"
-            onClick={onStop}
-            className="rounded-lg border border-border px-4 py-1.5"
-          >
-            Stop
-          </button>
+          <IconButton look="accent" label="Stop" onClick={onStop}>
+            <StopIcon />
+          </IconButton>
         ) : (
-          <button
-            type="submit"
-            disabled={!canSend}
-            className="rounded-lg border border-border px-4 py-1.5 disabled:text-muted"
-          >
-            Send
-          </button>
+          <IconButton look="accent" label="Send" type="submit" disabled={!canSend}>
+            <SendIcon />
+          </IconButton>
         )}
       </div>
+      <p id={counterId} className={`text-[12.5px] ${counterClass}`}>
+        {counterText}
+      </p>
     </form>
+  );
+}
+
+function SendIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="size-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 19V5M5 12l7-7 7 7" />
+    </svg>
+  );
+}
+
+function StopIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="currentColor">
+      <rect x="4" y="4" width="16" height="16" rx="3" />
+    </svg>
   );
 }
