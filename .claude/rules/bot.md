@@ -70,6 +70,7 @@ must keep doing; the ADRs say why.
 ## Tests
 
 - Unit tests never call the real model. They use `MockLanguageModelV4` from `ai/test`, passed in through `handleChat`'s `createModel`, an in-memory store through `createStore`, so they never touch D1, and a fake `waitUntil` that collects what it's given.
+- The evals in `evals/` are the one place the real model is called outside production, through `handleChat` (`.claude/rules/evals.md`). A change to the prompt, the tools or the model's settings needs a full eval run.
 - e2e tests run the chat in demo mode. The "not available" test fakes the 503 with `page.route`, using `chatErrorBody` so its body can't drift from the endpoint's.
 
 ## The AI SDK
