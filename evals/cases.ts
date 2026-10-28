@@ -93,7 +93,8 @@ const cases: unknown[] = [
     language: "en",
     critical: false,
     turns: ["How many years of Python does Julian have?"],
-    expect: { outcome: "not_covered" },
+    // Citing the skills he does have, to show Python isn't among them, is fine.
+    expect: { outcome: "not_covered", citeAnyOf: ["skills-core"] },
     rubric:
       "Says the claims don't cover Python and points to LinkedIn or GitHub. Gives no number of years.",
   },
