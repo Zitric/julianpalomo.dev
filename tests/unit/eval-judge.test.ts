@@ -10,6 +10,7 @@ import {
   judgeChecks,
   judgeCostMicroUsd,
   parseJudgeVerdict,
+  tidySentences,
 } from "../../evals/judge";
 import { JUDGE_PROMPT } from "../../evals/judge-prompt";
 
@@ -197,6 +198,44 @@ describe("judgeAnswer", () => {
     });
   });
 
+  it("returns the verdict without a trailing marker-only entry, merged into the sentence before", async () => {
+    const extra = {
+      ...verdict,
+      sentences: [
+        ...verdict.sentences,
+        { sentence: "[[oms-lead]]", verdict: "not_a_claim", claimIds: [], reason: "A marker." },
+        { sentence: "", verdict: "not_a_claim", claimIds: [], reason: "placeholder" },
+      ],
+    };
+    const outcome = await judgeAnswer(input, mockJudge(JSON.stringify(extra)));
+    expect(outcome.status === "judged" && outcome.verdict.sentences).toEqual([
+      {
+        ...verdict.sentences[0],
+        sentence: "He was the technical lead for a team of four developers. [[oms-lead]]",
+      },
+    ]);
+  });
+
+  it("still turns a merged marker's claim it wasn't given into an error", async () => {
+    const extra = {
+      ...verdict,
+      sentences: [
+        ...verdict.sentences,
+        {
+          sentence: "[[cazoo-role]]",
+          verdict: "not_a_claim",
+          claimIds: ["cazoo-role"],
+          reason: "",
+        },
+      ],
+    };
+    const outcome = await judgeAnswer(input, mockJudge(JSON.stringify(extra)));
+    expect(outcome).toMatchObject({
+      status: "error",
+      error: "the judge cited claims it wasn't given: cazoo-role",
+    });
+  });
+
   it("turns a safety block into an error", async () => {
     const outcome = await judgeAnswer(input, mockJudge(JSON.stringify(verdict), "content-filter"));
     expect(outcome).toMatchObject({
@@ -278,5 +317,57 @@ describe("judgeCostMicroUsd", () => {
   it("charges cache writes above the input price and reads at it, rounded up", () => {
     // 1 write at $2.50 and 1 read at $2 per million: 4.5 micro-dollars, rounded up.
     expect(judgeCostMicroUsd({ input: 0, output: 0, cacheWrite: 1, cacheRead: 1 })).toBe(5);
+  });
+});
+
+describe("tidySentences", () => {
+  const said = {
+    sentence: "Yes, Playwright is one of his testing skills.",
+    verdict: "supported" as const,
+    claimIds: ["skills-testing"],
+    reason: "The claim lists Playwright.",
+  };
+  const extra = (sentence: string, claimIds: string[] = []) => ({
+    sentence,
+    verdict: "not_a_claim" as const,
+    claimIds,
+    reason: "placeholder",
+  });
+
+  it("drops an empty sentence", () => {
+    expect(tidySentences([said, extra("")])).toEqual([said]);
+  });
+
+  it("drops a whitespace-only sentence", () => {
+    expect(tidySentences([extra(" \n\t "), said])).toEqual([said]);
+  });
+
+  it("merges a marker-only sentence into the one before, text and claim ids, once each", () => {
+    expect(
+      tidySentences([
+        said,
+        extra(" [[skills-testing]] [[skills-tools]] ", ["skills-testing", "skills-tools"]),
+      ]),
+    ).toEqual([
+      {
+        ...said,
+        sentence:
+          "Yes, Playwright is one of his testing skills. [[skills-testing]] [[skills-tools]]",
+        claimIds: ["skills-testing", "skills-tools"],
+      },
+    ]);
+  });
+
+  it("drops a marker-only sentence that comes first", () => {
+    expect(tidySentences([extra("[[skills-testing]]"), said])).toEqual([said]);
+  });
+
+  it("leaves nothing when every entry is empty or markers only", () => {
+    expect(tidySentences([extra(""), extra("[[skills-testing]]"), extra("  ")])).toEqual([]);
+  });
+
+  it("keeps a sentence with any other text as it is, markers and all", () => {
+    const withText = extra("See [[skills-testing]].");
+    expect(tidySentences([said, withText])).toEqual([said, withText]);
   });
 });

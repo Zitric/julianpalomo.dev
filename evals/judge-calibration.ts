@@ -163,7 +163,10 @@ export type CalibrationResult = {
   expected: Verdict;
   /** The verdict of each sentence the judge returned, in order. */
   verdicts: Verdict[];
-  /** The sentences as the judge split them, so a wrong verdict can be traced to its text. */
+  /**
+   * The sentences as the judge split them, after `tidySentences`, so a wrong
+   * verdict can be traced to its text.
+   */
   sentences: { sentence: string; verdict: Verdict; reason: string }[];
   /** Why it failed, in one line; empty when it passed. */
   reason: string;

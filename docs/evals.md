@@ -24,7 +24,10 @@ answer is worse than "I don't know".
    citations, links, contact details, Markdown, forbidden patterns. Then the
    judge reads every sentence against the claims the tools returned and says
    whether it is supported, overstated or unsupported, whether the answer is
-   in the right language and whether it meets the case's rubric.
+   in the right language and whether it meets the case's rubric. Before its
+   verdicts count, empty "sentences" and ones that are only citation markers,
+   which the judge sometimes returns, are dropped or joined to the sentence
+   before: they state nothing, but would otherwise fail a calibration item.
 4. **Reports a score and a cost.** A run passes when every critical case
    passes every time and at least 90% of all runs pass. It stops at $2 of
    estimated cost. A run that hit a provider error makes the whole run
