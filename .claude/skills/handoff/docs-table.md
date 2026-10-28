@@ -11,6 +11,7 @@ it: when a change doesn't obviously fit a row, apply the test directly.
 | `.claude/rules/*.md`                                       | code a rule describes changed: a file moved or was renamed (check the rule's `paths:` too), an exemplar it names changed shape.      |
 | `.claude/skills/*`, `.claude/hooks/*`, `.claude/README.md` | a procedure, a hook pattern or the setup itself changed. `.claude/README.md` lists every file in `.claude/`.                         |
 | `docs/adr/`                                                | a decision was made that shapes the project. Add a new ADR; never rewrite an accepted one. Update the index in `docs/adr/README.md`. |
+| `DESIGN.md`, `docs/design/`                                | a colour, font, layout, animation, sound or any other visible behaviour changed. The design is decided there first.                  |
 | `docs/tech-debt.md`                                        | a shortcut was taken on purpose, or an existing row was paid off (update its status; don't delete it).                               |
 
 If a doc is added or removed, update this table.

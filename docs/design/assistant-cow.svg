@@ -1,0 +1,93 @@
+<!-- Reference artwork: the assistant, a Highland cow (DESIGN.md, "The assistant"). Classes: tilt, jaw, talk, licks/lick-r/lick-l/lick-mouth. The idle loop is on here. -->
+<svg xmlns="http://www.w3.org/2000/svg" class="cow cow-idle" viewBox="5 26 190 150" width="380" height="300" role="img" aria-label="Highland cow"><style>.cow{--horn:#D9B98A;--horn-hi:#F2DEBC;--ear:#6E3410;--face:#8E461A;--fringe:#B5662E;--fringe-hi:#D0904F;--strand:#6E3410;--muzzle:#C98A55;--chin:#B9784A;--pad:#EBC6A0;--nostril:#6B3A1E;--mouth:#5A1A16;--tongue:#E48A8A;--tongue-dark:#C96B70}
+.cow .tilt,.cow .lick-r,.cow .lick-l{transform-box:view-box}
+.cow .tilt{transform-origin:100px 130px}
+.cow .lick-r{transform-origin:104px 148px}
+.cow .lick-l{transform-origin:96px 148px}
+.cow-talk .talk{animation:talk 1.8s step-end infinite}
+.cow-lick .lick-r{animation:lickr 5s ease-in-out infinite}
+.cow-lick .lick-l{animation:lickl 5s ease-in-out infinite}
+.cow-lick .lick-mouth{animation:lickmouth 5s step-end infinite}
+.cow-tilt .tilt{animation:tilt 4s ease-in-out infinite}
+.cow-idle .tilt{animation:idle 12s ease-in-out infinite}
+.cow-idle .lick-r{animation:idlelickr 12s ease-in-out infinite}
+.cow-idle .lick-l{animation:idlelickl 12s ease-in-out infinite}
+.cow-idle .lick-mouth{animation:idlemouth 12s step-end infinite}
+@keyframes idlelickr{0%,44%{transform:scale(0)}48%,54%{transform:scale(1)}58%,100%{transform:scale(0)}}
+@keyframes idlelickl{0%,76%{transform:scale(0)}80%,86%{transform:scale(1)}90%,100%{transform:scale(0)}}
+@keyframes idlemouth{0%{opacity:0}43%{opacity:1}59%{opacity:0}75%{opacity:1}91%{opacity:0}100%{opacity:0}}
+.cow-think .tilt{animation:think 2.4s ease-in-out infinite}
+.cow .jaw{transform-box:view-box}
+.cow-chew .jaw{animation:chew .55s ease-in-out infinite alternate}
+@keyframes chew{from{transform:translate(-2px,0)}to{transform:translate(2px,2px)}}
+@keyframes talk{0%{opacity:0}8%{opacity:1}20%{opacity:0}28%{opacity:1}44%{opacity:0}52%{opacity:1}60%{opacity:0}70%{opacity:1}82%{opacity:0}100%{opacity:0}}
+@keyframes lickr{0%,8%{transform:scale(0)}18%,32%{transform:scale(1)}42%,100%{transform:scale(0)}}
+@keyframes lickl{0%,50%{transform:scale(0)}60%,74%{transform:scale(1)}84%,100%{transform:scale(0)}}
+@keyframes lickmouth{0%{opacity:0}7%{opacity:1}43%{opacity:0}49%{opacity:1}85%{opacity:0}100%{opacity:0}}
+@keyframes tilt{0%,12%{transform:rotate(0deg)}28%,44%{transform:rotate(-10deg)}62%,78%{transform:rotate(10deg)}94%,100%{transform:rotate(0deg)}}
+@keyframes idle{0%,14%{transform:rotate(0deg)}18%,26%{transform:rotate(-7deg)}30%,62%{transform:rotate(0deg)}66%,70%{transform:rotate(6deg)}74%,100%{transform:rotate(0deg)}}
+@keyframes think{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(-4deg)}}
+</style><g class="tilt">
+<g transform="translate(0 16)">
+<path d="M74 60 L42 58 Q32 57 28 48 L15 20 Q13 16 12 21 L20 56 Q24 74 42 74 L72 78 Z" fill="var(--horn)"></path>
+<path d="M126 60 L158 58 Q168 57 172 48 L185 20 Q187 16 188 21 L180 56 Q176 74 158 74 L128 78 Z" fill="var(--horn)"></path>
+<path d="M68 61 L44 60 Q34 59 30 50 L19 26" fill="none" stroke="var(--horn-hi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M132 61 L156 60 Q166 59 170 50 L181 26" fill="none" stroke="var(--horn-hi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+</g>
+<path d="M68 80 C 50 76 36 88 40 102 C 42 110 46 104 48 114 C 52 106 56 116 60 108 C 64 114 68 104 72 102 Z" fill="var(--ear)"></path>
+<path d="M132 80 C 150 76 164 88 160 102 C 158 110 154 104 152 114 C 148 106 144 116 140 108 C 136 114 132 104 128 102 Z" fill="var(--ear)"></path>
+<path d="M64 78 C 72 64 128 64 136 78 C 142 98 138 118 128 136 C 120 150 80 150 72 136 C 62 118 58 98 64 78 Z" fill="var(--face)"></path>
+<path d="M75 139 L71 144 L79 143 Z M125 139 L129 144 L121 143 Z" fill="var(--face)"></path>
+<g class="jaw"><path d="M90 155 L93 164 L97 159 L100 167 L103 159 L107 164 L110 155 C 104 159 96 159 90 155 Z" fill="var(--face)"></path>
+<path d="M84 140 C 90 148 110 148 116 140 C 118 152 110 158 100 158 C 90 158 82 152 84 140 Z" fill="var(--chin)"></path></g>
+<path d="M54 92 C 52 82 55 75 59 71 L57 67 L65 66 C 67 61 71 58 75 56 L74 53 L82 53 C 85 50 89 49 93 49 L94 46 L100 48 C 104 46 108 47 112 49 L116 47 L118 51 C 123 53 127 57 131 61 L137 61 L137 67 C 142 72 146 80 146 92 C 146 100 142 106 138 110 L62 110 C 58 106 54 100 54 92 Z" fill="var(--fringe)"></path>
+<path d="M84 54 C 82 50 79 49 75 49 C 78 51 80 53 80 57 Z" fill="var(--fringe-hi)"></path>
+<path d="M112 52 C 113 48 116 46 120 46 C 117 48 116 51 116 55 Z" fill="var(--fringe-hi)"></path>
+<path d="M98 50 C 97 46 98 43 101 41 C 100 44 101 47 103 49 Z" fill="var(--fringe)"></path>
+<path d="M66 64 C 63 62 60 62 57 63 C 60 64 61 66 62 69 Z" fill="var(--fringe)"></path>
+<path d="M134 62 C 137 60 140 60 143 62 C 140 63 139 65 138 68 Z" fill="var(--fringe)"></path>
+<path d="M52 86 C 50 98 50 106 43 116 C 56 112 60 102 62 92 Z" fill="var(--fringe-hi)"></path>
+<path d="M148 86 C 150 98 150 106 157 116 C 144 112 140 102 138 92 Z" fill="var(--fringe-hi)"></path>
+<path d="M58 78 C 56 94 58 104 51 115 C 63 111 67 100 69 86 Z" fill="var(--fringe)"></path>
+<path d="M64 68 C 62 90 64 102 57 116 C 69 111 73 98 75 76 Z" fill="var(--fringe-hi)"></path>
+<path d="M73 60 C 71 86 75 104 66 122 C 81 115 85 96 85 64 Z" fill="var(--fringe)"></path>
+<path d="M82 55 C 82 82 86 102 92 124 C 96 104 96 82 95 55 Z" fill="var(--fringe-hi)"></path>
+<path d="M92 53 C 90 80 94 104 84 128 C 101 119 105 94 105 54 Z" fill="var(--fringe)"></path>
+<path d="M100 53 C 102 82 104 104 117 126 C 117 102 114 78 113 54 Z" fill="var(--fringe-hi)"></path>
+<path d="M110 54 C 110 82 114 102 108 122 C 123 111 125 86 123 57 Z" fill="var(--fringe)"></path>
+<path d="M120 59 C 122 86 124 104 135 120 C 135 98 134 82 131 64 Z" fill="var(--fringe-hi)"></path>
+<path d="M128 66 C 132 88 136 100 147 112 C 145 94 142 82 139 72 Z" fill="var(--fringe)"></path>
+<path d="M98 58 C 90 72 80 86 69 92 C 86 92 97 80 104 63 Z" fill="var(--fringe-hi)"></path>
+<path d="M106 58 C 112 70 121 78 132 80 C 123 72 117 63 112 56 Z" fill="var(--fringe-hi)"></path>
+<path d="M66 122 C 62 125 58 125 54 122 C 58 121 61 119 63 116 Z" fill="var(--fringe)"></path>
+<path d="M84 128 C 81 132 77 133 73 131 C 77 129 79 126 80 122 Z" fill="var(--fringe-hi)"></path>
+<path d="M92 124 C 95 129 99 130 103 129 C 99 127 97 124 96 120 Z" fill="var(--fringe)"></path>
+<path d="M117 126 C 121 129 125 129 129 127 C 125 126 122 123 121 119 Z" fill="var(--fringe-hi)"></path>
+<path d="M108 122 C 105 126 101 127 97 126 C 101 124 103 121 104 117 Z" fill="var(--fringe-hi)"></path>
+<path d="M135 120 C 133 124 129 126 125 125 C 129 123 131 120 132 116 Z" fill="var(--fringe)"></path>
+<path d="M147 112 C 151 115 155 115 159 113 C 155 112 152 110 150 106 Z" fill="var(--fringe-hi)"></path>
+<path d="M62 80 C 60 94 60 104 56 112 M77 70 C 76 90 77 102 72 115 M89 64 C 89 86 91 102 90 117 M118 66 C 119 86 121 102 126 115 M135 76 C 137 90 139 100 143 108 M98 64 C 92 76 84 86 76 90" fill="none" stroke="var(--strand)" stroke-width="1.6" stroke-linecap="round"></path>
+<path d="M78 122 C 78 110 122 110 122 122 C 124 136 114 143 100 143 C 86 143 76 136 78 122 Z" fill="var(--muzzle)"></path>
+<path d="M86 121 C 86 114 114 114 114 121 C 116 129 108 133 100 133 C 92 133 84 129 86 121 Z" fill="var(--pad)"></path>
+<path d="M89 124 q4 -4 8 0" fill="none" stroke="var(--nostril)" stroke-width="2.4" stroke-linecap="round"></path>
+<path d="M103 124 q4 -4 8 0" fill="none" stroke="var(--nostril)" stroke-width="2.4" stroke-linecap="round"></path>
+<g class="jaw"><path d="M89 146 Q100 150 111 146" fill="none" stroke="var(--strand)" stroke-width="1.8" stroke-linecap="round"></path></g>
+<g class="talk" opacity="0">
+<path d="M88 145 C 92 158 108 158 112 145 C 106 148 94 148 88 145 Z" fill="var(--mouth)"></path>
+<path d="M92 151 C 96 156 104 156 108 151 C 104 149 96 149 92 151 Z" fill="var(--tongue)"></path>
+</g>
+<g class="licks">
+<g class="lick-mouth" opacity="0">
+<path d="M90 145 C 94 154 106 154 110 145 C 104 148 96 148 90 145 Z" fill="var(--mouth)"></path>
+</g>
+<g class="lick-r" transform="scale(0)">
+<path d="M100 146 C 110 148 122 143 128 131 C 135 135 135 150 123 156 C 112 161 102 156 98 150 Z" fill="var(--tongue)"></path>
+<path d="M103 150 C 112 151 121 146 127 137" fill="none" stroke="var(--tongue-dark)" stroke-width="1.8" stroke-linecap="round"></path>
+</g>
+<g class="lick-l" transform="scale(0)">
+<path d="M100 146 C 90 148 78 143 72 131 C 65 135 65 150 77 156 C 88 161 98 156 102 150 Z" fill="var(--tongue)"></path>
+<path d="M97 150 C 88 151 79 146 73 137" fill="none" stroke="var(--tongue-dark)" stroke-width="1.8" stroke-linecap="round"></path>
+</g>
+</g>
+</g>
+</svg>

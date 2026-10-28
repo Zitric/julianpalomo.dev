@@ -1,0 +1,442 @@
+{
+  "_note": "Reference palettes for the landscape (DESIGN.md). skyKeys are the five moments of the day; land is per season, day and night, mixed by the land light of the moment. hourPlanExample is the mock-up's plan for a day with sunrise 07:00 and sunset 18:00; the site maps moments to the sun's real elevation instead.",
+  "skyKeys": {
+    "night": {
+      "sky": "#0E1A24",
+      "low": "#1C2C38",
+      "cloud": "#22313B",
+      "cloud2": "#18242C",
+      "sun": "#EE8A45",
+      "loch": "#142530",
+      "lochhi": "#C9D3D6",
+      "haze": "#1E2E38",
+      "fog": "#2A3A44",
+      "snow": "#AFC0C8",
+      "tree": "#0C1812",
+      "walls": "#3A4650",
+      "roof": "#18222A",
+      "window": "#F4C95D",
+      "smoke": "#4A5A64",
+      "stone": "#2A3338",
+      "rock": "#0F1A1F",
+      "grey": "#0B1218",
+      "tint": 0.0
+    },
+    "blue": {
+      "sky": "#26324C",
+      "low": "#6A5A6E",
+      "cloud": "#3A4258",
+      "cloud2": "#2C3448",
+      "sun": "#EE8A45",
+      "loch": "#2E3A52",
+      "lochhi": "#E0C8C0",
+      "haze": "#3E4A60",
+      "fog": "#4A5466",
+      "snow": "#C6CCD8",
+      "tree": "#16221C",
+      "walls": "#5A6270",
+      "roof": "#22282E",
+      "window": "#F4C95D",
+      "smoke": "#6A7280",
+      "stone": "#40464E",
+      "rock": "#1C2430",
+      "grey": "#1A2028",
+      "tint": 0.06
+    },
+    "golden": {
+      "sky": "#A9B7CF",
+      "low": "#F5C49A",
+      "cloud": "#F4D6C4",
+      "cloud2": "#D9B4A6",
+      "sun": "#F29A4A",
+      "loch": "#E5B08F",
+      "lochhi": "#FFF1E0",
+      "haze": "#C7B2B2",
+      "fog": "#EAD9D0",
+      "snow": "#FBEFE6",
+      "tree": "#3A3A30",
+      "walls": "#EBD9C8",
+      "roof": "#4A4A50",
+      "window": "#F4C95D",
+      "smoke": "#E9D6CA",
+      "stone": "#9C8E80",
+      "rock": "#6A5E5A",
+      "grey": "#A8A4A8",
+      "tint": 0.12
+    },
+    "morning": {
+      "sky": "#BFD9E6",
+      "low": "#F2E6D0",
+      "cloud": "#F7F4EE",
+      "cloud2": "#E3E2DC",
+      "sun": "#F6C060",
+      "loch": "#C2D8DC",
+      "lochhi": "#FFFFFF",
+      "haze": "#C2D2D2",
+      "fog": "#EEF0EC",
+      "snow": "#FFFFFF",
+      "tree": "#2F4F3A",
+      "walls": "#F4F1EA",
+      "roof": "#4A5560",
+      "window": "#6F7F86",
+      "smoke": "#E9EEF0",
+      "stone": "#8C8A80",
+      "rock": "#5D6B66",
+      "grey": "#B8C2C6",
+      "tint": 0.03
+    },
+    "day": {
+      "sky": "#CFE4EC",
+      "low": "#EEF5F0",
+      "cloud": "#F7FAFB",
+      "cloud2": "#E3EAEC",
+      "sun": "#F4C95D",
+      "loch": "#B9D6DE",
+      "lochhi": "#FFFFFF",
+      "haze": "#BFD2D6",
+      "fog": "#EEF2F1",
+      "snow": "#FFFFFF",
+      "tree": "#2F4F3A",
+      "walls": "#F4F1EA",
+      "roof": "#4A5560",
+      "window": "#6F7F86",
+      "smoke": "#E9EEF0",
+      "stone": "#8C8A80",
+      "rock": "#5D6B66",
+      "grey": "#B8C2C6",
+      "tint": 0.0
+    }
+  },
+  "hourPlanExample": {
+    "0": {
+      "from": "night",
+      "to": "night",
+      "mix": 0,
+      "landLight": 0
+    },
+    "1": {
+      "from": "night",
+      "to": "night",
+      "mix": 0,
+      "landLight": 0
+    },
+    "2": {
+      "from": "night",
+      "to": "night",
+      "mix": 0,
+      "landLight": 0
+    },
+    "3": {
+      "from": "night",
+      "to": "night",
+      "mix": 0,
+      "landLight": 0
+    },
+    "4": {
+      "from": "night",
+      "to": "night",
+      "mix": 0,
+      "landLight": 0
+    },
+    "5": {
+      "from": "night",
+      "to": "blue",
+      "mix": 0.4,
+      "landLight": 0.05
+    },
+    "6": {
+      "from": "blue",
+      "to": "blue",
+      "mix": 0,
+      "landLight": 0.15
+    },
+    "7": {
+      "from": "golden",
+      "to": "golden",
+      "mix": 0,
+      "landLight": 0.6
+    },
+    "8": {
+      "from": "morning",
+      "to": "morning",
+      "mix": 0,
+      "landLight": 0.9
+    },
+    "9": {
+      "from": "morning",
+      "to": "day",
+      "mix": 0.6,
+      "landLight": 1
+    },
+    "10": {
+      "from": "day",
+      "to": "day",
+      "mix": 0,
+      "landLight": 1
+    },
+    "11": {
+      "from": "day",
+      "to": "day",
+      "mix": 0,
+      "landLight": 1
+    },
+    "12": {
+      "from": "day",
+      "to": "day",
+      "mix": 0,
+      "landLight": 1
+    },
+    "13": {
+      "from": "day",
+      "to": "day",
+      "mix": 0,
+      "landLight": 1
+    },
+    "14": {
+      "from": "day",
+      "to": "day",
+      "mix": 0,
+      "landLight": 1
+    },
+    "15": {
+      "from": "day",
+      "to": "day",
+      "mix": 0,
+      "landLight": 1
+    },
+    "16": {
+      "from": "day",
+      "to": "morning",
+      "mix": 0.6,
+      "landLight": 0.95
+    },
+    "17": {
+      "from": "morning",
+      "to": "golden",
+      "mix": 0.5,
+      "landLight": 0.8
+    },
+    "18": {
+      "from": "golden",
+      "to": "golden",
+      "mix": 0,
+      "landLight": 0.6
+    },
+    "19": {
+      "from": "blue",
+      "to": "blue",
+      "mix": 0,
+      "landLight": 0.15
+    },
+    "20": {
+      "from": "blue",
+      "to": "night",
+      "mix": 0.6,
+      "landLight": 0.05
+    },
+    "21": {
+      "from": "night",
+      "to": "night",
+      "mix": 0,
+      "landLight": 0
+    },
+    "22": {
+      "from": "night",
+      "to": "night",
+      "mix": 0,
+      "landLight": 0
+    },
+    "23": {
+      "from": "night",
+      "to": "night",
+      "mix": 0,
+      "landLight": 0
+    }
+  },
+  "land": {
+    "spring": {
+      "day": {
+        "far": "#8EA98C",
+        "mid": "#86B36E",
+        "near": "#5E9150",
+        "patch": "#E7C33A"
+      },
+      "night": {
+        "far": "#1E3029",
+        "mid": "#1B2E23",
+        "near": "#16281E",
+        "patch": "#5C5222"
+      }
+    },
+    "summer": {
+      "day": {
+        "far": "#7E9A84",
+        "mid": "#6C9A5E",
+        "near": "#3F6E3D",
+        "patch": "#9B6BA8"
+      },
+      "night": {
+        "far": "#1C2E28",
+        "mid": "#182B21",
+        "near": "#13241B",
+        "patch": "#3E2C47"
+      }
+    },
+    "autumn": {
+      "day": {
+        "far": "#8E8C6E",
+        "mid": "#8C8550",
+        "near": "#4F7D4E",
+        "patch": "#B86A3A"
+      },
+      "night": {
+        "far": "#252C24",
+        "mid": "#22281C",
+        "near": "#17281F",
+        "patch": "#5E3A24"
+      }
+    },
+    "winter": {
+      "day": {
+        "far": "#A7B4B6",
+        "mid": "#8FA39A",
+        "near": "#6F857B",
+        "patch": "#A08A6E"
+      },
+      "night": {
+        "far": "#2C3A3F",
+        "mid": "#213033",
+        "near": "#1A272A",
+        "patch": "#2E2A24"
+      }
+    }
+  },
+  "clouds": [
+    {
+      "id": "c1",
+      "y": 46,
+      "scale": 1.5,
+      "driftSeconds": 150,
+      "delaySeconds": -30
+    },
+    {
+      "id": "c2",
+      "y": 22,
+      "scale": 1.0,
+      "driftSeconds": 190,
+      "delaySeconds": -120
+    },
+    {
+      "id": "c3",
+      "y": 70,
+      "scale": 1.9,
+      "driftSeconds": 130,
+      "delaySeconds": -70
+    },
+    {
+      "id": "c4",
+      "y": 34,
+      "scale": 1.3,
+      "driftSeconds": 170,
+      "delaySeconds": -150
+    },
+    {
+      "id": "c5",
+      "y": 88,
+      "scale": 2.3,
+      "driftSeconds": 120,
+      "delaySeconds": -10
+    },
+    {
+      "id": "c6",
+      "y": 56,
+      "scale": 2.0,
+      "driftSeconds": 160,
+      "delaySeconds": -95
+    },
+    {
+      "id": "c7",
+      "y": 14,
+      "scale": 2.6,
+      "driftSeconds": 140,
+      "delaySeconds": -55
+    },
+    {
+      "id": "c8",
+      "y": 96,
+      "scale": 2.9,
+      "driftSeconds": 135,
+      "delaySeconds": -40
+    },
+    {
+      "id": "c9",
+      "y": 70,
+      "scale": 3.3,
+      "driftSeconds": 155,
+      "delaySeconds": -110
+    },
+    {
+      "id": "c10",
+      "y": 26,
+      "scale": 3.0,
+      "driftSeconds": 175,
+      "delaySeconds": -80
+    },
+    {
+      "id": "c11",
+      "y": 108,
+      "scale": 2.5,
+      "driftSeconds": 125,
+      "delaySeconds": -20
+    },
+    {
+      "id": "c12",
+      "y": 52,
+      "scale": 3.5,
+      "driftSeconds": 165,
+      "delaySeconds": -130
+    },
+    {
+      "id": "c13",
+      "y": 86,
+      "scale": 3.0,
+      "driftSeconds": 145,
+      "delaySeconds": -60
+    }
+  ],
+  "assistantCow": {
+    "horn": "#D9B98A",
+    "horn-hi": "#F2DEBC",
+    "ear": "#6E3410",
+    "face": "#8E461A",
+    "fringe": "#B5662E",
+    "fringe-hi": "#D0904F",
+    "strand": "#6E3410",
+    "muzzle": "#C98A55",
+    "chin": "#B9784A",
+    "pad": "#EBC6A0",
+    "nostril": "#6B3A1E",
+    "mouth": "#5A1A16",
+    "tongue": "#E48A8A",
+    "tongue-dark": "#C96B70"
+  },
+  "herdCow": {
+    "coat": "#B4612F",
+    "coatDark": "#8A4421",
+    "legs": "#7A3B1C",
+    "hooves": "#2A1A12",
+    "muzzle": "#D7A07C",
+    "horn": "#EFE3C2"
+  },
+  "particles": {
+    "leaf": ["#C8642B", "#D99A2B", "#8E3B1F"],
+    "leafDark": ["#A9562A", "#B88430", "#7A3A22"],
+    "petal": ["#F6D3DC", "#FFFFFF", "#F2B8C8"],
+    "snowflake": "#FFFFFF",
+    "snowflakeDark": "#D7E2E8",
+    "raindrop": "rgba(60,85,100,.6)",
+    "raindropDark": "rgba(200,220,230,.4)",
+    "midge": "#2A2A22",
+    "midgeDark": "#C9D3C0"
+  }
+}
