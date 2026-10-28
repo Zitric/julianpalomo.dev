@@ -30,8 +30,11 @@ blocks something, change course; don't look for another way to run it.
 
 - **GitHub issues are the spec.** One issue, one branch from an up-to-date `origin/main`, one PR whose body says `Closes #N`. The epic an issue belongs to holds the shared rules; read it too.
 - **One branch, one driver.** A branch is worked on by one session only; another session reads and comments on the PR.
-- **If the issue and the code disagree, ask** instead of choosing.
+- **Ask only what isn't decided.** The issue, its epic and any review of the PR are decisions: don't ask about them again. Ask, instead of choosing, when they contradict the code or leave a choice open.
+- **Plan on the issue.** Before implementing, post the plan as a comment on the issue (`gh issue comment`) and wait for an OK from Julián or from the cloud review on that issue.
 - Explore, plan, implement, then `/handoff` (checks, docs, commit, both reviewer subagents, change summary) and `/ship-pr` (push, PR, CI). `/implement-issue <N>` runs the whole loop.
+- **Act on PR reviews.** After a review of your PR, read it with `gh`, apply it, and reply on the PR with what you didn't apply and why.
+- **Eval budgets.** If the issue sets an eval budget, spend up to it without asking and report the cost in the PR.
 - Each commit typechecks and builds on its own. Subjects are short, lowercase and imperative ("add …", "fix …").
 
 ## 3. Commands
