@@ -44,6 +44,10 @@ describe("calibrationResult", () => {
       pass: true,
       expected: "overstated",
       verdicts: ["overstated", "overstated"],
+      sentences: [
+        { sentence: "A sentence.", verdict: "overstated", reason: "A reason." },
+        { sentence: "A sentence.", verdict: "overstated", reason: "A reason." },
+      ],
       reason: "",
       costMicroUsd: 900,
     });

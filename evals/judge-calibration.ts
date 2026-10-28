@@ -121,6 +121,8 @@ export type CalibrationResult = {
   expected: Verdict;
   /** The verdict of each sentence the judge returned, in order. */
   verdicts: Verdict[];
+  /** The sentences as the judge split them, so a wrong verdict can be traced to its text. */
+  sentences: { sentence: string; verdict: Verdict; reason: string }[];
   /** Why it failed, in one line; empty when it passed. */
   reason: string;
   costMicroUsd: number;
@@ -134,17 +136,29 @@ export type CalibrationResult = {
 export function calibrationResult(item: CalibrationItem, outcome: JudgeOutcome): CalibrationResult {
   const base = { id: item.id, expected: item.expected, costMicroUsd: outcome.costMicroUsd };
   if (outcome.status === "error") {
-    return { ...base, pass: false, verdicts: [], reason: `judge-error: ${outcome.error}` };
+    return {
+      ...base,
+      pass: false,
+      verdicts: [],
+      sentences: [],
+      reason: `judge-error: ${outcome.error}`,
+    };
   }
-  const verdicts = outcome.verdict.sentences.map((sentence) => sentence.verdict);
+  const sentences = outcome.verdict.sentences.map(({ sentence, verdict, reason }) => ({
+    sentence,
+    verdict,
+    reason,
+  }));
+  const verdicts = sentences.map((sentence) => sentence.verdict);
   if (verdicts.length === 0) {
-    return { ...base, pass: false, verdicts, reason: "the judge returned no sentences" };
+    return { ...base, pass: false, verdicts, sentences, reason: "the judge returned no sentences" };
   }
   const pass = verdicts.every((verdict) => verdict === item.expected);
   return {
     ...base,
     pass,
     verdicts,
+    sentences,
     reason: pass ? "" : `expected ${item.expected}, got ${verdicts.join(", ")}`,
   };
 }
