@@ -351,3 +351,18 @@ export function mixHex(a: string, b: string, t: number): string {
   );
   return `#${mixed.join("")}`.toUpperCase();
 }
+
+/**
+ * Colours the scene uses at every moment, from the reference SVG's own
+ * stylesheet (docs/design/highland-scene.svg and herd-cow.svg), which the
+ * palettes file doesn't list.
+ */
+export const sceneFixed = {
+  moon: "#E9E4D0",
+  star: "#F4F1E0",
+  shade: "#0B1A22",
+  golden: "#F29A4A",
+  auroraGreen: "#7FCB98",
+  auroraBlue: "#6FB8C9",
+  nostril: "#3A2418",
+} as const;

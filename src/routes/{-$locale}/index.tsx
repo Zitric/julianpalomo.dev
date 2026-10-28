@@ -1,7 +1,9 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { z } from "zod";
 import { Chat } from "../../components/chat/Chat";
 import { LanguageToggle } from "../../components/i18n/LanguageToggle";
 import { useLocale } from "../../components/i18n/useLocale";
+import { HeroLandscape } from "../../components/landscape/HeroLandscape";
 import { ThemeToggle } from "../../components/theme/ThemeToggle";
 import { localeFromParam } from "../../lib/i18n/locale";
 import { rootLanguage } from "../../lib/i18n/root-language";
@@ -15,6 +17,8 @@ export const Route = createFileRoute("/{-$locale}/")({
   params: {
     parse: ({ locale }) => (locale === undefined || locale === "es" ? { locale } : false),
   },
+  // `?sky=` sets the landscape on previews and in e2e (SCENE_OVERRIDE).
+  validateSearch: z.object({ sky: z.string().optional().catch(undefined) }),
   beforeLoad: ({ params }) => {
     if (params.locale !== undefined || rootLanguage() !== "es") return;
     // 302, never cached: it depends on the visitor's cookie and country. The
@@ -59,10 +63,12 @@ const chatCard =
 
 function Home() {
   const locale = useLocale();
+  const { sky } = Route.useSearch();
   return (
     <div className={page}>
       <header className={header}>
-        <div className="relative h-[230px] bg-tint lg:col-span-full lg:h-80">
+        <div className="relative h-[230px] overflow-hidden bg-tint lg:col-span-full lg:h-80">
+          <HeroLandscape skyParam={sky} />
           <div className="absolute inset-x-3 top-3 flex justify-end gap-2">
             <LanguageToggle />
             <ThemeToggle />

@@ -15,7 +15,7 @@
   // Previews have no API key, so the chat answers in demo mode there. Never set
   // BOT_DEMO at the top level: production has a key and ignores it anyway.
   "previews": {
-    "vars": { "BOT_DEMO": "1" }
+    "vars": { "BOT_DEMO": "1", "SCENE_OVERRIDE": "1" }
   },
   // Only for the e2e build (CLOUDFLARE_ENV=e2e in playwright.config.ts), never
   // deployed. An empty `secrets.required` keeps the Vite plugin from copying a
@@ -26,7 +26,7 @@
       // Empty so this environment never inherits, and never takes over, the
       // production custom domain.
       "routes": [],
-      "vars": { "BOT_DEMO": "1" },
+      "vars": { "BOT_DEMO": "1", "SCENE_OVERRIDE": "1" },
       "secrets": { "required": [] }
     }
   },
