@@ -20,3 +20,6 @@ CLAUDE.local.md
 
 # Branch diff written by the handoff skill for the reviewer subagents
 .diff-dump/
+
+# Eval results, one JSON file per run of pnpm eval
+evals/results/

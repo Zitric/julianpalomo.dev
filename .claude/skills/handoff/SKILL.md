@@ -16,6 +16,7 @@ pnpm test
 ```
 
 - Add `pnpm knip` when the change touches exports, `package.json` or `pnpm-lock.yaml`.
+- Add one full `pnpm eval` run, and its cost in the summary, when the change touches `evals/`, the prompt, the tools, the model's settings or a claim (`.claude/rules/evals.md`). It calls the real model.
 - Add `bash .claude/hooks/tests/run.sh` when anything in `.claude/hooks/` or `biome.json` changed.
 - `pnpm build` and `pnpm test:e2e` take minutes: only when the change touches routes, the build or CI, and ask first. Otherwise rely on CI's e2e job and say so.
 
