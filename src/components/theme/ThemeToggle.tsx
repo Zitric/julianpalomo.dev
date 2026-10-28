@@ -55,6 +55,7 @@ export function ThemeToggle() {
           fill="currentColor"
         >
           <mask id={maskId}>
+            {/* Mask luminance, not colours on screen: white keeps the disc, black cuts the crescent. */}
             <rect width="24" height="24" fill="white" />
             <circle cx="17" cy="7" r="6.5" fill="black" />
           </mask>
