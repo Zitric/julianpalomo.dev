@@ -1,5 +1,6 @@
 import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
-import { resolveTheme, serializeThemeCookie, type Theme } from "../../lib/theme";
+import { rememberChoice } from "../../lib/cookie";
+import { resolveTheme, THEME_COOKIE, type Theme } from "../../lib/theme";
 import { useNow } from "../clock/Clock";
 
 /**
@@ -58,8 +59,7 @@ export function ThemeDocument({ initialChoice, children }: Props) {
 
   const toggle = () => {
     const next = theme === "dark" ? "light" : "dark";
-    // biome-ignore lint/suspicious/noDocumentCookie: the Cookie Store API isn't in every browser the site supports; serializeThemeCookie builds the string and is unit-tested.
-    document.cookie = serializeThemeCookie(next, { secure: location.protocol === "https:" });
+    rememberChoice(THEME_COOKIE, next);
     setChoice(next);
     setChange({ kind: "toggle" });
   };

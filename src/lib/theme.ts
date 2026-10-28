@@ -17,17 +17,9 @@ export function resolveTheme({ choice, now }: { choice: Theme | null; now: numbe
 }
 
 export const THEME_COOKIE = "theme";
-const ONE_YEAR = 365 * 24 * 60 * 60;
 
 /** The `theme` cookie's value, or null when it's missing or isn't a theme. */
 export function parseThemeCookie(value: unknown): Theme | null {
   const parsed = themeSchema.safeParse(value);
   return parsed.success ? parsed.data : null;
-}
-
-/** A `document.cookie` assignment that remembers the choice for a year. */
-export function serializeThemeCookie(theme: Theme, { secure }: { secure: boolean }): string {
-  const attributes = [`${THEME_COOKIE}=${theme}`, `Max-Age=${ONE_YEAR}`, "Path=/", "SameSite=Lax"];
-  if (secure) attributes.push("Secure");
-  return attributes.join("; ");
 }
