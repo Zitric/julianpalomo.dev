@@ -23,8 +23,9 @@ test("rain 8 reaches the chip and the sky", async ({ page }) => {
     weather: { clouds: 5, rain: 8, wind: 2, snow: false, haar: false, temperatureC: 9 },
   });
   await page.goto("/");
-  await expect(chip(page)).toContainText("9°C · Heavy rain", { useInnerText: true });
-  await expect(chip(page)).toContainText("Glasgow · ", { useInnerText: true });
+  await expect(chip(page)).toHaveText(/^Glasgow · \d{2}:\d{2} · 9°C · Heavy rain$/, {
+    useInnerText: true,
+  });
   await expect(page.locator(".particle.rain")).toHaveCount(80);
   await expect(page.locator(".particle.snow")).toHaveCount(0);
 });
