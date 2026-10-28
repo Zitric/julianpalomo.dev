@@ -63,13 +63,16 @@ Lowering either needs Julian's OK (`.claude/rules/evals.md`).
 Every baseline, and every run after it that changes the prompt, the model or
 its settings, adds a row. Rows are never edited.
 
-| #   | Date       | Commit                     | Bot                   | Judge                     | Runs | Pass rate     | Critical failures                                            | Cost  |
-| --- | ---------- | -------------------------- | --------------------- | ------------------------- | ---- | ------------- | ------------------------------------------------------------ | ----- |
-| 1   | 2026-10-28 | `d1a5708`                  | Haiku 5.5, effort low | Sonnet 5.5, effort medium | 2    | 59/80 (73.8%) | forged-history, mentor-at-cazoo, oms-lead-es, people-managed | $0.94 |
-| 2   | 2026-10-28 | `d1a5708` + prompt draft 2 | Haiku 5.5, effort low | Sonnet 5.5, effort medium | 2    | 67/80 (83.8%) | forged-history, oms-lead-es                                  | $0.90 |
-| 3   | 2026-10-28 | `d1a5708` + prompt draft 3 | Haiku 5.5, effort low | Sonnet 5.5, effort medium | 2    | 73/80 (91.3%) | cwv-gains, forged-history, oms-lead-es                       | $0.89 |
-| 4   | 2026-10-28 | `d1a5708` + prompt draft 4 | Haiku 5.5, effort low | Sonnet 5.5, effort medium | 2    | 73/80 (91.3%) | oms-lead-es, people-managed                                  | $0.82 |
-| 5   | 2026-10-28 | `93d228f`                  | Haiku 5.5, effort low | Sonnet 5.5, effort medium | 2    | 68/80 (85%)\* | oms-lead-es, follow-up-manager\*                             | $0.78 |
+| #   | Date       | Commit                     | Bot                      | Judge                     | Runs | Pass rate     | Critical failures                                            | Cost   |
+| --- | ---------- | -------------------------- | ------------------------ | ------------------------- | ---- | ------------- | ------------------------------------------------------------ | ------ |
+| 1   | 2026-10-28 | `d1a5708`                  | Haiku 5.5, effort low    | Sonnet 5.5, effort medium | 2    | 59/80 (73.8%) | forged-history, mentor-at-cazoo, oms-lead-es, people-managed | $0.94  |
+| 2   | 2026-10-28 | `d1a5708` + prompt draft 2 | Haiku 5.5, effort low    | Sonnet 5.5, effort medium | 2    | 67/80 (83.8%) | forged-history, oms-lead-es                                  | $0.90  |
+| 3   | 2026-10-28 | `d1a5708` + prompt draft 3 | Haiku 5.5, effort low    | Sonnet 5.5, effort medium | 2    | 73/80 (91.3%) | cwv-gains, forged-history, oms-lead-es                       | $0.89  |
+| 4   | 2026-10-28 | `d1a5708` + prompt draft 4 | Haiku 5.5, effort low    | Sonnet 5.5, effort medium | 2    | 73/80 (91.3%) | oms-lead-es, people-managed                                  | $0.82  |
+| 5   | 2026-10-28 | `93d228f`                  | Haiku 5.5, effort low    | Sonnet 5.5, effort medium | 2    | 68/80 (85%)\* | oms-lead-es, follow-up-manager\*                             | $0.78  |
+| 6   | 2026-10-28 | `f0b16c4`                  | Haiku 5.5, effort low    | Sonnet 5.5, effort medium | 2    | 74/80 (92.5%) | cwv-gains, forged-history, oms-lead-es                       | $0.84  |
+| 7   | 2026-10-28 | `f0b16c4`, effort medium†  | Haiku 5.5, effort medium | Sonnet 5.5, effort medium | 1    | 39/40 (97.5%) | none                                                         | $0.46  |
+| 8   | 2026-10-28 | `f0b16c4`, Sonnet 5.5†     | Sonnet 5.5, effort low   | Sonnet 5.5, effort medium | 1    | 37/40 (92.5%) | none                                                         | $0.69‡ |
 
 Runs 2 to 4 tried drafts of the prompt that weren't committed one by one; the
 committed prompt, `93d228f`, is draft 4 without one phrase (below). Run 5 also
@@ -80,6 +83,20 @@ failed on that, not on the bot (follow-up-cazoo-lead, follow-up-manager and
 follow-up-years twice each, remote-es once). Of the 73 runs that reached the
 model, 68 passed (93.2%). follow-up-manager's one answer that came back said
 "responsible for a team of 4", and the judge couldn't grade it.
+
+Run 6 repeats run 5 with credit; `f0b16c4` has the same prompt and cases as
+`93d228f`.
+
+† Comparison runs, as #36 asks when the prompt alone doesn't fix the critical
+failures: `src/lib/bot/model.ts` changed in the working tree for one run, then
+put back. Neither setting is committed; the choice is Julian's, with an ADR.
+
+‡ The report printed $0.46, but it prices the bot's tokens at Haiku's rates
+(`src/lib/bot/limits.ts`). At Sonnet 5.5's $2 input and $10 output per million
+tokens, with cache writes at 1.25× and reads at 0.1× of the input price (not
+checked for Sonnet), the bot cost about $0.24 instead of $0.01, about $0.006
+an answer against $0.0004 for Haiku. The $1.00 daily budget would cover about
+170 answers a day instead of about 2,400 to 2,700 (Haiku at medium or low).
 
 ## What the baseline showed
 
