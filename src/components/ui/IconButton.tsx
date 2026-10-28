@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from "react";
 
-// Only the looks in use: add one (glass, tint) with its first caller.
-type Look = "accent";
+// Only the looks in use: add one (tint) with its first caller.
+type Look = "accent" | "glass";
 
 type Props = Omit<ComponentProps<"button">, "aria-label" | "children" | "className"> & {
   /** The accessible name: the button shows only an icon. */
@@ -16,6 +16,8 @@ const shape =
 
 const looks: Record<Look, string> = {
   accent: "bg-accent text-on-accent hover:brightness-110 disabled:opacity-50",
+  // For buttons that sit on the landscape.
+  glass: "bg-glass text-foreground backdrop-blur-[6px]",
 };
 
 /** A round, flat, icon-only button, 44px so it's easy to hit on touch. */

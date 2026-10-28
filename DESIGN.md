@@ -144,10 +144,10 @@ From top to bottom:
 
 1. **The hero** (230px tall): the landscape fills it edge to edge. On top of
    it, a row of controls 12px from the edges:
-   - left: the gear (section 8), 40px round in `accent`, and the weather chip
+   - left: the gear (section 8), 44px round in `accent`, and the weather chip
      ("9°C · Drizzle", in `glass`);
    - right: the language toggle ("ES" / "EN"), the sound toggle and the theme
-     toggle, 36–40px round buttons in `glass`.
+     toggle, 44px round buttons in `glass`, the size of every icon button on the site.
 2. **The portrait** (96 × 120px), overlapping the hero's bottom edge by half
    its height, 20px from the left, with a 4px ring in `background`.
 3. **Name, role and one line** ("Ask about my experience. Answers come only
