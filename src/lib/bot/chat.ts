@@ -5,7 +5,6 @@
  * environment and the runtime's waitUntil, so this module can be tested with
  * a mock model, an in-memory store and a fake waitUntil.
  */
-import { createAnthropic } from "@ai-sdk/anthropic";
 import {
   consumeStream,
   convertToModelMessages,
@@ -23,7 +22,7 @@ import type { ChatUIMessage } from "./chat-message";
 import { parseCitations, type Source } from "./citations";
 import { createDemoModel } from "./demo";
 import { checkLimits, estimateCostMicroUsd, MAX_VISITOR_TEXT, type TokenUsage } from "./limits";
-import { anthropicOptions, MAX_OUTPUT_TOKENS, MAX_STEPS, MODEL_ID } from "./model";
+import { anthropicOptions, createBotModel, MAX_OUTPUT_TOKENS, MAX_STEPS } from "./model";
 import { SYSTEM_PROMPT } from "./prompt";
 import { buildTools } from "./tools";
 import { type D1Like, d1UsageStore, isD1, type UsageStore, utcDay, visitorHash } from "./usage";
@@ -126,7 +125,7 @@ type Deps = {
 };
 
 const defaultDeps: Deps = {
-  createModel: (apiKey) => createAnthropic({ apiKey })(MODEL_ID),
+  createModel: createBotModel,
   createStore: d1UsageStore,
   // Outside Workers nothing cuts the request short, so the promise just runs.
   // The route passes the runtime's waitUntil.

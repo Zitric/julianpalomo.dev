@@ -56,7 +56,7 @@ must keep doing; the ADRs say why.
 
 ## Where things live
 
-- `model.ts` holds the model id and its settings. Never add temperature, `topP` or `topK`: this model rejects non-default values.
+- `model.ts` holds the model id, its settings and `createBotModel`, the one place the bot's model is built: `handleChat` and the evals both use it, so the evals measure the production model. Never add temperature, `topP` or `topK`: this model rejects non-default values.
 - `prompt.ts` holds the system prompt, the only copy. Keep it byte-stable (no dates, ids or anything per request), or prompt caching stops working.
 - `tools.ts` builds the tools from an array of claims, so tests can pass fixtures.
 - `chat.ts` validates the request with Zod, checks the key and streams the answer. `src/routes/api/chat.ts` only passes in the request, `env` from `cloudflare:workers`, which, unlike `process.env`, includes the D1 binding, and `waitUntil` from the same module.

@@ -6,7 +6,6 @@
  * overrides are used; there is no code path for evals in src/. The model is
  * wrapped only to notice provider errors (provider-errors.ts).
  */
-import { createAnthropic } from "@ai-sdk/anthropic";
 import {
   parseJsonEventStream,
   readUIMessageStream,
@@ -17,7 +16,7 @@ import {
 import { handleChat } from "../src/lib/bot/chat";
 import type { ChatUIMessage } from "../src/lib/bot/chat-message";
 import type { TokenUsage } from "../src/lib/bot/limits";
-import { MODEL_ID } from "../src/lib/bot/model";
+import { createBotModel } from "../src/lib/bot/model";
 import type { UsageStore } from "../src/lib/bot/usage";
 import type { EvalCase } from "./cases";
 import type { Answer } from "./checks";
@@ -37,9 +36,6 @@ export type RunResult = Answer & {
 };
 
 type Model = Parameters<typeof wrapLanguageModel>[0]["model"];
-
-/** The model `handleChat` creates by default. */
-const realModel = (apiKey: string): Model => createAnthropic({ apiKey })(MODEL_ID);
 
 const VISITOR_SALT = "evals-fixed-salt";
 
@@ -145,12 +141,13 @@ function toolCallsOf(message: ChatUIMessage | undefined): ToolCall[] {
  * answer in the case goes into the history as written. A request that doesn't
  * answer 200 ends the run with that status, and a turn whose answer failed
  * on a provider error ends it with that error: the turns after it would build
- * on a broken answer. `createModel` is for tests; a run uses the real model.
+ * on a broken answer. `createModel` is for tests; a run uses `createBotModel`,
+ * the model production answers with.
  */
 export async function runCase(
   evalCase: EvalCase,
   apiKey: string,
-  createModel: (apiKey: string) => Model = realModel,
+  createModel: (apiKey: string) => Model = createBotModel,
 ): Promise<RunResult> {
   const { store, usage, cost } = runStore();
   const recorder = providerErrorRecorder();
