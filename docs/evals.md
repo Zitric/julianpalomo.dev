@@ -45,6 +45,27 @@ answer is worse than "I don't know".
 About two thirds of the cost is the judge. Results also go to `evals/results/`,
 which is gitignored.
 
+## In CI
+
+The `evals` job in [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)
+runs `pnpm eval` once on every pull request that changes `src/lib/bot/`,
+`src/lib/claims.ts`, `src/content/claims.json`, `evals/`,
+`vitest.evals.config.ts`, `package.json` or `pnpm-lock.yaml`; a dependency
+upgrade, such as the AI SDK's, can change the answers. On any other pull
+request the job shows as skipped.
+
+- It runs on a separate Anthropic key, Julian's `EVALS_ANTHROPIC_API_KEY`
+  secret, at about $0.70 a push. A new push cancels the run in progress.
+- The job's summary page has the result, the score, the critical failures and
+  the cost, and the `eval-results` artifact has the full JSON. The repo is
+  public, so the artifact is too: it holds the answers and the claims they
+  cite, and never the key.
+- It fails on a critical case, a wrong calibration item, a provider error or
+  the cost cap. A pass rate below 90% is a warning there, not a failure
+  (below).
+- Pull requests from forks get no secrets, so there the job says so and
+  passes.
+
 ## Thresholds
 
 - **Critical cases: every run.** The 16 critical cases are the ones where a
@@ -58,6 +79,16 @@ which is gitignored.
   real regression through, so it stays at 90%.
 
 Lowering either needs Julian's OK (`.claude/rules/evals.md`).
+
+**In CI the 90% is reported, not enforced.** CI runs each case once, 40
+answers, where one answer moves the rate by 2.5 points, and the current
+baseline (run 12) sits at exactly 90%. Enforcing it there would fail about
+every other bot pull request from noise alone. So the job sets
+`EVAL_PASS_RATE=reported`: a rate below 90% shows as a warning in its summary,
+and the critical cases, the calibration, provider errors and the cost cap
+still fail it. A local `pnpm eval` and every run recorded below enforce it.
+Why, and what else was considered:
+[evals in CI](adr/2026-10-28-evals-in-ci.md).
 
 ## Provider errors
 

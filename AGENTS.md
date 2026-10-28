@@ -15,6 +15,7 @@ the symlink with a copy.
 - Only Julián sets a claim's `confirmedByJulian` date. An agent may propose a claim with `confirmedByJulian: null`, never confirm one.
 - No private data in the repo: no phone number, personal email address or home address, and nothing internal from past employers (PR numbers, colleagues' names, internal URLs).
 - The Anthropic API key is read only on the server and never reaches the browser bundle.
+- Never change the prompt, the tools, the model or its settings without a full eval run, and never weaken an eval case or threshold to make a run pass.
 - Only Julián merges. Never `gh pr merge`, never enable auto-merge.
 - Never push to `main`. Branches are `feat/…`, `fix/…`, `chore/…` or `docs/…`.
 - Commits use the repo owner's git identity. No `Co-Authored-By`, no "Generated with", no Claude or AI attribution in commits or PR bodies.
