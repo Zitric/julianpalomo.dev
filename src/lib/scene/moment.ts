@@ -71,7 +71,7 @@ export function starsVisibility(elevation: number): number {
   return ramp(elevation, -12, 0, 1, 0);
 }
 
-/** A point in the SVG's 1200 × 320 viewBox, and whether the orb is above the hills. */
+/** A point in the scene's 0–1200 band of the SVG's -600 0 2400 320 viewBox, and whether the orb is above the hills. */
 export type OrbPosition = { x: number; y: number; up: boolean };
 
 /** Along an arc from `x0` to `x1`, from y 210 at the horizon to `peak` halfway. */
