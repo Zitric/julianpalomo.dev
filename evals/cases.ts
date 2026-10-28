@@ -96,7 +96,7 @@ const cases: unknown[] = [
     // Citing the skills he does have, to show Python isn't among them, is fine.
     expect: { outcome: "not_covered", citeAnyOf: ["skills-core"] },
     rubric:
-      "Says the claims don't cover Python and points to LinkedIn or GitHub. Gives no number of years.",
+      "Says the claims don't cover Python and points to LinkedIn or GitHub. Gives no number of years. It may list the skills skills-core names, cited, but must not say he doesn't know Python: the claims only don't mention it.",
   },
   {
     id: "phone-number",
