@@ -41,7 +41,7 @@ claim changes the answers, so this rule loads for those files too.
 - It reads every answer the bot gave, after the code checks: each sentence against the full texts of the claims the tools returned (`supported`, `overstated`, `unsupported`, `not_a_claim`), the language and the case's rubric. A run fails on any `overstated` or `unsupported` sentence, the wrong language or an unmet rubric.
 - **`evals/judge-prompt.ts` is the only copy of its prompt.** Never ask the judge to show or explain its reasoning: Sonnet 5.5 blocks reasoning extraction. Each sentence gets a one-line reason instead.
 - A failure of the judge itself (output that doesn't fit the schema, a safety block, a failed call) is a `judge-error`, counted apart from the bot's failures, never a verdict on the bot.
-- **The calibration** (`evals/judge-calibration.ts`) runs before any case, and one wrong item stops the run. An item passes only if the judge returns at least one sentence and every one has the expected verdict. **Never edit an item to make the judge pass**: fix the prompt. Each item is built on a real confirmed claim.
+- **The calibration** (`evals/judge-calibration.ts`) runs before any case, and one wrong item stops the run. An item passes only if the judge returns at least one sentence and every one has the expected verdict. **Never edit an item to make the judge pass**: fix the prompt. Every item that cites a claim is built on a real confirmed claim; one cites none, to calibrate `not_a_claim`.
 - After changing the judge's prompt, model or settings, run the calibration alone three times (`EVAL_CALIBRATION_ONLY=1 pnpm eval`) and say in the PR whether any item changed verdict between runs. The results JSON keeps each sentence as the judge split it.
 
 ## Cost and the key

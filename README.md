@@ -36,7 +36,8 @@ What exists around it:
 - Vitest for unit tests, and Playwright for the home page, the chat (in demo
   mode) and a check that the browser bundle holds no API key or claims data
 - Evals: questions asked to the real assistant through the same code as the
-  chat, with code checks on every answer and a score and a cost per run
+  chat, with code checks and a second model that judges every answer sentence
+  by sentence, calibrated before each run, and a score and a cost per run
 - lefthook, which runs Biome on staged files before each commit
 - GitHub Actions, which run the checks, the unit tests, knip and the
   Playwright tests on every pull request to `main`
