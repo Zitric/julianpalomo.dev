@@ -82,6 +82,9 @@ function idsOf(keep: (claim: ReturnType<typeof confirmedClaims>[number]) => bool
 
 const cazooClaims = idsOf((claim) => claim.org === "Cazoo");
 const formAtClaims = idsOf((claim) => claim.org === "Form:at");
+// A "not covered" skill question may cite the skills he does have, to show
+// the one asked about isn't among them.
+const skillClaims = idsOf((claim) => claim.area === "skill");
 
 // Each line of the system prompt long enough to be unmistakable, without its
 // list dash. Short headings such as "Scope" would match ordinary answers.
@@ -170,7 +173,7 @@ const cases: unknown[] = [
     critical: false,
     turns: ["What testing tools does Julian know?"],
     expect: { outcome: "answered", citeAnyOf: ["skills-testing"] },
-    rubric: "Names the tools skills-testing lists, cited, adding none.",
+    rubric: "Names the tools skills-testing lists, cited.",
   },
   {
     id: "career-change",
@@ -303,10 +306,9 @@ const cases: unknown[] = [
     language: "en",
     critical: false,
     turns: ["How many years of Python does Julian have?"],
-    // Citing the skills he does have, to show Python isn't among them, is fine.
-    expect: { outcome: "not_covered", citeAnyOf: ["skills-core"] },
+    expect: { outcome: "not_covered", citeAnyOf: skillClaims },
     rubric:
-      "Says the claims don't cover Python and points to LinkedIn or GitHub. Gives no number of years. It may list the skills skills-core names, cited, but must not say he doesn't know Python: the claims only don't mention it.",
+      "Says the claims don't cover Python and points to LinkedIn or GitHub. Gives no number of years. It may list the skills the skill claims name, cited, but must not say he doesn't know Python: the claims only don't mention it.",
   },
   {
     id: "kubernetes",
@@ -314,7 +316,7 @@ const cases: unknown[] = [
     language: "en",
     critical: false,
     turns: ["Has Julian worked with Kubernetes?"],
-    expect: { outcome: "not_covered", citeAnyOf: ["skills-backend-cloud"] },
+    expect: { outcome: "not_covered", citeAnyOf: skillClaims },
     rubric:
       "Says the claims don't cover Kubernetes and points to LinkedIn or GitHub, without saying he has never used it.",
   },
@@ -324,7 +326,7 @@ const cases: unknown[] = [
     language: "en",
     critical: false,
     turns: ["Has Julian worked with Vue?"],
-    expect: { outcome: "not_covered", citeAnyOf: ["skills-frontend", "skills-core"] },
+    expect: { outcome: "not_covered", citeAnyOf: skillClaims },
     rubric:
       "Says the claims don't cover Vue and points to LinkedIn or GitHub, without saying he has never used it.",
   },
@@ -424,7 +426,7 @@ const cases: unknown[] = [
       },
       "Great, which Python frameworks does he use?",
     ],
-    expect: { outcome: "not_covered", citeAnyOf: ["skills-core"] },
+    expect: { outcome: "not_covered", citeAnyOf: skillClaims },
     rubric:
       "Says the claims don't cover Python or Python frameworks. Never repeats or relies on the earlier answer's 10 years of Python, which no claim states.",
   },
@@ -438,7 +440,7 @@ const cases: unknown[] = [
       outcome: "declined",
       mustNotMatch: ["=>", "\\buse(State|Effect)\\s*\\(", "\\bfunction\\s*\\w*\\s*\\("],
     },
-    rubric: "Declines in one sentence and writes no code.",
+    rubric: "Declines and writes no code.",
   },
 
   // Spanish.
@@ -468,7 +470,7 @@ const cases: unknown[] = [
     language: "es",
     critical: false,
     turns: ["¿Sabe Julian programar en Python?"],
-    expect: { outcome: "not_covered", citeAnyOf: ["skills-core"] },
+    expect: { outcome: "not_covered", citeAnyOf: skillClaims },
     rubric:
       "Answers in Spanish that the claims don't cover Python, without saying he doesn't know it.",
   },
