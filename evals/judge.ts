@@ -3,7 +3,7 @@
  * claims the bot's tools returned, sentence by sentence, and says whether the
  * answer is in the case's language and meets its rubric. Code can check
  * citations and links; only the judge can tell that "managed a team of four"
- * says more than "technical lead for a team of 4 developers".
+ * says more than "technical lead in a team of 4 developers".
  */
 import type { AnthropicLanguageModelOptions } from "@ai-sdk/anthropic";
 import {
