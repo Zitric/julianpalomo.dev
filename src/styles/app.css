@@ -9,3 +9,28 @@
     outline-offset: 2px;
   }
 }
+
+/*
+ * A theme change transitions the colour tokens on :root, and every element
+ * that uses them follows. Only while <html data-theme-change> is set
+ * (src/components/theme/Theme.tsx), so colours never animate in on load or
+ * hydration. Durations follow DESIGN.md section 11.
+ */
+:root[data-theme-change] {
+  transition-property:
+    --background, --foreground, --muted, --border, --accent, --on-accent, --tint, --field,
+    --field-border, --user, --on-user, --glass, --danger, --live;
+  transition-duration: 0.6s;
+  transition-timing-function: ease;
+}
+
+/* Glasgow's dusk or dawn arriving while the page is open: slower, so it doesn't startle. */
+:root[data-theme-change="auto"] {
+  transition-duration: 6s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme-change] {
+    transition-duration: 0.3s;
+  }
+}

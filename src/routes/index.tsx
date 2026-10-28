@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Chat } from "../components/chat/Chat";
+import { ThemeToggle } from "../components/theme/ThemeToggle";
 import { site } from "../lib/site";
 
 export const Route = createFileRoute("/")({ component: Home });
@@ -21,7 +22,11 @@ function Home() {
   return (
     <div className={page}>
       <header className={header}>
-        <div className="h-[230px] bg-tint lg:col-span-full lg:h-80" />
+        <div className="relative h-[230px] bg-tint lg:col-span-full lg:h-80">
+          <div className="absolute inset-x-3 top-3 flex justify-end gap-2">
+            <ThemeToggle />
+          </div>
+        </div>
         <div className="flex flex-col px-4 sm:px-6 lg:col-start-2 lg:px-0">
           <img
             src="/images/julian.png"

@@ -2,10 +2,17 @@ import bricolageUrl from "@fontsource-variable/bricolage-grotesque/files/bricola
 import interUrl from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { ClockProvider } from "../components/clock/Clock";
+import { ThemeDocument } from "../components/theme/Theme";
+import { getFirstRender } from "../lib/first-render";
 import { pageTitle } from "../lib/site";
 import appCss from "../styles/app.css?url";
 
 export const Route = createRootRoute({
+  loader: () => getFirstRender(),
+  // The HTML depends on the visitor's cookie and the time, so no cache may
+  // keep it and serve it to someone else.
+  headers: () => ({ "Cache-Control": "private, no-store" }),
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -29,16 +36,21 @@ export const Route = createRootRoute({
   shellComponent: RootDocument,
 });
 
+// No script in <head>: the server renders data-theme from the cookie or
+// Glasgow's sun (docs/adr/2026-10-28-visual-direction.md).
 function RootDocument({ children }: { children: ReactNode }) {
+  const { choice, now } = Route.useLoaderData();
   return (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body className="bg-background text-[15.5px] leading-[1.55] text-foreground antialiased">
-        {children}
-        <Scripts />
-      </body>
-    </html>
+    <ClockProvider start={now}>
+      <ThemeDocument initialChoice={choice}>
+        <head>
+          <HeadContent />
+        </head>
+        <body className="bg-background text-[15.5px] leading-[1.55] text-foreground antialiased">
+          {children}
+          <Scripts />
+        </body>
+      </ThemeDocument>
+    </ClockProvider>
   );
 }

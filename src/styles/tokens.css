@@ -1,7 +1,8 @@
 /*
  * Colour tokens: the only place colours are defined.
- * Light is the default. Dark follows the OS, and `data-theme` on <html> will
- * override either way once a theme toggle exists.
+ * The server always renders <html data-theme>, from the visitor's cookie or
+ * Glasgow's sun, so there are two blocks: light on :root, dark on
+ * [data-theme="dark"]. The OS setting plays no part.
  * tests/unit/tokens.test.ts measures every text pair against WCAG AA.
  */
 
@@ -23,26 +24,6 @@
   --live: #e5484d;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --background: #0e1511;
-    --foreground: #e8efe9;
-    --muted: #9eb0a4;
-    --border: #24332a;
-    --accent: #7fcb98;
-    --on-accent: #0e1511;
-    --tint: #18241d;
-    --field: #121b16;
-    --field-border: #587060;
-    --user: #2b6f4a;
-    --on-user: #ffffff;
-    --glass: rgb(14 21 17 / 80%);
-    --danger: #fd7468;
-    --live: #e5484d;
-  }
-}
-
 :root[data-theme="dark"] {
   color-scheme: dark;
   --background: #0e1511;
@@ -59,6 +40,95 @@
   --glass: rgb(14 21 17 / 80%);
   --danger: #fd7468;
   --live: #e5484d;
+}
+
+/*
+ * Registered as colours so a theme change can transition the tokens themselves
+ * on :root (src/styles/app.css). Unregistered, a custom property snaps.
+ * The values live in the two blocks above, never here.
+ */
+@property --background {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --foreground {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --muted {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --border {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --accent {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --on-accent {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --tint {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --field {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --field-border {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --user {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --on-user {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --glass {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --danger {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --live {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
 }
 
 /* Exposes every token as a Tailwind colour: bg-background, text-accent, border-field-border and so on. */
