@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { sceneInstant } from "../../lib/scene/moment";
+import { effects } from "../../lib/scene/effects";
+import { glasgowElevation, sceneInstant, skyMix } from "../../lib/scene/moment";
 import { defaultSky, type SkyState } from "../../lib/scene/sky-state";
 import type { LiveWeather } from "../../lib/weather/weather";
 import { useNow } from "../clock/Clock";
 import { useTheme } from "../theme/Theme";
 import { Landscape } from "./Landscape";
+import { Particles } from "./Particles";
 
 // How long the landscape's half of a theme toggle runs (DESIGN.md section 6).
 // Keep in step with the glow's animation in src/styles/landscape.css.
@@ -50,5 +52,17 @@ export function HeroLandscape({ override, weather }: Props) {
     return () => document.removeEventListener("visibilitychange", sync);
   }, []);
 
-  return <Landscape sky={sky} at={at} choreography={choreography} paused={paused} />;
+  const elevation = glasgowElevation(at);
+  return (
+    <>
+      <Landscape sky={sky} at={at} choreography={choreography} paused={paused} />
+      <Particles
+        sky={sky}
+        effects={effects(sky)}
+        elevation={elevation}
+        landLight={skyMix(elevation).landLight}
+        paused={paused}
+      />
+    </>
+  );
 }
