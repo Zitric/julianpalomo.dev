@@ -45,7 +45,7 @@ blocks something, change course; don't look for another way to run it.
 | `pnpm build`                      | Production build into `dist/`. Takes a while: ask first.      |
 | `pnpm preview`                    | Serves the last build in the local Workers runtime.           |
 | `pnpm test:e2e`                   | Builds, serves and runs Playwright in Chromium. Ask first.    |
-| `pnpm eval`                       | Evals against the real model. Costs money: `evals.md` rule.   |
+| `pnpm eval`                       | Evals: the real bot and its judge. Costs money (`evals.md`).  |
 | `bash .claude/hooks/tests/run.sh` | Tests for the Claude Code hooks.                              |
 | `pnpm db:migrate:local`           | Applies the D1 migrations to the local database only.         |
 
@@ -63,7 +63,7 @@ wrangler commands that change Cloudflare.
 - `src/components/`: React components, one folder per feature, such as `chat/` (the chat on the home page).
 - `src/content/`: personal content, such as `claims.json`. It isn't MIT (`LICENSE`, section 2), and in `src/` only `src/lib/claims.ts` reads it.
 - `src/styles/tokens.css`: the only place colours are defined.
-- `evals/`: the evals: cases, code checks, the runner and its report, run by `pnpm eval` with `vitest.evals.config.ts` (`.claude/rules/evals.md`).
+- `evals/`: the evals: cases, code checks, the judge and its calibration, the runner and its report, run by `pnpm eval` with `vitest.evals.config.ts` (`.claude/rules/evals.md`).
 - `tests/unit/`: Vitest. `tests/e2e/`: Playwright, against a production build of the `e2e` environment, in demo mode (`.claude/rules/tests.md`).
 - `.github/workflows/ci.yml`: CI on every pull request to `main`. Deploys aren't here: Cloudflare Workers Builds deploys `main` and comments a preview URL on every PR.
 - `docs/adr/`: one file per decision. `docs/tech-debt.md`: shortcuts taken on purpose.

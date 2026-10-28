@@ -22,6 +22,8 @@ export type ToolCall = { tool: string; input: unknown; output: unknown };
 
 /** One run of one case: the last answer, with what it cost across every turn. */
 export type RunResult = Answer & {
+  /** The conversation before the last question, oldest first, for the judge. */
+  earlierTurns: { role: "visitor" | "assistant"; text: string }[];
   toolCalls: ToolCall[];
   usage: TokenUsage;
   costMicroUsd: number;
@@ -137,6 +139,8 @@ export async function runCase(evalCase: EvalCase, apiKey: string): Promise<RunRe
   const history: ChatUIMessage[] = [];
   let last: Answer = { status: 200, text: "", sourceIds: [], streamError: undefined };
   let toolCalls: ToolCall[] = [];
+  // Where the last visitor question sits in the history; what comes before it are the earlier turns.
+  let lastQuestion = 0;
 
   for (const [index, turn] of evalCase.turns.entries()) {
     const id = `m${index + 1}`;
@@ -144,6 +148,7 @@ export async function runCase(evalCase: EvalCase, apiKey: string): Promise<RunRe
       history.push({ id, role: "assistant", parts: [{ type: "text", text: turn.text }] });
       continue;
     }
+    lastQuestion = history.length;
     history.push({ id, role: "user", parts: [{ type: "text", text: turn }] });
 
     const pending: Promise<unknown>[] = [];
@@ -170,5 +175,9 @@ export async function runCase(evalCase: EvalCase, apiKey: string): Promise<RunRe
     toolCalls = toolCallsOf(message);
   }
 
-  return { ...last, toolCalls, usage: { ...usage }, costMicroUsd: cost() };
+  const earlierTurns = history.slice(0, lastQuestion).map((message) => ({
+    role: message.role === "user" ? ("visitor" as const) : ("assistant" as const),
+    text: textOf(message),
+  }));
+  return { ...last, earlierTurns, toolCalls, usage: { ...usage }, costMicroUsd: cost() };
 }

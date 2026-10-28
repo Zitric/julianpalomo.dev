@@ -36,7 +36,8 @@ What exists around it:
 - Vitest for unit tests, and Playwright for the home page, the chat (in demo
   mode) and a check that the browser bundle holds no API key or claims data
 - Evals: questions asked to the real assistant through the same code as the
-  chat, with code checks on every answer and a score and a cost per run
+  chat, with code checks and a second model that judges every answer sentence
+  by sentence, calibrated before each run, and a score and a cost per run
 - lefthook, which runs Biome on staged files before each commit
 - GitHub Actions, which run the checks, the unit tests, knip and the
   Playwright tests on every pull request to `main`
@@ -64,17 +65,17 @@ pnpm install
 pnpm dev
 ```
 
-| Command                 | What it does                                                                                                              |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm dev`              | Starts the dev server. Add `--host` to open it from a phone on the same wifi.                                             |
-| `pnpm build`            | Builds the app for production into `dist/`.                                                                               |
-| `pnpm preview`          | Serves the last build in the local Workers runtime. Run `pnpm build` first.                                               |
-| `pnpm check`            | Runs Biome (lint and format), then `tsc`.                                                                                 |
-| `pnpm test`             | Runs the unit tests once with Vitest.                                                                                     |
-| `pnpm test:e2e`         | Builds, serves and runs the Playwright tests in Chromium.                                                                 |
-| `pnpm eval`             | Asks the real assistant the eval cases and grades the answers. Costs money: about $0.001 a case. `-t <case-id>` runs one. |
-| `pnpm knip`             | Reports unused files, exports and dependencies.                                                                           |
-| `pnpm db:migrate:local` | Applies the D1 migrations to the local database in `.wrangler/state`.                                                     |
+| Command                 | What it does                                                                                                                                                |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm dev`              | Starts the dev server. Add `--host` to open it from a phone on the same wifi.                                                                               |
+| `pnpm build`            | Builds the app for production into `dist/`.                                                                                                                 |
+| `pnpm preview`          | Serves the last build in the local Workers runtime. Run `pnpm build` first.                                                                                 |
+| `pnpm check`            | Runs Biome (lint and format), then `tsc`.                                                                                                                   |
+| `pnpm test`             | Runs the unit tests once with Vitest.                                                                                                                       |
+| `pnpm test:e2e`         | Builds, serves and runs the Playwright tests in Chromium.                                                                                                   |
+| `pnpm eval`             | Asks the real assistant the eval cases and has a second model judge the answers. Costs money: about $0.06, then $0.01–0.02 a case. `-t <case-id>` runs one. |
+| `pnpm knip`             | Reports unused files, exports and dependencies.                                                                                                             |
+| `pnpm db:migrate:local` | Applies the D1 migrations to the local database in `.wrangler/state`.                                                                                       |
 
 To try the assistant locally, copy `.dev.vars.example` to `.dev.vars` (it's
 gitignored), put an Anthropic API key in it, and set `VISITOR_SALT` to any long
@@ -89,7 +90,11 @@ mode.
 `pnpm eval` reads the API key from `.dev.vars` too, asks the assistant every
 case in [`evals/`](evals/) through the same code as `/api/chat`, checks each
 answer in code (citations, links, no contact details, no Markdown), and prints
-a report with the score and the estimated cost. Results also go to
+then has a second model, Claude Sonnet 5.5, judge every answer sentence by
+sentence against the claims it used: a sentence that says more than its claim
+("managed" where the claim says "technical lead") fails the case. Before any
+case, the judge must get a set of calibration answers right, or the run stops.
+The report gives the score and the estimated cost. Results also go to
 `evals/results/`, which is gitignored. `EVAL_REPEAT=3 pnpm eval` asks each case
 three times. A run passes when every critical case passes every time and at
 least 90% of all runs pass; it stops at $2 of estimated cost.

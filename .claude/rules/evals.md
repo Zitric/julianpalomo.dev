@@ -35,10 +35,19 @@ claim changes the answers, so this rule loads for those files too.
 - A run passes when every critical case passes every time and at least `PASS_RATE` of all runs pass. It stops starting runs past `COST_CAP_MICRO_USD` of estimated cost, and then fails. The per-case tests never fail on their own; `afterAll` fails the command.
 - `vitest.evals.config.ts` is standalone and includes only `evals/**/*.eval.ts`. `pnpm test` never runs the evals.
 
+## The judge
+
+- **Claude Sonnet 5.5 at `effort: "medium"`** (`evals/judge.ts`), stronger than the bot's model, so subtle overclaims don't slip past. Never add temperature or sampling settings; its thinking is always adaptive and `effort` is the only control. Changing the model or the effort is Julian's decision.
+- It reads every answer the bot gave, after the code checks: each sentence against the full texts of the claims the tools returned (`supported`, `overstated`, `unsupported`, `not_a_claim`), the language and the case's rubric. A run fails on any `overstated` or `unsupported` sentence, the wrong language or an unmet rubric.
+- **`evals/judge-prompt.ts` is the only copy of its prompt.** Never ask the judge to show or explain its reasoning: Sonnet 5.5 blocks reasoning extraction. Each sentence gets a one-line reason instead.
+- A failure of the judge itself (output that doesn't fit the schema, a safety block, a failed call) is a `judge-error`, counted apart from the bot's failures, never a verdict on the bot.
+- **The calibration** (`evals/judge-calibration.ts`) runs before any case, and one wrong item stops the run. An item passes only if the judge returns at least one sentence and every one has the expected verdict. **Never edit an item to make the judge pass**: fix the prompt. Every item that cites a claim is built on a real confirmed claim; one cites none, to calibrate `not_a_claim`.
+- After changing the judge's prompt, model or settings, run the calibration alone three times (`EVAL_CALIBRATION_ONLY=1 pnpm eval`) and say in the PR whether any item changed verdict between runs. The results JSON keeps each sentence as the judge split it.
+
 ## Cost and the key
 
-- **`pnpm eval` calls the real model and costs money** (about $0.001 a case). Unit tests and CI's existing jobs never call it. Every run prints its estimated cost.
-- Claude Code may run single cases while developing (`pnpm eval -t <case-id>`) and one full run before `/handoff`, and reports each run's cost in the PR. Anything more, such as `EVAL_REPEAT` above 1, ask first.
+- **`pnpm eval` calls the real models and costs money**: about $0.06 for the calibration, which every run starts with, then about $0.01 to $0.02 a case, almost all of it the judge. Unit tests and CI's existing jobs never call them. Every run prints its estimated cost, split into the bot, the judge and the calibration, and the $2 cap counts all three.
+- Claude Code may run single cases while developing (`pnpm eval -t <case-id>`), the calibration alone, and one full run before `/handoff`, and reports each run's cost in the PR. Anything more, such as `EVAL_REPEAT` above 1, ask first.
 - The key comes from `.dev.vars` or the environment. It is never printed or logged: the eval file redacts it from all output and from `evals/results/`, which is gitignored.
 
 If `evals/` changes shape, update this rule.

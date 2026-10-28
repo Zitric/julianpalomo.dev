@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   COST_CAP_MICRO_USD,
+  formatCalibration,
   formatReport,
   PASS_RATE,
   type RunRecord,
@@ -11,7 +12,11 @@ import {
 
 const usage = { input: 1_000, output: 200, cacheRead: 3_000, cacheWrite: 0 };
 
-function run(caseId: string, pass: boolean, options: { critical?: boolean; run?: number } = {}) {
+function run(
+  caseId: string,
+  pass: boolean,
+  options: { critical?: boolean; run?: number; judgeCost?: number } = {},
+) {
   return toRecord({
     caseId,
     critical: options.critical ?? false,
@@ -20,7 +25,9 @@ function run(caseId: string, pass: boolean, options: { critical?: boolean; run?:
     text: pass ? "A cited answer. [[cazoo-role]]" : "An uncited answer.",
     toolCalls: [],
     usage,
-    costMicroUsd: 230,
+    judge: undefined,
+    botCostMicroUsd: 230,
+    judgeCostMicroUsd: options.judgeCost ?? 0,
   });
 }
 
@@ -81,6 +88,85 @@ describe("summarize", () => {
   });
 });
 
+describe("summarize with the judge", () => {
+  const calibration = [
+    {
+      id: "a",
+      pass: true,
+      expected: "overstated" as const,
+      verdicts: [],
+      sentences: [],
+      reason: "",
+      costMicroUsd: 1_000,
+    },
+    {
+      id: "b",
+      pass: true,
+      expected: "supported" as const,
+      verdicts: [],
+      sentences: [],
+      reason: "",
+      costMicroUsd: 2_000,
+    },
+  ];
+
+  it("splits the cost into the bot, the judge and the calibration, and adds them up", () => {
+    const summary = summarize([run("a-case", true, { judgeCost: 5_000 })], calibration);
+    expect(summary).toMatchObject({
+      botCostMicroUsd: 230,
+      judgeCostMicroUsd: 5_000,
+      calibrationCostMicroUsd: 3_000,
+      costMicroUsd: 8_230,
+      calibration: { passed: 2, total: 2, wrong: [] },
+    });
+  });
+
+  it("fails when a calibration item is wrong", () => {
+    const wrong = [{ ...calibration[0], id: "a", pass: false, reason: "expected overstated" }];
+    const summary = summarize(runs(10, 0), wrong as typeof calibration);
+    expect(summary.pass).toBe(false);
+    expect(summary.reasons).toContain("the judge got calibration items wrong: a");
+  });
+
+  it("counts the runs the judge itself failed on, apart from the bot's failures", () => {
+    const judgeFailed = toRecord({
+      ...run("a-case", true),
+      checks: [{ name: "judge-error", pass: false, reason: "blocked" }],
+    });
+    const summary = summarize([judgeFailed, run("other", false)]);
+    expect(summary.judgeErrors).toBe(1);
+    expect(formatReport(summary, [judgeFailed], "bot")).toContain("    judge-error: blocked");
+  });
+});
+
+describe("formatCalibration", () => {
+  it("gives the score and the cost, and lists each wrong item", () => {
+    const text = formatCalibration([
+      {
+        id: "a",
+        pass: true,
+        expected: "supported",
+        verdicts: ["supported"],
+        sentences: [],
+        reason: "",
+        costMicroUsd: 4_000,
+      },
+      {
+        id: "b",
+        pass: false,
+        expected: "overstated",
+        verdicts: ["supported"],
+        sentences: [],
+        reason: "expected overstated, got supported",
+        costMicroUsd: 6_000,
+      },
+    ]);
+    expect(text).toBe(
+      "Calibration: 1/2 right ($0.0100)\n    WRONG b: expected overstated, got supported",
+    );
+  });
+});
+
 describe("formatReport", () => {
   it("lists each run, a failure's reasons and answer, and the totals", () => {
     const records = [run("cazoo-overview", true), run("python-years", false)];
@@ -91,7 +177,9 @@ describe("formatReport", () => {
     expect(report).toContain("    answer: An uncited answer.");
     expect(report).toContain("Model: claude-haiku-5-5");
     expect(report).toContain("Passed: 1/2 runs (50%)");
-    expect(report).toContain("Estimated cost: $0.0005");
+    expect(report).toContain(
+      "Estimated cost: $0.0005 (bot $0.0005, judge $0.0000, calibration $0.0000)",
+    );
     expect(report).toContain("Result: FAIL");
   });
 });
