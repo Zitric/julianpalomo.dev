@@ -1,5 +1,9 @@
 import { clouds } from "../../lib/scene/palette";
 
+// The drift's start and end, as in landscape-drift in src/styles/landscape.css. Keep the two in step.
+const DRIFT_FROM = -300;
+const DRIFT_TO = 1400;
+
 const CLOUD =
   "M0 30 C 0 18 12 12 22 16 C 26 4 46 0 56 10 C 64 4 80 8 80 20 C 92 20 98 30 92 36 L4 36 C 0 36 0 33 0 30 Z";
 
@@ -25,10 +29,15 @@ export function Clouds({ visible, dark, speed }: Props) {
         {clouds.map((cloud, index) => {
           const shown = index < visible ? "" : " hidden";
           const shade = dark && index % 2 === 1 ? " dark" : "";
-          // Duration and delay scale together, so a cloud keeps its place in its crossing.
+          // Duration and delay scale together, so a cloud keeps its place in its
+          // crossing. The transform is where that delay puts it: the drift
+          // animation overrides it, and with reduced motion, which has no drift,
+          // the clouds still sit across the sky instead of piling up at x 0.
+          const progress = (-cloud.delaySeconds % cloud.driftSeconds) / cloud.driftSeconds;
           const timing = {
             animationDuration: `${cloud.driftSeconds / speed}s`,
             animationDelay: `${cloud.delaySeconds / speed}s`,
+            transform: `translateX(${DRIFT_FROM + (DRIFT_TO - DRIFT_FROM) * progress}px)`,
           };
           return (
             <g key={cloud.id} className={`cloud ${cloud.id}${shown}${shade}`} style={timing}>

@@ -49,7 +49,12 @@ test("weather from ?sky= reaches the scene", async ({ page }) => {
   expect(ripples).toBeCloseTo(0.7, 1);
 });
 
-test("the hero keeps its height and stays behind the controls", async ({ page }) => {
+test("the hero keeps its height and stays behind the controls", async ({
+  page,
+  context,
+  baseURL,
+}) => {
+  await context.addCookies([{ name: "theme", value: "light", url: baseURL ?? "" }]);
   await page.setViewportSize({ width: 390, height: 800 });
   await page.goto("/?sky=summer,15:00");
   const hero = page.locator("svg.landscape");
