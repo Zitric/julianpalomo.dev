@@ -91,6 +91,30 @@ export const CALIBRATION_ITEMS: readonly CalibrationItem[] = [
     language: "en",
     expected: "unsupported",
   },
+  // Held out: the judge's prompt doesn't spell these patterns out, so they test
+  // whether it generalises beyond its own examples.
+  {
+    id: "zustand-faster",
+    claimIds: ["cazoo-zustand"],
+    sentence: "Replacing Redux with Zustand made the site noticeably faster.",
+    language: "en",
+    expected: "overstated",
+  },
+  {
+    id: "zustand-all-apps",
+    claimIds: ["cazoo-zustand"],
+    sentence: "He replaced Redux with Zustand across all of Cazoo's apps.",
+    language: "en",
+    expected: "overstated",
+  },
+  {
+    id: "ga4-long-paraphrase",
+    claimIds: ["cazoo-ga4"],
+    sentence:
+      "He moved analytics to GA4 in both of Cazoo's web apps, rebuilding the Next.js app's tracking on a single data layer for page, navigation and e-commerce events across 58 files, and removing the legacy Universal Analytics tracking and the old GTM container from more than 300 files of the monolith.",
+    language: "en",
+    expected: "supported",
+  },
   {
     id: "not-covered-linkedin",
     claimIds: [],

@@ -183,6 +183,19 @@ describe("judgeAnswer", () => {
     expect(outcome.status === "error" && outcome.error).toContain("didn't fit the schema");
   });
 
+  it("turns a verdict that cites a claim it wasn't given into an error", async () => {
+    const foreign = {
+      ...verdict,
+      sentences: [{ ...verdict.sentences[0], claimIds: ["oms-lead", "cazoo-role"] }],
+    };
+    const outcome = await judgeAnswer(input, mockJudge(JSON.stringify(foreign)));
+    expect(outcome).toMatchObject({
+      status: "error",
+      error: "the judge cited claims it wasn't given: cazoo-role",
+      costMicroUsd: 7_000,
+    });
+  });
+
   it("turns a safety block into an error", async () => {
     const outcome = await judgeAnswer(input, mockJudge(JSON.stringify(verdict), "content-filter"));
     expect(outcome).toMatchObject({

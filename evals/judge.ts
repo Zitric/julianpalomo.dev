@@ -174,6 +174,14 @@ export async function judgeAnswer(input: JudgeInput, model: LanguageModel): Prom
     if (result.finishReason === "content-filter") {
       return outcomeError("the judge's request was blocked by a safety classifier", usage);
     }
+    // A verdict resting on a claim the judge wasn't given can't be trusted either way.
+    const given = new Set(input.claims.map((claim) => claim.id));
+    const foreign = [
+      ...new Set(result.output.sentences.flatMap((sentence) => sentence.claimIds)),
+    ].filter((id) => !given.has(id));
+    if (foreign.length > 0) {
+      return outcomeError(`the judge cited claims it wasn't given: ${foreign.join(", ")}`, usage);
+    }
     return {
       status: "judged",
       verdict: result.output,
