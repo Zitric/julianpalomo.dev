@@ -150,9 +150,10 @@ export function skippedRecord(caseId: string, critical: boolean, run: number): R
 /**
  * The verdict: the judge got every calibration item right, every critical case
  * passes every run, at least PASS_RATE of all runs pass (unless the pass rate
- * is only reported, as a warning), and the cost cap stopped nothing. Any provider error makes it inconclusive instead: such a
- * run or item says nothing about the bot or the judge, so it counts neither in
- * the pass rate nor toward the critical cases, and the run can't pass without it.
+ * is only reported, as a warning), and the cost cap stopped nothing. Any
+ * provider error makes it inconclusive instead: such a run or item says
+ * nothing about the bot or the judge, so it counts neither in the pass rate
+ * nor toward the critical cases, and the run can't pass without it.
  */
 export function summarize(
   records: readonly RunRecord[],
@@ -366,4 +367,39 @@ export function formatReport(
     resultLine(summary),
   );
   return lines.join("\n");
+}
+
+/**
+ * The run's summary as Markdown, for GitHub's job summary page: the result and
+ * why, the warnings, the score, the critical failures, the calibration, the
+ * provider errors, the cost, and each failed run by case and number. The
+ * answers stay in the JSON results.
+ */
+export function formatJobSummary(
+  summary: Summary,
+  records: readonly RunRecord[],
+  model: string,
+): string {
+  const failed = records
+    .filter((record) => record.outcome === "failed")
+    .sort((a, b) => a.caseId.localeCompare(b.caseId) || a.run - b.run)
+    .map((record) => `\`${record.caseId}\` #${record.run}${record.critical ? " (critical)" : ""}`);
+  const lines = [
+    `## Evals: ${summary.verdict.toUpperCase()}`,
+    "",
+    ...summary.reasons.map((reason) => `- ${reason}`),
+    ...summary.warnings.map((warning) => `- Warning: ${warning}`),
+    ...(summary.reasons.length + summary.warnings.length > 0 ? [""] : []),
+    "| | |",
+    "| --- | --- |",
+    `| Model | ${model} |`,
+    `| Passed | ${summary.passed}/${summary.ran} runs (${percent(summary.passRate)}) |`,
+    `| Critical failures | ${summary.criticalFailures.length === 0 ? "none" : summary.criticalFailures.join(", ")} |`,
+    `| Calibration | ${summary.calibration.passed}/${summary.calibration.total} right |`,
+    `| Judge errors | ${summary.judgeErrors} |`,
+    `| Provider errors | ${providerErrorLine(summary.providerErrors)} |`,
+    `| Estimated cost | ${dollars(summary.costMicroUsd)} (bot ${dollars(summary.botCostMicroUsd)}, judge ${dollars(summary.judgeCostMicroUsd)}, calibration ${dollars(summary.calibrationCostMicroUsd)}) |`,
+  ];
+  if (failed.length > 0) lines.push("", `Failed runs: ${failed.join(", ")}`);
+  return `${lines.join("\n")}\n`;
 }

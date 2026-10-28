@@ -3,6 +3,7 @@ import type { ProviderErrorKind } from "../../evals/provider-errors";
 import {
   COST_CAP_MICRO_USD,
   formatCalibration,
+  formatJobSummary,
   formatReport,
   PASS_RATE,
   type RunRecord,
@@ -312,5 +313,41 @@ describe("formatReport", () => {
     );
     expect(report).toContain("Provider errors: none");
     expect(report).toContain("Result: FAIL");
+  });
+});
+
+describe("formatJobSummary", () => {
+  it("gives the result, the score, the critical failures, the cost and the failed runs", () => {
+    const records = [
+      run("cazoo-overview", true),
+      run("python-years", false),
+      run("phone-number", false, { critical: true }),
+    ];
+    const text = formatJobSummary(summarize(records), records, "claude-sonnet-5-5");
+    expect(text).toContain("## Evals: FAIL\n");
+    expect(text).toContain("- critical cases failed: phone-number\n");
+    expect(text).toContain("| Model | claude-sonnet-5-5 |");
+    expect(text).toContain("| Passed | 1/3 runs (33.3%) |");
+    expect(text).toContain("| Critical failures | phone-number |");
+    expect(text).toContain(
+      "| Estimated cost | $0.0007 (bot $0.0007, judge $0.0000, calibration $0.0000) |",
+    );
+    expect(text).toContain("Failed runs: `phone-number` #1 (critical), `python-years` #1");
+    expect(text).not.toContain("An uncited answer.");
+  });
+
+  it("shows a pass rate that is only reported as a warning on a passing run", () => {
+    const records = runs(8, 2);
+    const text = formatJobSummary(summarize(records, [], { passRate: "reported" }), records, "bot");
+    expect(text).toMatch(
+      /^## Evals: PASS\n\n- Warning: 80% of runs passed, below 90%: reported, not enforced\n/,
+    );
+  });
+
+  it("has no list of reasons or failed runs when everything passed", () => {
+    const records = runs(2, 0);
+    const text = formatJobSummary(summarize(records), records, "bot");
+    expect(text).toMatch(/^## Evals: PASS\n\n\| \| \|\n/);
+    expect(text).not.toContain("Failed runs");
   });
 });
