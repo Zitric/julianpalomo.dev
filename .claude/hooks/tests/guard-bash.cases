@@ -39,6 +39,11 @@ pass  | pnpm check
 pass  | pnpm test
 pass  | pnpm knip
 pass  | pnpm dev
+pass  | pnpm build
+pass  | pnpm run build
+pass  | pnpm test:e2e
+pass  | pnpm exec playwright test
+pass  | pnpm exec vite build
 pass  | pnpm exec biome check --write src/lib/site.ts
 pass  | pnpm test -- --grep update
 pass  | cat wrangler.jsonc
@@ -111,11 +116,6 @@ ask   | git checkout .
 ask   | git checkout tracked.txt
 ask   | git checkout HEAD tracked.txt
 ask   | git restore src/lib/site.ts
-ask   | pnpm build
-ask   | pnpm run build
-ask   | pnpm test:e2e
-ask   | pnpm exec playwright test
-ask   | pnpm exec vite build
 ask   | pnpm add zod
 ask   | pnpm add -D @types/node
 ask   | pnpm install

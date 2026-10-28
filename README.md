@@ -122,7 +122,10 @@ is too small to tell a real drop from noise. Every other reason still fails
 the job.
 
 The first time you run `pnpm test:e2e`, install the browser with
-`pnpm exec playwright install chromium`. To fix formatting yourself, run
+`pnpm exec playwright install chromium`. It serves its own build on port 4173
+and stops at once if something else is already there, such as a `pnpm preview`
+or another worktree's run, so it never tests a build it didn't make. To fix
+formatting yourself, run
 `pnpm exec biome check --write`.
 
 ### Deploys and previews
