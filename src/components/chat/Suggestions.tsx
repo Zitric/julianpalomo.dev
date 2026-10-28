@@ -15,7 +15,7 @@ export function Suggestions({ onPick }: Props) {
           <button
             type="button"
             onClick={() => onPick(question)}
-            className="rounded-full border border-border px-3 py-1 text-sm"
+            className="min-h-11 rounded-full border-[1.5px] border-border bg-field px-4 py-2 text-left text-sm font-medium hover:border-accent"
           >
             {question}
           </button>

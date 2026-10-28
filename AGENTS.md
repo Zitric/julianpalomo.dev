@@ -60,7 +60,7 @@ wrangler commands that change Cloudflare.
 - `src/lib/`: plain TypeScript modules, such as `site.ts`.
 - `src/lib/bot/`: the assistant: model settings, the system prompt, the read-only tools, the citation parser, demo mode, the daily limits and the chat logic. `src/routes/api/chat.ts` is its endpoint, `POST /api/chat`.
 - `migrations/`: D1 migrations for the daily limits. `pnpm db:migrate:local` applies them locally; only Julián applies them to production.
-- `src/components/`: React components, one folder per feature, such as `chat/` (the chat on the home page).
+- `src/components/`: React components, one folder per feature, such as `chat/` (the chat on the home page); shared pieces such as `IconButton` live in `ui/`.
 - `src/content/`: personal content, such as `claims.json`. It isn't MIT (`LICENSE`, section 2), and in `src/` only `src/lib/claims.ts` reads it.
 - `src/styles/tokens.css`: the only place colours are defined.
 - `evals/`: the evals: cases, code checks, the judge and its calibration, the runner and its report, run by `pnpm eval` with `vitest.evals.config.ts` (`.claude/rules/evals.md`).
