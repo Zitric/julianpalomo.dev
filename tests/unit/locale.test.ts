@@ -3,6 +3,7 @@ import {
   chooseLanguage,
   type Locale,
   localeFromParam,
+  localeFromPath,
   paramFromLocale,
   parseLangCookie,
 } from "../../src/lib/i18n/locale";
@@ -48,5 +49,15 @@ describe("the locale route parameter", () => {
   it("reads back the locale it was made from", () => {
     expect(localeFromParam(paramFromLocale("en"))).toBe("en");
     expect(localeFromParam(paramFromLocale("es"))).toBe("es");
+  });
+});
+
+describe("localeFromPath", () => {
+  it("is Spanish under /es and English everywhere else", () => {
+    expect(localeFromPath("/es")).toBe("es");
+    expect(localeFromPath("/es/")).toBe("es");
+    expect(localeFromPath("/")).toBe("en");
+    expect(localeFromPath("/essay")).toBe("en");
+    expect(localeFromPath("/api/chat")).toBe("en");
   });
 });

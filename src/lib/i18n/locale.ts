@@ -8,6 +8,11 @@ export function localeFromParam(param: string | undefined): Locale {
   return param === "es" ? "es" : "en";
 }
 
+/** The language of a path: Spanish under `/es`, English everywhere else. */
+export function localeFromPath(pathname: string): Locale {
+  return localeFromParam(pathname.split("/")[1]);
+}
+
 /** The route parameter for a locale: none for English, so its page stays at `/`. */
 export function paramFromLocale(locale: Locale): "es" | undefined {
   return locale === "es" ? "es" : undefined;

@@ -1,5 +1,6 @@
 import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import { rememberChoice } from "../../lib/cookie";
+import type { Locale } from "../../lib/i18n/locale";
 import { resolveTheme, THEME_COOKIE, type Theme } from "../../lib/theme";
 import { useNow } from "../clock/Clock";
 
@@ -31,12 +32,14 @@ const ThemeContext = createContext<ThemeState | null>(null);
 type Props = {
   /** The `theme` cookie as the server read it. */
   initialChoice: Theme | null;
+  /** The page's language, for <html lang>. */
+  lang: Locale;
   /** The document's <head> and <body>. */
   children: ReactNode;
 };
 
 /** The <html> element, with the theme the server resolved and the client keeps current. */
-export function ThemeDocument({ initialChoice, children }: Props) {
+export function ThemeDocument({ initialChoice, lang, children }: Props) {
   const now = useNow();
   const [choice, setChoice] = useState(initialChoice);
   const [change, setChange] = useState<ThemeChange | null>(null);
@@ -66,7 +69,7 @@ export function ThemeDocument({ initialChoice, children }: Props) {
 
   return (
     <ThemeContext value={{ theme, choice, glasgowTheme, change, toggle }}>
-      <html lang="en" data-theme={theme} data-theme-change={change?.kind}>
+      <html lang={lang} data-theme={theme} data-theme-change={change?.kind}>
         {children}
       </html>
     </ThemeContext>

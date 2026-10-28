@@ -1,0 +1,91 @@
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { Chat } from "../../components/chat/Chat";
+import { LanguageToggle } from "../../components/i18n/LanguageToggle";
+import { useLocale } from "../../components/i18n/useLocale";
+import { ThemeToggle } from "../../components/theme/ThemeToggle";
+import { localeFromParam } from "../../lib/i18n/locale";
+import { rootLanguage } from "../../lib/i18n/root-language";
+import { t } from "../../lib/i18n/t";
+import { pageTitle, site } from "../../lib/site";
+
+// `/` is English and `/es` is Spanish: one route, so switching language keeps
+// the page, and the conversation in it, mounted. Any other first segment is a
+// 404.
+export const Route = createFileRoute("/{-$locale}/")({
+  params: {
+    parse: ({ locale }) => (locale === undefined || locale === "es" ? { locale } : false),
+  },
+  beforeLoad: ({ params }) => {
+    if (params.locale !== undefined || rootLanguage() !== "es") return;
+    // 302, never cached: it depends on the visitor's cookie and country. The
+    // query string comes along, so a shared link keeps its parameters.
+    throw redirect({
+      to: "/{-$locale}",
+      params: { locale: "es" },
+      search: true,
+      statusCode: 302,
+      headers: { "Cache-Control": "private, no-store", Vary: "Cookie" },
+    });
+  },
+  head: ({ params }) => {
+    const locale = localeFromParam(params.locale);
+    return {
+      meta: [
+        { title: pageTitle(undefined, t(locale, "name")) },
+        { name: "description", content: t(locale, "metaDescription") },
+      ],
+      links: [
+        { rel: "alternate", hrefLang: "en", href: `${site.url}/` },
+        { rel: "alternate", hrefLang: "es", href: `${site.url}/es` },
+        { rel: "alternate", hrefLang: "x-default", href: `${site.url}/` },
+      ],
+    };
+  },
+  component: Home,
+});
+
+// One column on mobile. From lg, a four-column grid: two gutters and, centred
+// between them, the intro (300px) and the chat, at most 1120px together. The
+// header spans every column on a subgrid, so the hero runs edge to edge in its
+// first row and the intro sits in the second row's left column, while main
+// takes the second row's right column beside it.
+const page = "pb-12 lg:grid lg:grid-cols-[1fr_300px_minmax(0,772px)_1fr] lg:gap-x-12";
+const header =
+  "lg:col-span-full lg:row-span-2 lg:row-start-1 lg:grid lg:grid-cols-subgrid lg:grid-rows-subgrid";
+const portrait =
+  "ml-1 -mt-[60px] h-[120px] w-24 -scale-x-100 rounded-[26px] ring-4 ring-background [image-rendering:pixelated] sm:ml-0 lg:-mt-[75px] lg:h-[150px] lg:w-[120px] lg:rounded-[32px] lg:ring-[6px]";
+const chatCard =
+  "px-4 pt-8 sm:px-6 lg:col-start-3 lg:row-start-2 lg:mt-8 lg:self-start lg:rounded-[20px] lg:border-2 lg:border-border lg:p-6";
+
+function Home() {
+  const locale = useLocale();
+  return (
+    <div className={page}>
+      <header className={header}>
+        <div className="relative h-[230px] bg-tint lg:col-span-full lg:h-80">
+          <div className="absolute inset-x-3 top-3 flex justify-end gap-2">
+            <LanguageToggle />
+            <ThemeToggle />
+          </div>
+        </div>
+        <div className="flex flex-col px-4 sm:px-6 lg:col-start-2 lg:px-0">
+          <img
+            src="/images/julian.png"
+            alt={t(locale, "portraitAlt")}
+            width={96}
+            height={120}
+            className={portrait}
+          />
+          <h1 className="mt-4 font-display text-[34px] leading-tight font-extrabold tracking-[-0.02em] sm:text-[44px]">
+            {t(locale, "name")}
+          </h1>
+          <p className="mt-1 font-display text-lg font-bold text-accent lg:text-xl">{site.role}</p>
+          <p className="mt-3 text-muted">{t(locale, "intro")}</p>
+        </div>
+      </header>
+      <main className={chatCard}>
+        <Chat />
+      </main>
+    </div>
+  );
+}
