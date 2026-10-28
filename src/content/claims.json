@@ -42,11 +42,11 @@
   {
     "id": "cazoo-role",
     "label": "Role",
-    "text": "Senior Frontend Engineer at Cazoo (formerly Motors.co.uk), Glasgow, UK, remote, July 2022 – August 2026.",
+    "text": "Senior Frontend Engineer at Motors, the company behind the UK car marketplace Motors.co.uk, which bought the Cazoo brand in 2024 and rebranded as Cazoo in 2026; Glasgow, UK, remote, July 2022 – August 2026.",
     "area": "role",
     "org": "Cazoo",
     "source": "cv",
-    "confirmedByJulian": "2026-10-27"
+    "confirmedByJulian": null
   },
   {
     "id": "cazoo-context",
@@ -186,11 +186,11 @@
   {
     "id": "oms-lead",
     "label": "Technical lead",
-    "text": "Technical lead for a team of 4 developers across web (React), mobile (React Native) and a serverless Node.js backend: owned technical decisions and mentored the junior engineers.",
+    "text": "Technical lead in a team of 4 developers across web (React), mobile (React Native) and a serverless Node.js backend: owned technical decisions, mentored the junior engineers and interviewed candidates for hiring.",
     "area": "experience",
     "org": "Orders Made Simple",
     "source": "cv",
-    "confirmedByJulian": "2026-10-27"
+    "confirmedByJulian": null
   },
   {
     "id": "oms-takeover",
