@@ -87,8 +87,7 @@ describe("calibrationResult", () => {
 describe("calibrationResult with a provider error", () => {
   it("fails the item with the kind, so the run is inconclusive instead of the judge wrong", () => {
     const result = calibrationResult(item, {
-      status: "error",
-      error: "the judge call hit a provider error: credit",
+      status: "provider-error",
       providerError: "credit",
       usage: zero,
       costMicroUsd: 0,

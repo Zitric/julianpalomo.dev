@@ -227,8 +227,7 @@ describe("judgeAnswer", () => {
     });
     const outcome = await judgeAnswer(input, failingJudge(error));
     expect(outcome).toEqual({
-      status: "error",
-      error: "the judge call hit a provider error: auth",
+      status: "provider-error",
       providerError: "auth",
       usage: zero,
       costMicroUsd: 0,

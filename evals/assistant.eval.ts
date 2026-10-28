@@ -134,7 +134,7 @@ async function judge(
             spentMicroUsd += verdict?.costMicroUsd ?? 0;
             const providerError =
               result.providerError ??
-              (verdict?.status === "error" ? verdict.providerError : undefined);
+              (verdict?.status === "provider-error" ? verdict.providerError : undefined);
             records.push(
               toRecord({
                 ...base,

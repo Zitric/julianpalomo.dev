@@ -84,15 +84,16 @@ export type JudgeInput = {
 
 /**
  * What one judge call gave: a verdict, or why there isn't one. Either way it
- * cost something. `providerError` is set when the call failed because the
- * model API did, which says nothing about the judge or the bot.
+ * cost something. "provider-error" means the call failed because the model
+ * API did, which says nothing about the judge or the bot; it keeps the kind,
+ * never the provider's message.
  */
 export type JudgeOutcome =
   | { status: "judged"; verdict: JudgeVerdict; usage: TokenUsage; costMicroUsd: number }
+  | { status: "error"; error: string; usage: TokenUsage; costMicroUsd: number }
   | {
-      status: "error";
-      error: string;
-      providerError?: ProviderErrorKind;
+      status: "provider-error";
+      providerError: ProviderErrorKind;
       usage: TokenUsage;
       costMicroUsd: number;
     };
@@ -162,18 +163,8 @@ export function judgeCostMicroUsd(usage: TokenUsage): number {
   return Math.ceil(total / 1_000_000);
 }
 
-function outcomeError(
-  error: string,
-  usage: TokenUsage,
-  providerError?: ProviderErrorKind,
-): JudgeOutcome {
-  const outcome = {
-    status: "error",
-    error,
-    usage,
-    costMicroUsd: judgeCostMicroUsd(usage),
-  } as const;
-  return providerError === undefined ? outcome : { ...outcome, providerError };
+function outcomeError(error: string, usage: TokenUsage): JudgeOutcome {
+  return { status: "error", error, usage, costMicroUsd: judgeCostMicroUsd(usage) };
 }
 
 /**
@@ -219,11 +210,12 @@ export async function judgeAnswer(input: JudgeInput, model: LanguageModel): Prom
     const providerError = providerErrorKind(error);
     if (providerError !== undefined) {
       // The kind only: the provider's message never reaches the report.
-      return outcomeError(
-        `the judge call hit a provider error: ${providerError}`,
-        tokenUsage(undefined),
+      return {
+        status: "provider-error",
         providerError,
-      );
+        usage: tokenUsage(undefined),
+        costMicroUsd: 0,
+      };
     }
     return outcomeError(
       `the judge call failed: ${error instanceof Error ? error.message : String(error)}`,
@@ -243,6 +235,10 @@ function oneLine(text: string): string {
  * failure is one `judge-error` check, kept apart from the bot's failures.
  */
 export function judgeChecks(outcome: JudgeOutcome): CheckResult[] {
+  if (outcome.status === "provider-error") {
+    const reason = `the judge call hit a provider error: ${outcome.providerError}`;
+    return [{ name: "judge-error", pass: false, reason }];
+  }
   if (outcome.status === "error") {
     return [{ name: "judge-error", pass: false, reason: oneLine(outcome.error) }];
   }

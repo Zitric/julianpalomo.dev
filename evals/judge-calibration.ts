@@ -180,7 +180,7 @@ export type CalibrationResult = {
  */
 export function calibrationResult(item: CalibrationItem, outcome: JudgeOutcome): CalibrationResult {
   const base = { id: item.id, expected: item.expected, costMicroUsd: outcome.costMicroUsd };
-  if (outcome.status === "error" && outcome.providerError !== undefined) {
+  if (outcome.status === "provider-error") {
     return {
       ...base,
       pass: false,
