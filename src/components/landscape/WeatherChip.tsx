@@ -42,7 +42,8 @@ export function WeatherChip({ weather }: { weather: LiveWeather | null }) {
 
   return (
     <p className={pill}>
-      <span className="hidden sm:inline">{where} · </span>
+      {/* A string, so the space before the temperature survives JSX's trimming. */}
+      <span className="hidden sm:inline">{`${where} · `}</span>
       {temperature} · {label}
     </p>
   );
