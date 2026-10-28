@@ -1,5 +1,7 @@
 import { type FormEvent, type KeyboardEvent, type Ref, useId } from "react";
 import { MAX_VISITOR_TEXT } from "../../lib/bot/limits";
+import { t } from "../../lib/i18n/t";
+import { useLocale } from "../i18n/useLocale";
 import { IconButton } from "../ui/IconButton";
 
 type Props = {
@@ -13,10 +15,9 @@ type Props = {
   ref?: Ref<HTMLTextAreaElement>;
 };
 
-const numberFormat = new Intl.NumberFormat("en");
-
 /** The question box: Enter sends, Shift+Enter adds a line, and a counter enforces the limit. */
 export function Composer({ value, onChange, onSend, onStop, onFocus, onBlur, busy, ref }: Props) {
+  const locale = useLocale();
   const inputId = useId();
   const counterId = useId();
   const length = value.length;
@@ -25,8 +26,8 @@ export function Composer({ value, onChange, onSend, onStop, onFocus, onBlur, bus
 
   const counterText =
     over > 0
-      ? `${numberFormat.format(over)} ${over === 1 ? "character" : "characters"} over the ${numberFormat.format(MAX_VISITOR_TEXT)} limit`
-      : `${numberFormat.format(length)} / ${numberFormat.format(MAX_VISITOR_TEXT)}`;
+      ? t(locale, "counterOver")(over, MAX_VISITOR_TEXT)
+      : t(locale, "counter")(length, MAX_VISITOR_TEXT);
   const counterClass = over > 0 ? "text-danger" : "text-muted";
 
   function submit(event: FormEvent) {
@@ -44,7 +45,7 @@ export function Composer({ value, onChange, onSend, onStop, onFocus, onBlur, bus
   return (
     <form onSubmit={submit} className="flex flex-col gap-2">
       <label htmlFor={inputId} className="text-[12.5px] font-semibold text-muted">
-        Your question
+        {t(locale, "questionLabel")}
       </label>
       {/* The box, not the textarea, shows focus: its border turns accent with a
           glow, in place of the outline ring. */}
@@ -68,11 +69,11 @@ export function Composer({ value, onChange, onSend, onStop, onFocus, onBlur, bus
           className="min-w-0 flex-1 resize-none self-center bg-transparent py-2 text-base focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-transparent"
         />
         {busy ? (
-          <IconButton look="accent" label="Stop" onClick={onStop}>
+          <IconButton look="accent" label={t(locale, "stop")} onClick={onStop}>
             <StopIcon />
           </IconButton>
         ) : (
-          <IconButton look="accent" label="Send" type="submit" disabled={!canSend}>
+          <IconButton look="accent" label={t(locale, "send")} type="submit" disabled={!canSend}>
             <SendIcon />
           </IconButton>
         )}

@@ -1,16 +1,14 @@
-const SUGGESTIONS = [
-  "What did Julian do at Cazoo?",
-  "What is Form:at?",
-  "Is Julian open to remote work?",
-] as const;
+import { t } from "../../lib/i18n/t";
+import { useLocale } from "../i18n/useLocale";
 
 type Props = { onPick: (question: string) => void };
 
 /** Questions to start with, sent as an ordinary message. */
 export function Suggestions({ onPick }: Props) {
+  const locale = useLocale();
   return (
-    <ul aria-label="Suggested questions" className="flex flex-wrap gap-2">
-      {SUGGESTIONS.map((question) => (
+    <ul aria-label={t(locale, "suggestionsLabel")} className="flex flex-wrap gap-2">
+      {t(locale, "suggestions").map((question) => (
         <li key={question}>
           <button
             type="button"

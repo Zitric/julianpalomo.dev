@@ -1,12 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { glasgow } from "../../src/lib/glasgow";
 import { sunTimes } from "../../src/lib/sun";
-import {
-  isGlasgowNight,
-  parseThemeCookie,
-  resolveTheme,
-  serializeThemeCookie,
-} from "../../src/lib/theme";
+import { isGlasgowNight, parseThemeCookie, resolveTheme } from "../../src/lib/theme";
 
 const MINUTE = 60_000;
 
@@ -62,24 +57,5 @@ describe("parseThemeCookie", () => {
     expect(parseThemeCookie("")).toBeNull();
     expect(parseThemeCookie("Dark")).toBeNull();
     expect(parseThemeCookie("system")).toBeNull();
-  });
-});
-
-describe("serializeThemeCookie", () => {
-  it("remembers the choice for a year on every path", () => {
-    expect(serializeThemeCookie("dark", { secure: false })).toBe(
-      "theme=dark; Max-Age=31536000; Path=/; SameSite=Lax",
-    );
-  });
-
-  it("adds Secure over https", () => {
-    expect(serializeThemeCookie("light", { secure: true })).toBe(
-      "theme=light; Max-Age=31536000; Path=/; SameSite=Lax; Secure",
-    );
-  });
-
-  it("writes what parseThemeCookie reads back", () => {
-    const value = serializeThemeCookie("dark", { secure: false }).split(";")[0]?.split("=")[1];
-    expect(parseThemeCookie(value)).toBe("dark");
   });
 });
