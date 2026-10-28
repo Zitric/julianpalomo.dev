@@ -2,7 +2,7 @@
 # PreToolUse hook for the Bash tool. Blocks (exit 2, reason on stderr) the git
 # and GitHub commands AGENTS.md §1 forbids and any command that could write
 # src/content/claims.json, and returns an "ask" decision for
-# slow commands, dependency changes and anything wrangler. Everything else exits
+# discarding changes, dependency changes and anything wrangler. Everything else exits
 # 0 with no output, which leaves the normal permission flow in charge.
 #
 # The command is split on && || ; | and newlines and each segment is checked on
@@ -162,16 +162,14 @@ while IFS= read -r raw; do
     block "merging or enabling auto-merge through the API is still merging. The repo owner merges."
   fi
 
-  # ── Slow, dependency-changing or Cloudflare commands: ask ─────────────────
+  # ── Dependency-changing or Cloudflare commands: ask ───────────────────────
+  # Builds and e2e runs pass: they cost nothing, and AGENTS.md §3 says when to
+  # run them.
   if printf '%s' "$seg" | grep -qE '^((npx|pnpm( +exec| +dlx)?) +)?([^ ]*/)?wrangler( |$)'; then
     want_ask "wrangler talks to Cloudflare or starts its runtime; ask the repo owner first."
   fi
-  if printf '%s' "$seg" | grep -qE '^pnpm( |$)'; then
-    if printf '%s' "$seg" | grep -qE ' (build|test:e2e)( |$)|exec +(vite +build|playwright +test)( |$)'; then
-      want_ask "builds and e2e runs take minutes; ask the repo owner first."
-    elif printf '%s' "$seg" | grep -qE '^pnpm( +(-C|--dir|--filter|-F) +[^ ]+| +-[^ ]+)* +(add|install|i|update|up|remove|rm|uninstall)( |$)'; then
-      want_ask "this changes dependencies or the lockfile; ask the repo owner first."
-    fi
+  if printf '%s' "$seg" | grep -qE '^pnpm( +(-C|--dir|--filter|-F) +[^ ]+| +-[^ ]+)* +(add|install|i|update|up|remove|rm|uninstall)( |$)'; then
+    want_ask "this changes dependencies or the lockfile; ask the repo owner first."
   fi
 done <<EOF
 $segments
