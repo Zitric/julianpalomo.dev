@@ -16,7 +16,7 @@ pnpm test
 ```
 
 - Add `pnpm knip` when the change touches exports, `package.json` or `pnpm-lock.yaml`.
-- Add one full `pnpm eval` run, and its cost (bot, judge, calibration) in the summary, when the change touches `evals/`, the prompt, the tools, the model's settings or a claim (`.claude/rules/evals.md`). After changing the judge's prompt, model or effort, also run the calibration alone three times (`EVAL_CALIBRATION_ONLY=1 pnpm eval`) and say whether any item's verdict changed. Both call the real models.
+- Run `/run-evals` for one full `pnpm eval` run when the change touches `src/lib/bot/`, `src/lib/claims.ts`, `src/content/claims.json`, `evals/`, `vitest.evals.config.ts`, `package.json` or `pnpm-lock.yaml`, and put its cost (bot, judge, calibration) in the summary. After changing the judge's prompt, model or effort, also run the calibration alone three times (`EVAL_CALIBRATION_ONLY=1 pnpm eval`) and say whether any item's verdict changed. Both call the real models.
 - Add `bash .claude/hooks/tests/run.sh` when anything in `.claude/hooks/` or `biome.json` changed.
 - `pnpm build` and `pnpm test:e2e` take minutes: only when the change touches routes, the build or CI, and ask first. Otherwise rely on CI's e2e job and say so.
 
