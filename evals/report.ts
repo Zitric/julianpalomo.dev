@@ -403,3 +403,20 @@ export function formatJobSummary(
   if (failed.length > 0) lines.push("", `Failed runs: ${failed.join(", ")}`);
   return `${lines.join("\n")}\n`;
 }
+
+/**
+ * Each warning as a GitHub Actions `::warning::` command, so it shows as an
+ * annotation on the run without opening the job summary. The message escapes
+ * `%`, CR and LF as GitHub requires; an unescaped `%` garbles "90%".
+ */
+export function formatAnnotations(summary: Summary): string {
+  return summary.warnings
+    .map((warning) => {
+      const message = warning
+        .replaceAll("%", "%25")
+        .replaceAll("\r", "%0D")
+        .replaceAll("\n", "%0A");
+      return `::warning title=Evals::${message}\n`;
+    })
+    .join("");
+}

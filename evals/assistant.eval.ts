@@ -30,6 +30,7 @@ import { type CalibrationResult, runCalibration } from "./judge-calibration";
 import { providerErrorKind } from "./provider-errors";
 import {
   COST_CAP_MICRO_USD,
+  formatAnnotations,
   formatCalibration,
   formatJobSummary,
   formatReport,
@@ -191,10 +192,15 @@ async function judge(
 
 const MODEL_LABEL = `${MODEL_ID}, judged by ${JUDGE_MODEL_ID}`;
 
-/** In GitHub Actions, the summary also goes to the job's summary page. */
+/**
+ * In GitHub Actions, the summary also goes to the job's summary page, and each
+ * warning to an annotation on the run.
+ */
 function writeJobSummary(summary: Summary): void {
   const file = process.env.GITHUB_STEP_SUMMARY;
   if (file) appendFileSync(file, redact(formatJobSummary(summary, records, MODEL_LABEL)));
+  if (process.env.GITHUB_ACTIONS === "true")
+    process.stdout.write(redact(formatAnnotations(summary)));
 }
 
 afterAll(() => {

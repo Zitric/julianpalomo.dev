@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { ProviderErrorKind } from "../../evals/provider-errors";
 import {
   COST_CAP_MICRO_USD,
+  formatAnnotations,
   formatCalibration,
   formatJobSummary,
   formatReport,
@@ -349,5 +350,18 @@ describe("formatJobSummary", () => {
     const text = formatJobSummary(summarize(records), records, "bot");
     expect(text).toMatch(/^## Evals: PASS\n\n\| \| \|\n/);
     expect(text).not.toContain("Failed runs");
+  });
+});
+
+describe("formatAnnotations", () => {
+  it("writes each warning as a workflow command, with its % escaped", () => {
+    const summary = summarize(runs(8, 2), [], { passRate: "reported" });
+    expect(formatAnnotations(summary)).toBe(
+      "::warning title=Evals::80%25 of runs passed, below 90%25: reported, not enforced\n",
+    );
+  });
+
+  it("writes nothing when there is no warning", () => {
+    expect(formatAnnotations(summarize(runs(8, 2)))).toBe("");
   });
 });
