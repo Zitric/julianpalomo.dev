@@ -84,6 +84,23 @@ describe("calibrationResult", () => {
   });
 });
 
+describe("calibrationResult with a provider error", () => {
+  it("fails the item with the kind, so the run is inconclusive instead of the judge wrong", () => {
+    const result = calibrationResult(item, {
+      status: "error",
+      error: "the judge call hit a provider error: credit",
+      providerError: "credit",
+      usage: zero,
+      costMicroUsd: 0,
+    });
+    expect(result).toMatchObject({
+      pass: false,
+      providerError: "credit",
+      reason: "provider error: credit",
+    });
+  });
+});
+
 describe("CALIBRATION_ITEMS", () => {
   it("has unique ids and builds every item on confirmed claims", () => {
     expect(new Set(CALIBRATION_ITEMS.map((entry) => entry.id)).size).toBe(CALIBRATION_ITEMS.length);

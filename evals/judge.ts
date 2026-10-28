@@ -17,6 +17,7 @@ import { z } from "zod";
 import type { TokenUsage } from "../src/lib/bot/limits";
 import type { CheckResult } from "./checks";
 import { JUDGE_PROMPT } from "./judge-prompt";
+import { type ProviderErrorKind, providerErrorKind } from "./provider-errors";
 import type { ToolCall } from "./run-case";
 
 /** Julian's choice of judge. It is also the bot's model; the calibration shows it still catches overclaims. */
@@ -81,10 +82,20 @@ export type JudgeInput = {
   rubric: string;
 };
 
-/** What one judge call gave: a verdict, or why there isn't one. Either way it cost something. */
+/**
+ * What one judge call gave: a verdict, or why there isn't one. Either way it
+ * cost something. `providerError` is set when the call failed because the
+ * model API did, which says nothing about the judge or the bot.
+ */
 export type JudgeOutcome =
   | { status: "judged"; verdict: JudgeVerdict; usage: TokenUsage; costMicroUsd: number }
-  | { status: "error"; error: string; usage: TokenUsage; costMicroUsd: number };
+  | {
+      status: "error";
+      error: string;
+      providerError?: ProviderErrorKind;
+      usage: TokenUsage;
+      costMicroUsd: number;
+    };
 
 const toolClaimsSchema = z.object({
   claims: z.array(
@@ -151,8 +162,18 @@ export function judgeCostMicroUsd(usage: TokenUsage): number {
   return Math.ceil(total / 1_000_000);
 }
 
-function outcomeError(error: string, usage: TokenUsage): JudgeOutcome {
-  return { status: "error", error, usage, costMicroUsd: judgeCostMicroUsd(usage) };
+function outcomeError(
+  error: string,
+  usage: TokenUsage,
+  providerError?: ProviderErrorKind,
+): JudgeOutcome {
+  const outcome = {
+    status: "error",
+    error,
+    usage,
+    costMicroUsd: judgeCostMicroUsd(usage),
+  } as const;
+  return providerError === undefined ? outcome : { ...outcome, providerError };
 }
 
 /**
@@ -193,6 +214,15 @@ export async function judgeAnswer(input: JudgeInput, model: LanguageModel): Prom
       return outcomeError(
         `the judge's output didn't fit the schema (finish: ${error.finishReason ?? "unknown"})`,
         tokenUsage(error.usage),
+      );
+    }
+    const providerError = providerErrorKind(error);
+    if (providerError !== undefined) {
+      // The kind only: the provider's message never reaches the report.
+      return outcomeError(
+        `the judge call hit a provider error: ${providerError}`,
+        tokenUsage(undefined),
+        providerError,
       );
     }
     return outcomeError(

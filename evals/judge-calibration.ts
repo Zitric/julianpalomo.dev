@@ -8,6 +8,7 @@
 import type { LanguageModel } from "ai";
 import { confirmedClaims } from "../src/lib/claims";
 import { type JudgeClaim, type JudgeOutcome, judgeAnswer, type Verdict } from "./judge";
+import type { ProviderErrorKind } from "./provider-errors";
 
 export type CalibrationItem = {
   id: string;
@@ -166,16 +167,29 @@ export type CalibrationResult = {
   sentences: { sentence: string; verdict: Verdict; reason: string }[];
   /** Why it failed, in one line; empty when it passed. */
   reason: string;
+  /** Set when the judge call failed because the model API did: the item says nothing about the judge. */
+  providerError?: ProviderErrorKind;
   costMicroUsd: number;
 };
 
 /**
  * An item passes only when the judge returned at least one sentence and every
  * one has the expected verdict. No sentences at all is a failure, and so is
- * a judge error.
+ * a judge error. A provider error isn't passed either, and keeps its kind, so
+ * the run is inconclusive instead of blaming the judge.
  */
 export function calibrationResult(item: CalibrationItem, outcome: JudgeOutcome): CalibrationResult {
   const base = { id: item.id, expected: item.expected, costMicroUsd: outcome.costMicroUsd };
+  if (outcome.status === "error" && outcome.providerError !== undefined) {
+    return {
+      ...base,
+      pass: false,
+      verdicts: [],
+      sentences: [],
+      reason: `provider error: ${outcome.providerError}`,
+      providerError: outcome.providerError,
+    };
+  }
   if (outcome.status === "error") {
     return {
       ...base,
