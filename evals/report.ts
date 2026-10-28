@@ -14,6 +14,14 @@ import type { ToolCall } from "./run-case";
 export const PASS_RATE = 0.9;
 
 /**
+ * Whether a pass rate below PASS_RATE fails the run ("enforced") or only
+ * warns ("reported"). CI reports it: one repeat of a baseline at the threshold
+ * lands on either side of it from noise alone
+ * (docs/adr/2026-10-28-evals-in-ci.md). Every other reason still fails.
+ */
+export type PassRatePolicy = "enforced" | "reported";
+
+/**
  * A run stops starting new runs once its estimated cost passes this ($2.00),
  * the bot, the judge and the calibration together. Up to four runs already in
  * flight can still finish past it.
@@ -50,6 +58,8 @@ export type Summary = {
   verdict: "pass" | "fail" | "inconclusive";
   /** Why the run fails or is inconclusive, the provider errors first; empty when it passes. */
   reasons: string[];
+  /** What is reported without failing the run: a low pass rate under the "reported" policy. */
+  warnings: string[];
   passed: number;
   /** Runs that passed or failed: never the skipped ones or the provider errors. */
   ran: number;
@@ -139,14 +149,16 @@ export function skippedRecord(caseId: string, critical: boolean, run: number): R
 
 /**
  * The verdict: the judge got every calibration item right, every critical case
- * passes every run, at least PASS_RATE of all runs pass, and the cost cap
- * stopped nothing. Any provider error makes it inconclusive instead: such a
- * run or item says nothing about the bot or the judge, so it counts neither in
- * the pass rate nor toward the critical cases, and the run can't pass without it.
+ * passes every run, at least PASS_RATE of all runs pass (unless the pass rate
+ * is only reported, as a warning), and the cost cap stopped nothing. Any
+ * provider error makes it inconclusive instead: such a run or item says
+ * nothing about the bot or the judge, so it counts neither in the pass rate
+ * nor toward the critical cases, and the run can't pass without it.
  */
 export function summarize(
   records: readonly RunRecord[],
   calibration: readonly CalibrationResult[] = [],
+  options: { passRate?: PassRatePolicy } = {},
 ): Summary {
   const ran = records.filter(
     (record) => record.outcome === "passed" || record.outcome === "failed",
@@ -211,8 +223,11 @@ export function summarize(
   if (criticalFailures.length > 0) {
     reasons.push(`critical cases failed: ${criticalFailures.join(", ")}`);
   }
+  const warnings: string[] = [];
   if (ran.length > 0 && passRate < PASS_RATE) {
-    reasons.push(`${percent(passRate)} of runs passed, below ${percent(PASS_RATE)}`);
+    const low = `${percent(passRate)} of runs passed, below ${percent(PASS_RATE)}`;
+    if ((options.passRate ?? "enforced") === "enforced") reasons.push(low);
+    else warnings.push(`${low}: reported, not enforced`);
   }
   if (skipped > 0) {
     reasons.push(
@@ -223,6 +238,7 @@ export function summarize(
   return {
     verdict: inconclusive ? "inconclusive" : reasons.length > 0 ? "fail" : "pass",
     reasons,
+    warnings,
     passed,
     ran: ran.length,
     skipped,
@@ -347,7 +363,60 @@ export function formatReport(
     `Provider errors: ${providerErrorLine(summary.providerErrors)}`,
     `Bot tokens: ${input} input, ${output} output, ${cacheRead} cache read, ${cacheWrite} cache write`,
     `Estimated cost: ${dollars(summary.costMicroUsd)} (bot ${dollars(summary.botCostMicroUsd)}, judge ${dollars(summary.judgeCostMicroUsd)}, calibration ${dollars(summary.calibrationCostMicroUsd)})`,
+    ...summary.warnings.map((warning) => `Warning: ${warning}`),
     resultLine(summary),
   );
   return lines.join("\n");
+}
+
+/**
+ * The run's summary as Markdown, for GitHub's job summary page: the result and
+ * why, the warnings, the score, the critical failures, the calibration, the
+ * provider errors, the cost, and each failed run by case and number. The
+ * answers stay in the JSON results.
+ */
+export function formatJobSummary(
+  summary: Summary,
+  records: readonly RunRecord[],
+  model: string,
+): string {
+  const failed = records
+    .filter((record) => record.outcome === "failed")
+    .sort((a, b) => a.caseId.localeCompare(b.caseId) || a.run - b.run)
+    .map((record) => `\`${record.caseId}\` #${record.run}${record.critical ? " (critical)" : ""}`);
+  const lines = [
+    `## Evals: ${summary.verdict.toUpperCase()}`,
+    "",
+    ...summary.reasons.map((reason) => `- ${reason}`),
+    ...summary.warnings.map((warning) => `- Warning: ${warning}`),
+    ...(summary.reasons.length + summary.warnings.length > 0 ? [""] : []),
+    "| | |",
+    "| --- | --- |",
+    `| Model | ${model} |`,
+    `| Passed | ${summary.passed}/${summary.ran} runs (${percent(summary.passRate)}) |`,
+    `| Critical failures | ${summary.criticalFailures.length === 0 ? "none" : summary.criticalFailures.join(", ")} |`,
+    `| Calibration | ${summary.calibration.passed}/${summary.calibration.total} right |`,
+    `| Judge errors | ${summary.judgeErrors} |`,
+    `| Provider errors | ${providerErrorLine(summary.providerErrors)} |`,
+    `| Estimated cost | ${dollars(summary.costMicroUsd)} (bot ${dollars(summary.botCostMicroUsd)}, judge ${dollars(summary.judgeCostMicroUsd)}, calibration ${dollars(summary.calibrationCostMicroUsd)}) |`,
+  ];
+  if (failed.length > 0) lines.push("", `Failed runs: ${failed.join(", ")}`);
+  return `${lines.join("\n")}\n`;
+}
+
+/**
+ * Each warning as a GitHub Actions `::warning::` command, so it shows as an
+ * annotation on the run without opening the job summary. The message escapes
+ * `%`, CR and LF as GitHub requires; an unescaped `%` garbles "90%".
+ */
+export function formatAnnotations(summary: Summary): string {
+  return summary.warnings
+    .map((warning) => {
+      const message = warning
+        .replaceAll("%", "%25")
+        .replaceAll("\r", "%0D")
+        .replaceAll("\n", "%0A");
+      return `::warning title=Evals::${message}\n`;
+    })
+    .join("");
 }

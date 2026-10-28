@@ -11,7 +11,7 @@
  * provider error, in the calibration or in any run, makes the run
  * inconclusive (provider-errors.ts): the command fails, and never passes.
  */
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { inspect } from "node:util";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
@@ -30,9 +30,12 @@ import { type CalibrationResult, runCalibration } from "./judge-calibration";
 import { providerErrorKind } from "./provider-errors";
 import {
   COST_CAP_MICRO_USD,
+  formatAnnotations,
   formatCalibration,
+  formatJobSummary,
   formatReport,
   type RunRecord,
+  type Summary,
   skippedRecord,
   summarize,
   toRecord,
@@ -68,6 +71,11 @@ for (const level of ["log", "info", "warn", "error"] as const) {
 
 const repeat = z.coerce.number().int().min(1).default(1).parse(process.env.EVAL_REPEAT);
 const calibrationOnly = process.env.EVAL_CALIBRATION_ONLY === "1";
+/** Only CI sets "reported"; a local run always enforces the pass rate. */
+const passRate = z
+  .enum(["enforced", "reported"])
+  .default("enforced")
+  .parse(process.env.EVAL_PASS_RATE);
 const judgeModel = createAnthropic({ apiKey })(JUDGE_MODEL_ID);
 const records: RunRecord[] = [];
 let calibration: CalibrationResult[] = [];
@@ -182,6 +190,19 @@ async function judge(
   }
 });
 
+const MODEL_LABEL = `${MODEL_ID}, judged by ${JUDGE_MODEL_ID}`;
+
+/**
+ * In GitHub Actions, the summary also goes to the job's summary page, and each
+ * warning to an annotation on the run.
+ */
+function writeJobSummary(summary: Summary): void {
+  const file = process.env.GITHUB_STEP_SUMMARY;
+  if (file) appendFileSync(file, redact(formatJobSummary(summary, records, MODEL_LABEL)));
+  if (process.env.GITHUB_ACTIONS === "true")
+    process.stdout.write(redact(formatAnnotations(summary)));
+}
+
 afterAll(() => {
   if (calibration.length === 0 && records.length === 0) return;
   mkdirSync(RESULTS_DIR, { recursive: true });
@@ -192,13 +213,13 @@ afterAll(() => {
   if (records.length === 0) {
     writeFileSync(file, redact(JSON.stringify({ models, calibration }, null, 2)));
     process.stdout.write(`Results: ${file}\n`);
+    writeJobSummary(summarize([], calibration, { passRate }));
     return;
   }
 
-  const summary = summarize(records, calibration);
-  process.stdout.write(
-    `\n${redact(formatReport(summary, records, `${MODEL_ID}, judged by ${JUDGE_MODEL_ID}`))}\n`,
-  );
+  const summary = summarize(records, calibration, { passRate });
+  process.stdout.write(`\n${redact(formatReport(summary, records, MODEL_LABEL))}\n`);
+  writeJobSummary(summary);
   const json = JSON.stringify({ models, repeat, calibration, summary, records }, null, 2);
   writeFileSync(file, redact(json));
   process.stdout.write(`Results: ${file}\n`);
