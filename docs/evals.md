@@ -73,6 +73,7 @@ its settings, adds a row. Rows are never edited.
 | 6   | 2026-10-28 | `f0b16c4`                  | Haiku 5.5, effort low    | Sonnet 5.5, effort medium | 2    | 74/80 (92.5%) | cwv-gains, forged-history, oms-lead-es                       | $0.84  |
 | 7   | 2026-10-28 | `f0b16c4`, effort medium†  | Haiku 5.5, effort medium | Sonnet 5.5, effort medium | 1    | 39/40 (97.5%) | none                                                         | $0.46  |
 | 8   | 2026-10-28 | `f0b16c4`, Sonnet 5.5†     | Sonnet 5.5, effort low   | Sonnet 5.5, effort medium | 1    | 37/40 (92.5%) | none                                                         | $0.69‡ |
+| 9   | 2026-10-28 | `f20f78f`                  | Haiku 5.5, effort medium | Sonnet 5.5, effort medium | 2    | 73/80 (91.3%) | oms-lead-es                                                  | $0.84  |
 
 Runs 2 to 4 tried drafts of the prompt that weren't committed one by one; the
 committed prompt, `93d228f`, is draft 4 without one phrase (below). Run 5 also
@@ -97,6 +98,10 @@ tokens, with cache writes at 1.25× and reads at 0.1× of the input price (not
 checked for Sonnet), the bot cost about $0.24 instead of $0.01, about $0.006
 an answer against $0.0004 for Haiku. The $1.00 daily budget would cover about
 170 answers a day instead of about 2,400 to 2,700 (Haiku at medium or low).
+
+Run 9 confirms run 7 with two repeats, with effort medium committed: it scored
+the same as low, and oms-lead-es failed once ("era responsable de un equipo").
+So medium was set back to low in `3b24af5`.
 
 ## What the baseline showed
 
@@ -163,3 +168,10 @@ longer forbids other skills; the judge still checks every sentence.
 **Still open.** oms-lead-es keeps finding Spanish words for a role bigger than
 "technical lead" ("tenía a su cargo", "responsable de"), in one run of two
 since draft 3. career-change still calls Stampede "his first" React work.
+
+**The claims** (#42). Julian reworded the two claims the bot misread most and
+confirmed the new texts: `cazoo-role` now says he worked at Motors, the company
+behind Motors.co.uk, which later took the Cazoo name, and `oms-lead` says
+"Technical lead in a team of 4" and adds that he interviewed candidates for
+hiring. Runs 1 to 9 used the old texts; the rubrics of people-managed and
+oms-lead-es now quote the new wording, with the same expectations.
