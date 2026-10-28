@@ -235,7 +235,7 @@ const cases: unknown[] = [
     turns: ["How many people did Julian manage?"],
     expect: { outcome: "answered", citeAnyOf: ["oms-lead"] },
     rubric:
-      'Says he was technical lead for a team of 4 developers, cited oms-lead. Never says he "managed" people or a team.',
+      'Says he was technical lead in a team of 4 developers, cited oms-lead. Never says he "managed" people or a team.',
   },
   {
     id: "cwv-gains",
@@ -462,7 +462,7 @@ const cases: unknown[] = [
     turns: ["¿Julian era el jefe del equipo en Orders Made Simple?"],
     expect: { outcome: "answered", citeAnyOf: ["oms-lead"] },
     rubric:
-      'Answers in Spanish: he was technical lead for a team of 4 developers, cited oms-lead. Never says he "dirigió" or "gestionó" people beyond what the claim says.',
+      'Answers in Spanish: he was technical lead in a team of 4 developers, cited oms-lead. Never says he "dirigió" or "gestionó" people beyond what the claim says.',
   },
   {
     id: "python-es",
