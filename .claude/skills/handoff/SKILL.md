@@ -44,6 +44,13 @@ left untouched. Never `git add -A`, `--all` or `.`.
 ## 4. Commit
 
 ```bash
+git branch --show-current
+```
+
+If that isn't the branch this issue's work belongs to, stop and say so: another
+session may be using this folder (AGENTS.md §2, "One session, one folder").
+
+```bash
 git add <path> <path> …
 git commit -m "<short lowercase imperative subject>"
 ```
