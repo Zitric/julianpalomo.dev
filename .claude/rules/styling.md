@@ -15,9 +15,6 @@ Tailwind and `tokens.css`; `src/routes/__root.tsx` links `app.css`.
 - `@theme inline` exposes each variable as a Tailwind colour (`bg-background`, `text-foreground`, `text-muted`). A new colour is a new variable in all three blocks plus a line in `@theme inline`.
 - **No colour literals in components**: no hex, `oklch()` or Tailwind palette colours like `text-gray-500`. Use the token utilities.
 - **No `dark:` variants.** Dark mode is the tokens' job; a colour that differs in dark mode is a token.
-- Values are hex (`rgb()` for the translucent `glass`), matching the table in `DESIGN.md` section 2.
-- **Contrast is tested.** `tests/unit/tokens.test.ts` reads `tokens.css` and checks each pair on screen against WCAG AA in both themes (4.5:1 for text, 3:1 for field borders), and that the two dark blocks match. A new pair gets a line in its `pairs` list; a failing pair changes the value, and the `DESIGN.md` table with it.
-- Fields (the composer, form inputs) are outlined in `field-border`, which reaches 3:1; `border` is for chips and dividers only.
 
 ## Markup
 

@@ -60,31 +60,27 @@ All UI colours are tokens in `src/styles/tokens.css`, defined for light and
 dark as `.claude/rules/styling.md` says. The existing token names stay; these
 are their values and the new ones.
 
-| Token          | Light                    | Dark                  | Used for                                                     |
-| -------------- | ------------------------ | --------------------- | ------------------------------------------------------------ |
-| `background`   | `#F6F8F3`                | `#0E1511`             | Page                                                         |
-| `foreground`   | `#13201A`                | `#E8EFE9`             | Text                                                         |
-| `muted`        | `#4F5E55`                | `#9EB0A4`             | Secondary text, hints, labels                                |
-| `border`       | `#DCE5DA`                | `#24332A`             | Chip borders, dividers                                       |
-| `accent`       | `#2B6F4A`                | `#7FCB98`             | Buttons, links, citation numbers, focus ring                 |
-| `on-accent`    | `#FFFFFF`                | `#0E1511`             | Text and icons on `accent`                                   |
-| `tint`         | `#E6F0E6`                | `#18241D`             | Assistant bubbles, status pill, icon buttons in the bar      |
-| `field`        | `#FFFFFF`                | `#121B16`             | The composer and form fields                                 |
-| `field-border` | `#7F9184`                | `#587060`             | The border of the composer and form fields (3:1 on the page) |
-| `user`         | `#2B6F4A`                | `#2B6F4A`             | The visitor's bubbles (the same green in both themes)        |
-| `on-user`      | `#FFFFFF`                | `#FFFFFF`             | Text on `user`                                               |
-| `glass`        | `rgb(246 248 243 / 86%)` | `rgb(14 21 17 / 80%)` | Chips and buttons that sit on the landscape, with a 6px blur |
-| `danger`       | `#B7191C`                | `#FD7468`             | Only for a broken field in the contact form                  |
-| `live`         | `#E5484D`                | `#E5484D`             | The small "live" dot in "Back to live Glasgow"               |
+| Token        | Light                    | Dark                   | Used for                                                     |
+| ------------ | ------------------------ | ---------------------- | ------------------------------------------------------------ |
+| `background` | `#F6F8F3`                | `#0E1511`              | Page                                                         |
+| `foreground` | `#13201A`                | `#E8EFE9`              | Text                                                         |
+| `muted`      | `#4F5E55`                | `#9EB0A4`              | Secondary text, hints, labels                                |
+| `border`     | `#DCE5DA`                | `#24332A`              | Field and chip borders, dividers                             |
+| `accent`     | `#2B6F4A`                | `#7FCB98`              | Buttons, links, citation numbers, focus ring                 |
+| `on-accent`  | `#FFFFFF`                | `#0E1511`              | Text and icons on `accent`                                   |
+| `tint`       | `#E6F0E6`                | `#18241D`              | Assistant bubbles, status pill, icon buttons in the bar      |
+| `field`      | `#FFFFFF`                | `#121B16`              | The composer and form fields                                 |
+| `user`       | `#2B6F4A`                | `#2B6F4A`              | The visitor's bubbles (the same green in both themes)        |
+| `on-user`    | `#FFFFFF`                | `#FFFFFF`              | Text on `user`                                               |
+| `glass`      | `rgb(246 248 243 / 86%)` | `rgb(14 21 17 / 80%)`  | Chips and buttons that sit on the landscape, with a 6px blur |
+| `danger`     | keep the current value   | keep the current value | Only for a broken field in the contact form                  |
+| `live`       | `#E5484D`                | `#E5484D`              | The small "live" dot in "Back to live Glasgow"               |
 
-The values were picked by eye on the canvas, then measured:
-`tests/unit/tokens.test.ts` reads `tokens.css` and checks every text pair
-against WCAG AA (4.5:1 for text, 3:1 for UI parts) in both themes. Where a
-pair fails, the value changes, not the rule. `border` is too faint to outline
-a field (1.2:1 on the page), so fields have their own `field-border`, and
-`border` stays for dividers and chips. `danger` is the colour it already had,
-written in hex. `tokens.css` uses hex, so it reads the same as this table and
-the test needs no colour conversion.
+The values were picked by eye on the canvas and haven't been measured. The
+tokens issue measures every text pair against WCAG AA (4.5:1 for text, 3:1
+for large text and UI parts) and adjusts the value, not the rule, where one
+fails. Hex or `oklch()` are both fine in `tokens.css`; the existing file uses
+`oklch()`, so convert for consistency.
 
 ### The landscape's palette
 
@@ -127,9 +123,8 @@ never use a colour literal.
 - **Spacing:** a 4px scale (Tailwind's default). The page gutter is 16px on
   mobile and 24px from `sm` up.
 - **Touch targets:** at least 44 × 44px on mobile, including icon buttons.
-- **Borders:** 1.5–2px, in `border` for chips and dividers and in
-  `field-border` for fields; a focused field's border turns `accent`, with a
-  4px glow of `accent` at 22% opacity.
+- **Borders:** 1.5–2px in `border`; a focused field's border turns `accent`,
+  with a 4px glow of `accent` at 22% opacity.
 - **Buttons:** flat. The primary button is `accent` on `on-accent`; it
   brightens slightly on hover and, when pressed, scales to `0.92` (round icon
   buttons such as Send) or `0.97` (wide buttons such as "Back to live
