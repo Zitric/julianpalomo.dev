@@ -11,7 +11,8 @@ each answer comes from, and say "I don't know" when it doesn't.
 The home page has my name, my role and a chat with the assistant. It is a
 TanStack Start app (React, TypeScript in strict mode, Tailwind CSS) that runs
 on Cloudflare Workers at [julianpalomo.dev](https://julianpalomo.dev). There is
-no visual design yet: the page is plain on purpose.
+no visual design yet: the page is plain on purpose. [`DESIGN.md`](DESIGN.md)
+describes the design being built.
 
 You ask a question and the answer streams in from Claude (Haiku 5.5, through
 the Vercel AI SDK), which can only look up the facts I've confirmed. Each fact
@@ -148,6 +149,8 @@ Each decision is recorded as it's made, one file each, in `docs/adr/`.
   repo.
 - [How a question is answered](docs/architecture.md): the path of one question
   through the limits, the model, its tools and the citation check.
+- [`DESIGN.md`](DESIGN.md): how the site looks, moves and sounds: colours,
+  type, the live Highland landscape, the cow and the chat.
 - [Architecture decision records](docs/adr/README.md): what was decided,
   what else was considered, and why.
 - [Tech debt](docs/tech-debt.md): shortcuts taken on purpose, and their status.

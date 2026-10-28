@@ -31,3 +31,4 @@ files are the answer, written down at the time instead of remembered later.
 | 2026-10-27 | [Deploys with Cloudflare Workers Builds](2026-10-27-deploy-with-workers-builds.md)                   |
 | 2026-10-27 | [Claims in English only](2026-10-27-claims-in-english-only.md)                                       |
 | 2026-10-27 | [Claude Haiku 5.5 at low effort, on AI SDK 7](2026-10-27-claude-model-and-ai-sdk-7.md)               |
+| 2026-10-28 | [The visual direction: a live Highland landscape and a cow](2026-10-28-visual-direction.md)          |

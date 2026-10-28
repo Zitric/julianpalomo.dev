@@ -1,0 +1,659 @@
+# DESIGN.md
+
+How julianpalomo.dev looks, moves and sounds. It is the spec for the visual
+design: every issue in the visual-design epic builds a piece of it, and a
+change to the design starts here, before any code.
+
+The design was explored on a private canvas of mock-ups. This file and the
+reference files in [`docs/design/`](docs/design/) are what survived it, and
+they are the source of truth. The decision record is
+[`docs/adr/2026-10-28-visual-direction.md`](docs/adr/2026-10-28-visual-direction.md).
+
+**Status:** agreed with Julian on 28 October 2026. Until the epic's issues are
+closed, the live site is still the plain page from phase 4.
+
+## Contents
+
+1. [Principles](#1-principles)
+2. [Colour](#2-colour)
+3. [Type](#3-type)
+4. [Shape and spacing](#4-shape-and-spacing)
+5. [Layout](#5-layout)
+6. [Theme: Glasgow's day and night](#6-theme-glasgows-day-and-night)
+7. [The landscape](#7-the-landscape)
+8. [Play with the sky](#8-play-with-the-sky)
+9. [The assistant](#9-the-assistant)
+10. [The chat](#10-the-chat)
+11. [Motion](#11-motion)
+12. [Sound](#12-sound)
+13. [The portrait](#13-the-portrait)
+14. [CV and contact](#14-cv-and-contact)
+15. [Accessibility](#15-accessibility)
+16. [Reference files](#16-reference-files)
+17. [Not in this design](#17-not-in-this-design)
+
+## 1. Principles
+
+- **Warm and playful, never in the way.** The landscape, the cow and the
+  sounds are there to make people smile. The content (who Julian is, the chat,
+  the CV) always comes first, loads first and never waits for decoration.
+- **Alive, and true.** The landscape is Glasgow's real season, time and
+  weather. When a visitor plays with it, the page says so ("Your sky"), so
+  nobody thinks it's snowing in Glasgow in August.
+- **Mobile first.** Every layout starts at 375px wide and works down to 320px
+  with no horizontal scroll. Desktop is a wider arrangement of the same parts,
+  not a different site.
+- **One accent.** The green of Julian's CV, `#2B6F4A`, is the only accent.
+  Seasons change the landscape and its particles, never the UI colours, so the
+  site looks like itself in January and in July.
+- **Motion and sound are optional extras.** With `prefers-reduced-motion`,
+  nothing moves that doesn't have to (section 11). With sound muted, nothing
+  is lost (section 12). Nothing is ever conveyed by animation or sound alone.
+- **Flat.** Flat fills, no drop shadows on buttons, rounded shapes. The only
+  shadows are on things that float: the gear panel and dialogs.
+
+## 2. Colour
+
+### UI tokens
+
+All UI colours are tokens in `src/styles/tokens.css`, defined for light and
+dark as `.claude/rules/styling.md` says. The existing token names stay; these
+are their values and the new ones.
+
+| Token        | Light                    | Dark                   | Used for                                                     |
+| ------------ | ------------------------ | ---------------------- | ------------------------------------------------------------ |
+| `background` | `#F6F8F3`                | `#0E1511`              | Page                                                         |
+| `foreground` | `#13201A`                | `#E8EFE9`              | Text                                                         |
+| `muted`      | `#4F5E55`                | `#9EB0A4`              | Secondary text, hints, labels                                |
+| `border`     | `#DCE5DA`                | `#24332A`              | Field and chip borders, dividers                             |
+| `accent`     | `#2B6F4A`                | `#7FCB98`              | Buttons, links, citation numbers, focus ring                 |
+| `on-accent`  | `#FFFFFF`                | `#0E1511`              | Text and icons on `accent`                                   |
+| `tint`       | `#E6F0E6`                | `#18241D`              | Assistant bubbles, status pill, icon buttons in the bar      |
+| `field`      | `#FFFFFF`                | `#121B16`              | The composer and form fields                                 |
+| `user`       | `#2B6F4A`                | `#2B6F4A`              | The visitor's bubbles (the same green in both themes)        |
+| `on-user`    | `#FFFFFF`                | `#FFFFFF`              | Text on `user`                                               |
+| `glass`      | `rgb(246 248 243 / 86%)` | `rgb(14 21 17 / 80%)`  | Chips and buttons that sit on the landscape, with a 6px blur |
+| `danger`     | keep the current value   | keep the current value | Only for a broken field in the contact form                  |
+| `live`       | `#E5484D`                | `#E5484D`              | The small "live" dot in "Back to live Glasgow"               |
+
+The values were picked by eye on the canvas and haven't been measured. The
+tokens issue measures every text pair against WCAG AA (4.5:1 for text, 3:1
+for large text and UI parts) and adjusts the value, not the rule, where one
+fails. Hex or `oklch()` are both fine in `tokens.css`; the existing file uses
+`oklch()`, so convert for consistency.
+
+### The landscape's palette
+
+The landscape is an illustration whose colours are computed: the sky mixes
+between five moments of the day, and the land between day and night for each
+season (section 7). Those colours can't be static tokens, so they are data in
+the landscape's palette module (`src/lib/scene/palette.ts`), taken from
+[`docs/design/landscape-palettes.json`](docs/design/landscape-palettes.json).
+The same goes for the two cows' colours, which are part of their artwork.
+
+This is the one exception to "colours live only in `tokens.css`"; the
+landscape issue adds it to `.claude/rules/styling.md`. UI components still
+never use a colour literal.
+
+## 3. Type
+
+| Role                    | Font                | Weight  | Size (mobile / desktop)  | Notes                    |
+| ----------------------- | ------------------- | ------- | ------------------------ | ------------------------ |
+| Name (`h1`)             | Bricolage Grotesque | 800     | 34px / 44px              | Letter spacing `-0.02em` |
+| Role under the name     | Bricolage Grotesque | 700     | 18px / 20px              | In `accent`              |
+| Name in the compact bar | Bricolage Grotesque | 800     | 18px                     |                          |
+| Panel and dialog titles | Bricolage Grotesque | 700     | 20px                     |                          |
+| Buttons with text       | Bricolage Grotesque | 700     | 15px                     |                          |
+| Body and chat messages  | Inter               | 400     | 15.5px, line height 1.55 |                          |
+| Chips, suggestions      | Inter               | 500     | 13–14px                  |                          |
+| Hints, labels, captions | Inter               | 500–600 | 12–12.5px                | Labels in `muted`        |
+- Both fonts are OFL-1.1 and self-hosted from Fontsource's variable packages
+  (`@fontsource-variable/bricolage-grotesque`, `@fontsource-variable/inter`),
+  never from Google Fonts, so no visitor's IP goes to Google and there's no
+  third-party request on the critical path.
+- Only the Latin subsets load (English and Spanish need nothing else), with
+  `font-display: swap`. The two files the first screen needs are preloaded.
+- Form fields are at least 16px, so iOS doesn't zoom in on focus.
+
+## 4. Shape and spacing
+
+- **Radii:** buttons, chips and pills are fully round (`999px`); the composer
+  `24px`; chat bubbles `20px` with the corner nearest the speaker at `6px`;
+  cards and panels `20px`; the portrait `26px` on mobile and `32px` on desktop.
+- **Spacing:** a 4px scale (Tailwind's default). The page gutter is 16px on
+  mobile and 24px from `sm` up.
+- **Touch targets:** at least 44 × 44px on mobile, including icon buttons.
+- **Borders:** 1.5–2px in `border`; a focused field's border turns `accent`,
+  with a 4px glow of `accent` at 22% opacity.
+- **Buttons:** flat. The primary button is `accent` on `on-accent`; it
+  brightens slightly on hover and, when pressed, scales to `0.92` (round icon
+  buttons such as Send) or `0.97` (wide buttons such as "Back to live
+  Glasgow") for 80ms. Secondary buttons are `border`-outlined pills
+  ("Download CV", "Contact"). Never a 3D edge or a drop shadow.
+
+## 5. Layout
+
+### Mobile (from 320px)
+
+From top to bottom:
+
+1. **The hero** (230px tall): the landscape fills it edge to edge. On top of
+   it, a row of controls 12px from the edges:
+   - left: the gear (section 8), 40px round in `accent`, and the weather chip
+     ("9°C · Drizzle", in `glass`);
+   - right: the language toggle ("ES" / "EN"), the sound toggle and the theme
+     toggle, 36–40px round buttons in `glass`.
+2. **The portrait** (96 × 120px), overlapping the hero's bottom edge by half
+   its height, 20px from the left, with a 4px ring in `background`.
+3. **Name, role and one line** ("Ask about my experience. Answers come only
+   from facts I've confirmed, with their sources."), then **"Download CV"**
+   and **"Contact"**.
+4. **The chat** (section 10): the cow's greeting, three suggested questions
+   and the composer.
+
+Once the visitor sends a first question, the page scrolls so the chat fills
+the screen, and a **compact bar** sticks to the top: the square portrait at
+34px, the name, and the sound and theme toggles, 58px tall, with a thin strip
+of hills along its bottom edge. The composer stays fixed at the bottom, above
+the on-screen keyboard.
+
+### Desktop (from 1024px)
+
+- **The hero** is 300–320px tall and spans the full width; the content below
+  is centred, at most 1120px wide. On wider screens the landscape stretches
+  and the slice shows more of it (a distant cow on the right hill, for
+  example).
+- **Two columns** under the hero: on the left (about 300px) the portrait at
+  120 × 150px overlapping the hero, the name, the role, the line and the two
+  buttons; on the right, the chat in a card with a 2px `border` and a 20px
+  radius.
+- The gear's panel opens as a popover under the gear (section 8).
+
+### Between the two
+
+From 640px the mobile layout gets wider gutters and a larger name; the two
+columns start at 1024px. Nothing is hidden at any width except the distant
+parts of the landscape that the slice crops.
+
+### Two languages
+
+`/` is English and `/es` is Spanish, the same page in each. Visitors in Spain
+get Spanish by default and everyone else English; the "ES" / "EN" toggle
+always wins and is remembered, and a link to `/es` is always Spanish. Spanish
+usually runs longer than English, so every text box is checked in both
+languages at 320px.
+
+## 6. Theme: Glasgow's day and night
+
+The site has two themes, light and dark, and by default it follows **day and
+night in Glasgow**, wherever the visitor is.
+
+- **Night** runs from civil dusk to civil dawn in Glasgow (55.8642° N,
+  4.2518° W): from when the sun is 6° below the horizon in the evening until
+  it's 6° below in the morning. Sunrise, sunset and the sun's elevation are
+  computed in code with the NOAA solar equations. There is no API call and no
+  dependency.
+- **The toggle always wins and is remembered.** Pressing it sets the other
+  theme and stores the choice. From then on the site keeps that theme until
+  the visitor presses it again.
+- **No flash, without a head script.** The choice is stored in a cookie
+  (`theme=light|dark`, one year). The server renders `<html data-theme>` from
+  the cookie, or from Glasgow's sun at the time of the request, so the first
+  paint is already right and there's no inline script to keep in step with the
+  TypeScript.
+- **While the page is open**, the client re-checks every minute. If the
+  visitor hasn't chosen and Glasgow's dusk or dawn arrives, the theme changes
+  by itself with the same choreography as the toggle, but slower (about 6s),
+  so it doesn't startle.
+- **The landscape matches the theme.** Normally it shows Glasgow's real time.
+  If the chosen theme disagrees with it (dark during Glasgow's day, or light
+  at night), the landscape shows a representative moment instead: today's
+  solar noon for light, 22:00 for dark.
+
+### The toggle's choreography
+
+Going from light to dark is a 1.7s sunset; dark to light is the same in
+reverse, a sunrise.
+
+| What                                                              | From (s) | To (s) |
+| ----------------------------------------------------------------- | -------- | ------ |
+| UI colours (background, text, buttons)                            | 0.00     | 0.60   |
+| The toggle's icon: the sun pulls in its rays and becomes the moon | 0.00     | 0.55   |
+| The sun sinks behind the hills and turns orange                   | 0.00     | 1.10   |
+| The landscape darkens                                             | 0.00     | 1.20   |
+| A sunset glow in the sky                                          | 0.00     | 1.70   |
+| The moon rises                                                    | 0.35     | 1.45   |
+| The stars come out                                                | 0.50     | 1.40   |
+| The cottage's windows light up                                    | 0.85     | 1.15   |
+| Sound: a soft switch click                                        | 0.00     | 0.12   |
+
+With reduced motion it's a 0.3s crossfade of the colours, with no sun, moon
+or stars moving.
+
+## 7. The landscape
+
+The hero is an SVG illustration of a Highland glen: far mountains with peaks,
+gullies and shading, a long loch with an islet and a ruined tower, a
+white cottage with a smoking chimney, Scots pines, a dry-stone dyke along the
+near meadow, gorse or heather or bracken patches by season, and a small herd
+of Highland cows grazing. The reference artwork is
+[`docs/design/highland-scene.svg`](docs/design/highland-scene.svg).
+
+It is drawn in a `1200 × 320` viewBox with `preserveAspectRatio="xMidYMax
+slice"`: it always fills the hero, anchored to the bottom centre, and narrow
+screens show the middle (about x 400–800 on a phone). Everything that matters
+on mobile (the loch, the islet, the mother cow and her calf) sits in that
+middle band.
+
+It is decoration: `aria-hidden`, no focusable parts, and it never intercepts
+a click meant for the controls on top of it.
+
+### Layers, back to front
+
+Sky gradient → stars → aurora → moon and sun → weather grey-outs → back cloud
+deck → clouds → front cloud deck → haze ridge → far mountains (with their
+shading, gullies and snowcaps) → middle hills → cottage and the distant cow →
+the first haar band → loch, shimmer, sun reflection, islet and rain ripples →
+near meadow, patches and dyke → snow cover → the herd → pines → the two lower
+haar bands → the golden-hour tint.
+
+### Season
+
+From the date in Glasgow (`Europe/London`), by whole months:
+
+| Months  | Season | The land                                       | What falls or flies                              |
+| ------- | ------ | ---------------------------------------------- | ------------------------------------------------ |
+| Mar–May | Spring | Fresh greens, yellow gorse                     | White and pink blossom petals (hawthorn, cherry) |
+| Jun–Aug | Summer | Deep greens, purple heather                    | Midges over the loch on still, dry days          |
+| Sep–Nov | Autumn | Olive and gold, rust-coloured bracken          | Falling leaves                                   |
+| Dec–Feb | Winter | Grey-greens, snowcaps on the peaks, no gullies | Frost glints on the ground on clear, dry days    |
+
+The land colours per season, for day and night, are in
+`landscape-palettes.json` (`land`). Special dates (Bonfire Night, Christmas)
+can be added later with the same mechanism.
+
+### Time of day
+
+The sky has five moments, `night`, `blue`, `golden`, `morning` and `day`,
+each a full set of colours (`skyKeys` in the palettes file: sky, horizon,
+clouds, sun, loch, haze, haar, snow, trees, cottage, smoke, stone, rock and a
+golden-tint strength). The landscape mixes between two neighbouring moments
+by the **sun's elevation in Glasgow**, so the same code works in June, when
+the sun barely sets, and in December, when it never climbs above 11°:
+
+| Sun's elevation | Sky                  | Land light |
+| --------------- | -------------------- | ---------- |
+| ≤ −12°          | `night`              | 0          |
+| −12° to −4°     | `night` → `blue`     | 0 → 0.15   |
+| −4° to 0°       | `blue` → `golden`    | 0.15 → 0.6 |
+| 0° to 6°        | `golden` → `morning` | 0.6 → 0.9  |
+| 6° to 20°       | `morning` → `day`    | 0.9 → 1    |
+| > 20°           | `day`                | 1          |
+
+"Land light" mixes each season's night land colours (0) into its day ones
+(1). The mock-up's hour-by-hour plan for a day with sunrise at 07:00 and
+sunset at 18:00 is in the palettes file (`hourPlanExample`) to check the
+result against.
+
+- **The sun** crosses the sky from sunrise (left, x 150) to sunset (right,
+  x 1050), on an arc from y 210 at the horizon to y 45 at solar noon,
+  whatever the season, so it's always visible above the mountains.
+- **The moon** does the same across the night, from x 200 to x 1000, peaking
+  at y 60. It's a crescent.
+- **Stars** show at night, fading in through the `blue` moment.
+- **The cottage's windows** are lit (`#F4C95D`) at night and in the `blue` and
+  `golden` moments, grey in daylight. Its chimney smokes in autumn and winter.
+- **The aurora** shows on clear winter nights (clouds ≤ 1, from 21:00 to
+  01:00), a slow green ribbon. It's rare in Glasgow, and that's the joke.
+
+The palette updates once a minute. Colours change with a 1.1s transition, so
+dawn and dusk drift rather than tick.
+
+### Weather
+
+The weather is four levels from 0 to 10 and two switches. The live values
+come from Glasgow (below); the gear lets visitors set them (section 8).
+
+| Input       | What it does in the scene                                                                                                                                                                                                                                                                                                 |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Clouds 0–10 | Shows `round(n × 1.3)` of the 13 clouds. From 6 a back cloud deck fades in (`(n − 5) / 5`), from 8 a front deck (`(n − 7) / 3 × 0.9`), and every other cloud turns the darker cloud colour. The sky greys by `n × 3.5%`. The sun or moon fades from 7 (`1 − (n − 6) / 3.5`); the stars fade with any cloud (`1 − n / 8`). |
+| Rain 0–10   | The sky greys a further `n × 4%`, the sun or moon fades (`1 − n / 4`), rings ripple on the loch (`0.4 + n × 0.05`), and `n × 10` raindrops fall. Rain also means at least `n + 3` clouds.                                                                                                                                 |
+| Wind 0–10   | Clouds drift `1 + n × 0.45` times faster, pines sway faster (period `max(0.9, 5 − n × 0.45)`s) and harder from 4, particles fall `1 + n × 0.18` times faster, and from 5 the rain slants and leaves blow sideways.                                                                                                        |
+| Snow        | Precipitation falls as `n × 8` snowflakes instead of rain; from level 3, snow settles on the land (a white layer at 62%). Snowcaps show in winter anyway.                                                                                                                                                                 |
+| Haar        | Three bands of sea fog drift across the glen at 80% opacity.                                                                                                                                                                                                                                                              |
+
+### Live Glasgow weather
+
+- A route on our Worker (`GET /api/weather`) asks
+  [Open-Meteo](https://open-meteo.com/) for Glasgow's current weather and
+  caches the answer for 30 minutes, so the site makes at most about 48 calls
+  a day whatever the traffic. No cron, no API key.
+- The page renders without weather (season and time only), then fetches
+  `/api/weather` after hydration and lets the weather roll in with the 1.1s
+  transition. A failed or slow fetch leaves the sky as it is; the chip then
+  shows only the time.
+- **Mapping**, to be checked against Open-Meteo's documentation for each
+  variable and unit:
+  - clouds: cloud cover in %, divided by 10 and rounded;
+  - rain: precipitation in mm over the last hour: 0 → 0, ≤ 0.2 → 1,
+    ≤ 0.5 → 2, ≤ 1 → 3, ≤ 2 → 4, ≤ 3 → 5, ≤ 4 → 6, ≤ 6 → 7, ≤ 8 → 8,
+    ≤ 12 → 9, more → 10; drizzle codes mean at least 1, thunderstorm codes at
+    least 7;
+  - snow: a snowfall or snow-shower weather code, or snowfall above 0;
+  - haar: a fog weather code;
+  - wind: the wind speed at 10m on the Beaufort scale, capped at 10;
+  - the chip's temperature: rounded to a whole degree.
+- **Attribution:** Open-Meteo's terms ask for a credit under CC BY 4.0. The
+  footer says "Weather data by Open-Meteo.com" with a link.
+- **The weather chip** reads "Glasgow · 15:04 · 9°C · Drizzle" on desktop and
+  "9°C · Drizzle" on mobile, in Glasgow's time. It's a button that opens the
+  gear's panel.
+
+### Particles
+
+Particles are HTML elements over the hero, in their own layer, with
+`pointer-events: none` and a mask that fades them out from 34% to 70% of the
+hero's height, so they never fall over the name or the chat.
+
+| Particle | When                                                       | How many                                      |
+| -------- | ---------------------------------------------------------- | --------------------------------------------- |
+| Leaves   | Autumn                                                     | 12, fewer as rain rises (`× (1 − rain / 12)`) |
+| Petals   | Spring                                                     | 14, fewer as rain rises                       |
+| Midges   | Summer, wind < 4 and rain < 3; a small cloud over the loch | 16                                            |
+| Glints   | Winter, daytime, dry, clouds < 4; on the near meadow       | 10                                            |
+| Rain     | Rain > 0, no snow                                          | `rain × 10`                                   |
+| Snow     | Rain > 0 with snow                                         | `rain × 8`                                    |
+
+Leaves and petals fall with a gentle sway, rain falls fast and straight
+(slanted in wind), snow drifts, midges buzz in place and glints twinkle.
+Their colours are in the palettes file (`particles`). Positions and timings
+come from a seeded pseudo-random function, so server and client agree and a
+reload looks the same.
+
+### The herd
+
+Full-body Highland cows, much smaller than the assistant's head, so the
+assistant is still the star. Reference:
+[`docs/design/herd-cow.svg`](docs/design/herd-cow.svg) (drawn facing right,
+feet on `y = 0`).
+
+| Cow        | Where (viewBox)                  | Scale | Faces | What it does                      |
+| ---------- | -------------------------------- | ----- | ----- | --------------------------------- |
+| The grazer | x 420, y 294                     | 0.80  | Right | Grazes (16s loop)                 |
+| The calf   | x 598, y 296                     | 0.48  | Right | Looks around (11s loop); no horns |
+| The mother | x 655, y 294                     | 0.72  | Left  | Grazes (19s loop, offset)         |
+| Far away   | x 1118, y 222, on the right hill | 0.26  | Right | Grazes; only on wide screens      |
+- **Grazing:** the head lowers to the grass (46°), nibbles, lifts to look
+  around, and lowers again. **Looking:** the head turns up and down without
+  grazing. **Every cow** swishes its tail at flies every 4.5s (2.8s for the
+  calf).
+- They darken with the landscape at night (brightness 0.62, and 0.82 in the
+  `blue` and `golden` moments).
+- The assistant's cow doesn't appear in the landscape: its head is far bigger
+  than the herd and would break the scale. It lives only in the chat.
+
+### Performance
+
+- The scene is server-rendered inline SVG. The first paint has the right
+  season, time and theme; JavaScript only adds the clock, the weather and the
+  gear.
+- Only `transform` and `opacity` animate, and only with CSS.
+- All animations pause (`animation-play-state: paused`) while the tab is
+  hidden.
+- The hero has a fixed height, so nothing shifts when the weather or the fonts
+  arrive.
+- Each SVG gradient id is unique per instance; duplicate ids make every
+  instance use the first one's colours.
+
+## 8. Play with the sky
+
+A gear lets visitors play with the landscape, like the rainbow on Josh
+Comeau's blog. It's a toy, and it's honest about being one.
+
+- **The gear isn't there at first.** It spins in after 2s and pulses three
+  times so it's noticed. On a first visit, a small bubble next to it says
+  "Psst… you can change the weather" and goes away after 5s or on any tap;
+  the site remembers it was shown.
+- **The panel** is a bottom sheet on mobile and a popover under the gear on
+  desktop (about 380px wide). Title "Play with the sky", subtitle "Only on
+  your screen, for as long as you like."
+  - **Season:** four segmented buttons.
+  - **Time of day:** a slider from 00:00 to 23:00 whose track is a gradient
+    from night through dawn, day and dusk back to night. Label: "15:00 · day",
+    "07:00 · golden hour", "22:00 · night".
+  - **Clouds, Rain (or Snow), Wind:** sliders from 0 to 10 whose tracks show
+    what they do (pale sky to grey, dry to dark blue, pale to deep green),
+    with words at both ends and a word for the current value:
+    - clouds: Clear, Clear, A few clouds, A few clouds, Some clouds, Cloudy,
+      Cloudy, Mostly cloudy, Mostly cloudy, Overcast, Overcast;
+    - rain: Dry, Drizzle, Drizzle, Light, Light, Steady, Steady, Heavy,
+      Heavy, Downpour, Downpour;
+    - wind: Calm, Breeze, Breeze, Fresh, Fresh, Windy, Windy, Strong, Strong,
+      Gale, Gale.
+  - **Switches:** "Snow instead of rain" and "Haar".
+  - **"Back to live Glasgow"**: a wide flat button with the live dot.
+- **While playing**, the slider's time also drives the theme (night is dark),
+  the chip turns `accent` and reads "Your sky · 15:00 · tap to reset", and
+  tapping it goes back to live. Pressing the theme toggle while playing moves
+  the time to 13:00 (light) or 22:00 (dark).
+- **Nothing is stored.** A reload, or "Back to live Glasgow", returns to the
+  real sky and the theme rule from section 6.
+- The sliders are native range inputs with `aria-valuetext` set to the words,
+  and the whole panel works with the keyboard. Escape closes it and returns
+  focus to the gear.
+
+## 9. The assistant
+
+The assistant is a Highland cow, "in honour of the country that welcomed me".
+It is a character, not Julian: the bot speaks about him in the third person,
+and the site's promise is that it never pretends to be him. Reference
+artwork: [`docs/design/assistant-cow.svg`](docs/design/assistant-cow.svg).
+
+It's a flat illustration in the landscape's style: ginger fringe hiding the
+eyes, messy tips, short trimmed chin hair, horns that go out and bend up,
+pale muzzle. Its parts are grouped so each animation moves only what it
+should: `tilt` (the whole head), `jaw` (chin and mouth line), `talk` (the open
+mouth), `licks` with `lick-r`, `lick-l` and `lick-mouth` (the tongue to either
+side). Only the mouth opens; nothing else separates and no background shows
+through.
+
+### Its states
+
+| State                | When                                        | What it does                                                                                                              |
+| -------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Idle                 | Nothing is happening                        | A 12s loop: tilts one way (18–26%), licks to the right (44–58%), tilts the other way (66–70%), licks to the left (76–90%) |
+| Listening            | The visitor is typing                       | Holds its head tilted, as if listening                                                                                    |
+| Thinking             | A question was sent and no text has arrived | Chews (the jaw moves side to side every 0.55s) with a slight thoughtful tilt                                              |
+| Talking              | The answer is streaming                     | The mouth opens and closes, irregularly, every 1.8s                                                                       |
+| Satisfied            | The answer just finished                    | Licks once (1.6s), then goes back to idle                                                                                 |
+| Sorry                | An error or the daily limit                 | Lowers its head and stays still                                                                                           |
+| Hover (pointer only) | The pointer is over it                      | Tilts and says "Moo!" in a small speech bubble                                                                            |
+| Tap                  | It's tapped                                 | Licks and, if sound is on, moos softly (at most once every 3s)                                                            |
+- Only the cow next to the **latest** assistant message is animated. Earlier
+  ones stay still, so a long conversation doesn't become a field of moving
+  heads.
+- **Sizes:** 66px wide next to the greeting, 58px next to answers.
+- The cow next to messages is decorative (`aria-hidden`). The tap and hover
+  are extras; nothing depends on them.
+- With reduced motion it's a still drawing in every state.
+
+## 10. The chat
+
+The chat should feel smooth, warm and quick. These are the five states on
+mobile; desktop is the same inside the right-hand card.
+
+1. **Typing.** The composer grows as the visitor types, up to 6 lines, and its
+   border lights up in `accent`. The cow listens. The character counter only
+   appears near the limit (from 900 of 1,000). Hint under the box: "Enter to
+   send · Shift+Enter for a new line" (hidden on touch screens).
+2. **Thinking.** The question jumps into place as a bubble, with a small
+   bounce and a "pop". The cow chews. A status pill says what's happening in
+   words ("Looking up claims…") with three bouncing dots. Send becomes Stop.
+3. **Answering.** The cow talks while the text arrives. Each new piece of text
+   fades in over 0.2s; earlier text never re-animates and the page never
+   jumps. Citations show as small green numbers. The view follows the answer
+   only if the visitor was already at the bottom; if they scrolled up to
+   read, a "New answer ↓" pill appears instead.
+4. **Done.** The cow licks once, satisfied. The sources rise in one by one
+   (80ms apart) as numbered chips, such as "1 · Julian · Work mode". Tapping
+   a chip opens the claim exactly as Julian confirmed it, with "Confirmed by
+   Julian on 27 Oct 2026 · from his CV". Under the answer: "Copy", and "Keep
+   asking" with the suggested questions not asked yet.
+5. **Out of questions, or something went wrong.** Errors are warm too: the cow
+   lowers its head, the message says what happened and offers another way
+   (the contact form, LinkedIn). Never a bare red error. For the daily limit:
+   "You've reached today's limit for questions. Come back tomorrow, or write
+   to Julian directly. He reads every message." The composer's placeholder
+   becomes "Questions are back tomorrow".
+
+### Details that don't show in a picture
+
+- **Suggested questions:** tapping one flies it into place as the visitor's
+  bubble (a FLIP animation) and plays the "pop".
+- **Citations are buttons:** each number opens its claim. This is what sets
+  the bot apart: you can see where every sentence comes from. To show the
+  claim's text and confirmation date, the `data-sources` part carries them;
+  the model, the prompt and the tools don't change.
+- **Copy** copies the answer as plain text with its sources listed at the
+  end, ready to paste into an email.
+- **Screen readers:** "Answering…" is announced when an answer starts, and the
+  full answer once when it ends, never piece by piece. This settles the
+  VoiceOver check left open in phase 4.
+- **Keyboard:** Enter sends, Shift+Enter adds a line, Escape stops a streaming
+  answer when focus is in the composer.
+- **Mobile:** the composer is fixed to the bottom above the keyboard, with
+  the safe-area inset; every button is at least 44px.
+- **Greeting:** "Hi! Ask me about Julian's experience. I only answer with
+  facts he has confirmed, and I show where each one comes from."
+
+The copy in this file is the starting point. Julian approves every visible
+text, in both languages, in the pull request that adds it.
+
+## 11. Motion
+
+| What                              | Duration          | Easing                                             |
+| --------------------------------- | ----------------- | -------------------------------------------------- |
+| UI colours on a theme change      | 0.6s              | `ease`                                             |
+| Theme toggle (sunset or sunrise)  | 1.7s              | Section 6                                          |
+| Theme change at Glasgow's dusk    | about 6s          | Same choreography, stretched                       |
+| Landscape colours (time, weather) | 1.1s              | `ease`                                             |
+| The visitor's bubble appears      | 0.5s              | `cubic-bezier(.3, 1.5, .5, 1)` (a small overshoot) |
+| Source chips rise                 | 0.45s, 80ms apart | `cubic-bezier(.3, 1.4, .5, 1)`                     |
+| A claim opens                     | 0.35s             | `ease`                                             |
+| New text in an answer             | 0.2s              | `ease`                                             |
+| Button press                      | 80ms              | `ease`                                             |
+| The gear spins in                 | 0.6s, after 2s    | Spring-like overshoot, then 3 pulses               |
+| Clouds cross the sky              | 120–190s each     | `linear`                                           |
+| The herd's loops                  | 11s, 16s, 19s     | `ease-in-out`                                      |
+
+### Reduced motion
+
+With `prefers-reduced-motion: reduce`:
+
+- no particles, no drifting clouds or haar, no swaying pines, no herd or cow
+  animation, no bounces, no FLIP;
+- the theme changes with a 0.3s crossfade, and the landscape's colours change
+  instantly;
+- answer text appears without fading, sources without rising;
+- the gear appears without spinning or pulsing.
+
+## 12. Sound
+
+Sounds are **on by default**, quiet, and one tap away from off.
+
+- They play through [use-sound](https://github.com/joshwcomeau/use-sound)
+  from a single audio sprite. The sounds issue checks that it works with
+  React 19 before relying on it.
+- Browsers block audio until the first interaction with the page. That's
+  fine: every sound here answers something the visitor did.
+- **The sound toggle** is always visible (in the hero, and in the compact bar
+  on mobile). The choice is stored in a cookie (`sound=on|off`), so the
+  server renders the right icon.
+- All sounds are short and quiet (the loudest at about half volume), and no
+  sound plays more than once every 150ms.
+
+| Moment                               | Sound                                 |
+| ------------------------------------ | ------------------------------------- |
+| Send a question                      | A "pop"                               |
+| An answer starts                     | A soft brush                          |
+| An answer ends                       | A short chime                         |
+| Tap the cow                          | A soft "moo" (at most once every 3s)  |
+| Theme toggle                         | A switch click                        |
+| Language toggle                      | A soft tick                           |
+| Release a slider in the gear's panel | A soft click                          |
+| Heavy rain (7 or more)               | A rain loop, very low, while it lasts |
+| Download the CV                      | A paper rustle                        |
+
+Which sounds: Julian's own (made with his synths) or a CC0 pack such as
+Kenney's Interface Sounds, plus a CC0 moo. The sounds issue asks Julian before
+it starts, and records each file's source and licence in `docs/sounds.md`.
+
+## 13. The portrait
+
+Julian's pixel-art portrait, cropped from his full pixel art with his face
+centred and the background left exactly as it is: no blur, no fade.
+
+| File                              | Crop               | Size        | Shown at                                     |
+| --------------------------------- | ------------------ | ----------- | -------------------------------------------- |
+| `public/images/julian.png`        | 68 × 85 pixels, ×6 | 408 × 510px | 96 × 120px on mobile, 120 × 150px on desktop |
+| `public/images/julian-square.png` | 74 × 74 pixels, ×6 | 444 × 444px | 34px in the compact bar                      |
+- It's **mirrored** with CSS (`transform: scaleX(-1)`), so he leans into the
+  page, towards his name.
+- `image-rendering: pixelated`, so the pixels stay sharp.
+- A ring of `background` around it (4px on mobile, 6px on desktop) separates
+  it from the landscape.
+- Alt text: "Pixel-art portrait of Julian Palomo" ("Retrato en pixel art de
+  Julián Palomo" in Spanish).
+- Like the claims, the portrait is personal content (`LICENSE`, section 2).
+
+## 14. CV and contact
+
+- **"Download CV"** downloads the Software Engineer version of Julian's CV
+  **without his phone number or email address**, with LinkedIn, GitHub and
+  this site as contact. Julian provides the PDF; it never contains private
+  data, because the repo is public.
+- **"Contact"** opens a form: a bottom sheet on mobile, a dialog on desktop.
+  Fields: name, email (so Julian can reply), message (up to 2,000
+  characters). Protected by Cloudflare Turnstile and a hidden honeypot field,
+  and limited per visitor per day like the chat. The message goes to Julian's
+  email from the server; his address is a secret and never appears in the
+  repo or the page. Success: "Thanks! Julian will get back to you." and the
+  cow licks, satisfied.
+
+## 15. Accessibility
+
+- Contrast: WCAG AA for every text and UI pair, in both themes (section 2).
+- Focus: a visible 3px `accent` ring with a 2px offset on every interactive
+  element, including on top of the landscape.
+- Everything works with the keyboard alone; dialogs and the gear's panel trap
+  focus while open and give it back when they close.
+- The landscape, the particles, the herd and the cows next to messages are
+  `aria-hidden`. The weather chip has an accessible name ("Weather in Glasgow:
+  9°C, drizzle. Play with the sky").
+- `lang` on `<html>` matches the page's language, and each page links its
+  other language with `hreflang`.
+- Reduced motion (section 11) and muted sound (section 12) lose nothing.
+- Every icon-only button has a label ("Switch to dark theme", "Mute sounds",
+  "Ver en español").
+
+## 16. Reference files
+
+[`docs/design/`](docs/design/) holds the artwork the components are built
+from. Nothing in it is imported by the app.
+
+| File                      | What it is                                                                                               |
+| ------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `highland-scene.svg`      | The whole landscape (autumn, 15:00, a few clouds), with its layer classes and the CSS that animates them |
+| `landscape-palettes.json` | The five sky moments, the land per season, the cloud table, the cows' and particles' colours             |
+| `assistant-cow.svg`       | The assistant, with its part groups and its keyframes; the idle loop runs when you open it               |
+| `herd-cow.svg`            | One cow from the herd, grazing                                                                           |
+
+Open the SVGs in a browser to see them animate.
+
+## 17. Not in this design
+
+- Clicking a falling leaf to hear it crunch. Particles never take clicks.
+- A babbling voice while the cow talks.
+- Special dates (Halloween, Bonfire Night, Christmas). The season mechanism
+  allows them later.
+- More pages. The site is one page in two languages.
