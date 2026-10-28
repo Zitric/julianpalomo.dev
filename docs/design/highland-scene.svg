@@ -29,8 +29,8 @@
 .hl .ripples circle:nth-child(2){animation-delay:-.5s}.hl .ripples circle:nth-child(3){animation-delay:-1s}.hl .ripples circle:nth-child(4){animation-delay:-1.3s}
 .hl .dyke{fill:none;stroke:var(--stone);stroke-width:4;stroke-dasharray:6 2.5;stroke-linecap:round}
 .hl .dyke-top{fill:none;stroke:var(--stone);stroke-width:1.6;opacity:.6;transform:translateY(-3px)}
-.hl .snowcover path{fill:var(--snow);opacity:0}
-.hl.snowy .snowcover path{opacity:.62}
+.hl .snowcover{opacity:0}.hl .snowcover path{fill:var(--snow)}
+.hl.snowy .snowcover{opacity:.62}
 .hl .fog{fill:var(--fog);opacity:0}.hl.haar .fog{opacity:.8}
 .hl .fog.f1{animation:fogdrift 26s ease-in-out infinite alternate}.hl .fog.f2{animation:fogdrift 34s ease-in-out infinite alternate-reverse}.hl .fog.f3{animation:fogdrift 30s ease-in-out infinite alternate}
 .hl .tree{transform-box:fill-box;transform-origin:50% 100%;animation:sway 5s ease-in-out infinite alternate}
