@@ -3,7 +3,7 @@
  * as data rather than as UI tokens: the one exception to "colours live only in
  * tokens.css" (DESIGN.md section 2). The values are copied from
  * docs/design/landscape-palettes.json, which the app never imports;
- * tests/unit/assistant-cow.test.ts and tests/unit/scene-palette.test.ts keep
+ * tests/unit/assistant-cow.test.ts and tests/unit/scene.test.ts keep
  * them equal.
  */
 
