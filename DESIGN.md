@@ -175,6 +175,14 @@ From 640px the mobile layout gets wider gutters and a larger name; the two
 columns start at 1024px. Nothing is hidden at any width except the distant
 parts of the landscape that the slice crops.
 
+### Two languages
+
+`/` is English and `/es` is Spanish, the same page in each. Visitors in Spain
+get Spanish by default and everyone else English; the "ES" / "EN" toggle
+always wins and is remembered, and a link to `/es` is always Spanish. Spanish
+usually runs longer than English, so every text box is checked in both
+languages at 320px.
+
 ## 6. Theme: Glasgow's day and night
 
 The site has two themes, light and dark, and by default it follows **day and
