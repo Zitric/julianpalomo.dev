@@ -16,7 +16,7 @@ describes the visual design, which is being built in steps: the colours, the
 fonts and the layout are in; the hero is still a plain fill where the Highland
 landscape will go.
 
-You ask a question and the answer streams in from Claude (Haiku 5.5, through
+You ask a question and the answer streams in from Claude (Sonnet 5.5, through
 the Vercel AI SDK), which can only look up the facts I've confirmed. Each fact
 an answer cites shows as a source chip, such as "CV · Cazoo · Redux →
 Zustand", and a citation only counts if the model looked that fact up while
@@ -76,7 +76,7 @@ pnpm dev
 | `pnpm check`            | Runs Biome (lint and format), then `tsc`.                                                                                                                   |
 | `pnpm test`             | Runs the unit tests once with Vitest.                                                                                                                       |
 | `pnpm test:e2e`         | Builds, serves and runs the Playwright tests in Chromium.                                                                                                   |
-| `pnpm eval`             | Asks the real assistant the eval cases and has a second model judge the answers. Costs money: about $0.06, then $0.01–0.02 a case. `-t <case-id>` runs one. |
+| `pnpm eval`             | Asks the real assistant the eval cases and has a second model judge the answers. Costs money: about $0.09, then $0.01–0.02 a case. `-t <case-id>` runs one. |
 | `pnpm knip`             | Reports unused files, exports and dependencies.                                                                                                             |
 | `pnpm db:migrate:local` | Applies the D1 migrations to the local database in `.wrangler/state`.                                                                                       |
 
@@ -92,15 +92,16 @@ mode.
 
 `pnpm eval` reads the API key from `.dev.vars` too, asks the assistant every
 case in [`evals/`](evals/) through the same code as `/api/chat`, checks each
-answer in code (citations, links, no contact details, no Markdown), and prints
-then has a second model, Claude Sonnet 5.5, judge every answer sentence by
+answer in code (citations, links, no contact details, no Markdown), and then
+has a second model, Claude Sonnet 5.5, judge every answer sentence by
 sentence against the claims it used: a sentence that says more than its claim
 ("managed" where the claim says "technical lead") fails the case. Before any
 case, the judge must get a set of calibration answers right, or the run stops.
 The report gives the score and the estimated cost. Results also go to
-`evals/results/`, which is gitignored. `EVAL_REPEAT=3 pnpm eval` asks each case
-three times. A run passes when every critical case passes every time and at
-least 90% of all runs pass; it stops at $2 of estimated cost.
+`evals/results/`, which is gitignored. `EVAL_REPEAT=2 pnpm eval` asks each case
+twice, as a baseline does. A run passes when every critical case passes every
+time and at least 90% of all runs pass; it stops at $2 of estimated cost.
+[`docs/evals.md`](docs/evals.md) has every baseline so far.
 
 The first time you run `pnpm test:e2e`, install the browser with
 `pnpm exec playwright install chromium`. To fix formatting yourself, run
@@ -153,6 +154,8 @@ Each decision is recorded as it's made, one file each, in `docs/adr/`.
   through the limits, the model, its tools and the citation check.
 - [`DESIGN.md`](DESIGN.md): how the site looks, moves and sounds: colours,
   type, the live Highland landscape, the cow and the chat.
+- [Evals](docs/evals.md): how the assistant is tested against its claims,
+  and the score of every baseline.
 - [Architecture decision records](docs/adr/README.md): what was decided,
   what else was considered, and why.
 - [Tech debt](docs/tech-debt.md): shortcuts taken on purpose, and their status.

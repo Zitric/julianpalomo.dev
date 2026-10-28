@@ -17,9 +17,10 @@ paths:
 # The bot
 
 The assistant answers questions about Julian from his confirmed claims. The
-reasons are in three ADRs: `docs/adr/2026-10-26-ai-sdk-claude-read-only-tools.md`,
-`docs/adr/2026-10-26-answers-only-from-confirmed-claims.md` and
-`docs/adr/2026-10-27-claude-model-and-ai-sdk-7.md`. This rule says what the code
+reasons are in four ADRs: `docs/adr/2026-10-26-ai-sdk-claude-read-only-tools.md`,
+`docs/adr/2026-10-26-answers-only-from-confirmed-claims.md`,
+`docs/adr/2026-10-27-claude-model-and-ai-sdk-7.md` (the AI SDK) and
+`docs/adr/2026-10-28-claude-sonnet-for-the-bot.md` (the model). This rule says what the code
 must keep doing; the ADRs say why.
 
 ## What feeds the model

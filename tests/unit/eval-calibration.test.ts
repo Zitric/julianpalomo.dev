@@ -111,6 +111,9 @@ describe("runCalibration", () => {
     const managed = inputs.find((input) => input.answer.startsWith("Julian managed"));
     expect(managed?.answer).toBe(`${item.sentence} [[oms-lead]]`);
     expect(managed?.claims[0]?.text).toContain("Technical lead in a team of 4 developers");
+    expect(managed?.question).toBeUndefined();
+    const premise = inputs.find((input) => input.answer.startsWith("Sí, fue"));
+    expect(premise?.question).toBe("¿Julian era el jefe del equipo en Orders Made Simple?");
     const none = inputs.find((input) => input.claims.length === 0);
     expect(none?.answer).toBe("The claims don't cover that; you can ask Julian on LinkedIn.");
   });

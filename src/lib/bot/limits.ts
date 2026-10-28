@@ -15,17 +15,16 @@ export const MAX_VISITOR_MESSAGES_PER_DAY = 30;
 export const DAILY_BUDGET_MICRO_USD = 1_000_000;
 
 /**
- * Micro-dollars per million tokens for Claude Haiku 5.5: input $0.10, output
- * $0.50, cache writes (5 minutes) $0.125, cache reads $0.01. These belong to
- * the model: change them whenever MODEL_ID in model.ts changes. The input and
- * output prices are the ones recorded in
- * docs/adr/2026-10-27-claude-model-and-ai-sdk-7.md.
+ * Micro-dollars per million tokens for Claude Sonnet 5.5: input $2, output
+ * $10, cache writes (5 minutes) $2.50, cache reads $0.10 (0.05x the input
+ * price on this model, not the usual 0.1x). These belong to the model: change
+ * them whenever MODEL_ID in model.ts changes.
  */
 const PRICE_MICRO_USD_PER_MILLION = {
-  input: 100_000,
-  output: 500_000,
-  cacheWrite: 125_000,
-  cacheRead: 10_000,
+  input: 2_000_000,
+  output: 10_000_000,
+  cacheWrite: 2_500_000,
+  cacheRead: 100_000,
 } as const;
 
 /** Tokens one answer used, split the way the price table charges them. */
