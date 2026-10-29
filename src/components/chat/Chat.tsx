@@ -1,6 +1,6 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useEffect, useRef, useState } from "react";
+import { type RefObject, useEffect, useRef, useState } from "react";
 import type { ChatUIMessage } from "../../lib/bot/chat-message";
 import { MAX_MESSAGES } from "../../lib/bot/limits";
 import { liveCowSlot } from "../../lib/cow-state";
@@ -99,12 +99,16 @@ export function Chat({ onStarted }: { onStarted?: () => void }) {
     }
   }
 
-  // Follow the typing only from the bottom of the page; a visitor who
-  // scrolled up to read gets a "New answer ↓" pill instead.
-  const atBottom = useAtBottom();
+  // Follow the typing only from the end of the chat; a visitor who scrolled
+  // up to read gets a "New answer ↓" pill instead. The end of the chat, not
+  // of the page: on a phone the footer and the room for the fixed composer
+  // sit below it.
+  const end = useRef<HTMLDivElement>(null);
+  const atBottom = useAtEnd(end);
+  const scrollToEnd = () => end.current?.scrollIntoView({ block: "nearest" });
   useEffect(() => {
     if (reveal.shown > 0 && shouldFollow({ atBottom, streaming: reveal.revealing })) {
-      scrollToBottom();
+      end.current?.scrollIntoView({ block: "nearest" });
     }
   }, [reveal.shown, atBottom, reveal.revealing]);
   const showNewAnswer = reveal.revealing && !atBottom;
@@ -154,7 +158,7 @@ export function Chat({ onStarted }: { onStarted?: () => void }) {
       {showNewAnswer && (
         <button
           type="button"
-          onClick={scrollToBottom}
+          onClick={scrollToEnd}
           className="fixed bottom-44 left-1/2 z-20 lg:bottom-6 min-h-11 -translate-x-1/2 rounded-full bg-accent px-4 text-[13px] font-semibold text-on-accent"
         >
           {t(locale, "newAnswer")}
@@ -174,30 +178,27 @@ export function Chat({ onStarted }: { onStarted?: () => void }) {
         closed={outOfQuestions(error)}
         ref={inputRef}
       />
+      {/* The end of the chat, which following keeps in view, clear of the
+          composer fixed over a phone's bottom. */}
+      <div ref={end} aria-hidden="true" className="-mt-6 h-px max-lg:scroll-mb-44" />
     </section>
   );
 }
 
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-function scrollToBottom() {
-  window.scrollTo({ top: document.documentElement.scrollHeight });
-}
-
-/** Whether the page is scrolled to (near) its bottom, kept current on scroll and resize. */
-function useAtBottom(): boolean {
-  const [atBottom, setAtBottom] = useState(true);
+/** Whether `end` is in view, or near it below, kept current on scroll and resize. */
+function useAtEnd(end: RefObject<HTMLElement | null>): boolean {
+  const [atEnd, setAtEnd] = useState(true);
   useEffect(() => {
     const check = () =>
-      setAtBottom(
-        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 48,
-      );
+      setAtEnd((end.current?.getBoundingClientRect().top ?? 0) <= window.innerHeight + 48);
     window.addEventListener("scroll", check, { passive: true });
     window.addEventListener("resize", check);
     return () => {
       window.removeEventListener("scroll", check);
       window.removeEventListener("resize", check);
     };
-  }, []);
-  return atBottom;
+  }, [end]);
+  return atEnd;
 }

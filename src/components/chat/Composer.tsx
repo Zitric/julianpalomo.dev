@@ -108,7 +108,9 @@ export function Composer({
       style={{ bottom: keyboard }}
       className="flex flex-col gap-2 max-lg:fixed max-lg:inset-x-0 max-lg:z-30 max-lg:border-t-2 max-lg:border-border max-lg:bg-background max-lg:px-4 max-lg:pt-3 max-lg:pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:max-lg:px-6"
     >
-      <label htmlFor={inputId} className="text-[12.5px] font-semibold text-muted">
+      {/* Fixed to the bottom of a phone, the box speaks for itself: the label
+          stays as its accessible name, hidden to save height. */}
+      <label htmlFor={inputId} className="text-[12.5px] font-semibold text-muted max-lg:sr-only">
         {t(locale, "questionLabel")}
       </label>
       {/* The box, not the textarea, shows focus: its border turns accent with a

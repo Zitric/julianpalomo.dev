@@ -86,7 +86,9 @@ function Home() {
   const [panel, setPanel] = useState<PanelState>({ open: false, position: null });
 
   // After the first question a phone gets the compact bar, and the page
-  // scrolls so the chat fills the screen under it.
+  // scrolls so the chat fills the screen under it. The chat is at least a
+  // screen tall from then on: with only a greeting and a question there'd be
+  // too little page below it to scroll it up to the bar.
   const [started, setStarted] = useState(false);
   const chatRef = useRef<HTMLElement>(null);
   function start() {
@@ -143,7 +145,10 @@ function Home() {
         </div>
       </header>
       {started && <CompactBar />}
-      <main ref={chatRef} className={chatCard}>
+      <main
+        ref={chatRef}
+        className={started ? `${chatCard} max-lg:min-h-[calc(100dvh-58px)]` : chatCard}
+      >
         <Chat onStarted={start} />
       </main>
       <SiteFooter className="lg:col-start-2 lg:col-end-4 lg:px-0" />
