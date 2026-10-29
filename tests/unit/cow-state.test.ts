@@ -9,7 +9,7 @@ import {
 const quiet: CowSituation = {
   status: "ready",
   answerHasText: false,
-  toolRunning: false,
+  revealing: false,
   stopped: false,
   composer: { hasText: false, focused: false },
 };
@@ -31,8 +31,10 @@ function play(...situations: CowSituation[]): CowState[] {
 
 const typing = situation({ composer: { hasText: true, focused: true } });
 const submitted = situation({ status: "submitted" });
-const lookingUp = situation({ status: "streaming", toolRunning: true });
-const streamingText = situation({ status: "streaming", answerHasText: true });
+const lookingUp = situation({ status: "streaming" });
+const streamingText = situation({ status: "streaming", answerHasText: true, revealing: true });
+// The stream has ended, but the answer is still typing itself out.
+const typingOut = situation({ status: "ready", answerHasText: true, revealing: true });
 const done = situation({ status: "ready", composer: { hasText: false, focused: true } });
 
 describe("nextCowState", () => {
@@ -62,17 +64,43 @@ describe("nextCowState", () => {
     ]);
   });
 
-  it("talks while text streams, and thinks again while a later tool runs", () => {
-    const toolAfterText = situation({
-      status: "streaming",
-      answerHasText: true,
-      toolRunning: true,
-    });
-    expect(play(submitted, streamingText, toolAfterText, streamingText)).toEqual([
+  it("talks from the first word on screen, not from the first text that arrives", () => {
+    const arrivedNotShown = situation({ status: "streaming", revealing: true });
+    expect(play(submitted, arrivedNotShown, streamingText)).toEqual([
+      "thinking",
       "thinking",
       "talking",
+    ]);
+  });
+
+  it("keeps talking while the stream waits, without thinking again", () => {
+    // The reveal has caught up and waits for more text, or a later tool runs:
+    // a word is on screen and the answer isn't done, so it stays talking.
+    expect(play(submitted, streamingText, streamingText, streamingText)).toEqual([
       "thinking",
       "talking",
+      "talking",
+      "talking",
+    ]);
+  });
+
+  it("follows the typing, not the stream: talks until the last word, then licks", () => {
+    expect(play(submitted, streamingText, typingOut, typingOut, done)).toEqual([
+      "thinking",
+      "talking",
+      "talking",
+      "talking",
+      "satisfied",
+    ]);
+  });
+
+  it("thinks until the first word when the stream ends before any is typed", () => {
+    const arrivedAllAtOnce = situation({ status: "ready", revealing: true });
+    expect(play(submitted, arrivedAllAtOnce, typingOut, done)).toEqual([
+      "thinking",
+      "thinking",
+      "talking",
+      "satisfied",
     ]);
   });
 
@@ -124,7 +152,7 @@ describe("nextCowState", () => {
 
   it("gives the same state when applied twice to the same situation", () => {
     const states: CowState[] = ["idle", "listening", "thinking", "talking", "satisfied", "sorry"];
-    const situations = [quiet, typing, submitted, lookingUp, streamingText, done];
+    const situations = [quiet, typing, submitted, lookingUp, streamingText, typingOut, done];
     for (const previous of states) {
       for (const now of situations) {
         const once = nextCowState(previous, now);

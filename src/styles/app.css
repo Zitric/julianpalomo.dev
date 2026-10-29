@@ -3,6 +3,7 @@
 @import "./fonts.css";
 @import "./landscape.css";
 @import "./play.css";
+@import "./chat.css";
 @import "./cow.css";
 
 /* The focus ring on every interactive element: 3px of accent, 2px away (DESIGN.md section 15). */

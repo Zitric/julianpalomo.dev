@@ -402,10 +402,36 @@ describe("citations", () => {
     expect(sources[0]).toMatchObject({
       id: "sources",
       data: {
-        sources: [{ id: sentinel.id, label: sentinel.label, source: sentinel.source }],
+        sources: [
+          {
+            id: sentinel.id,
+            label: sentinel.label,
+            source: sentinel.source,
+            text: sentinel.text,
+            confirmedOn: sentinel.confirmedByJulian,
+          },
+        ],
       },
     });
     expect(warnLog).not.toHaveBeenCalled();
+  });
+
+  it("gives the UI each source's text and date, and never the model", async () => {
+    const model = new MockLanguageModelV4({
+      doStream: [await getClaimsCall(), await answer(`A fact.[[${sentinel.id}]]`)()],
+    });
+    const response = await chat(chatRequest({ messages: [userMessage("Sources?")] }), env, {
+      createModel: () => model,
+    });
+    await chunks(response);
+
+    // What the model received on its second step: the tool's result, which
+    // carries the claim's text but not when Julian confirmed it.
+    const sentToModel = JSON.stringify(model.doStreamCalls.at(-1)?.prompt);
+    expect(sentToModel).toContain(sentinel.id);
+    expect(sentToModel).not.toContain("confirmedByJulian");
+    expect(sentToModel).not.toContain("confirmedOn");
+    expect(sentToModel).not.toContain(String(sentinel.confirmedByJulian));
   });
 
   it("never sends a source no tool returned in this answer, and logs the invalid ids", async () => {

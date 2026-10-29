@@ -23,8 +23,8 @@ a chip with the time and the temperature. A gear lets visitors play with
 the sky on their own screen (season, time of day, clouds, rain or snow, wind
 and haar) until they go back to live Glasgow. The assistant is a
 Highland cow that greets you and follows the chat: it listens while you type,
-chews while it looks things up, talks while the answer streams, licks its lips
-when it's done and lowers its head when something goes wrong. The site is in
+chews while it looks things up, talks while the answer types itself out, licks
+its lips when it's done and lowers its head when something goes wrong. The site is in
 English at `/` and Spanish at `/es`: visitors in Spain get Spanish by default,
 everyone else English, and the language toggle always wins.
 
@@ -37,9 +37,14 @@ sky when it fails. The footer credits Open-Meteo, as its CC BY 4.0 terms ask.
 
 You ask a question and the answer streams in from Claude (Sonnet 5.5, through
 the Vercel AI SDK), which can only look up the facts I've confirmed. Each fact
-an answer cites shows as a source chip, such as "CV · Cazoo · Redux →
-Zustand", and a citation only counts if the model looked that fact up while
-answering. Every question goes through two daily limits kept in Cloudflare
+an answer cites shows as a numbered citation and a source chip, such as "1 ·
+CV · Cazoo · Redux → Zustand", and a citation only counts if the model looked
+that fact up while answering. Tapping a number or a chip opens the claim as I
+confirmed it, with the date I confirmed it; the model never sees that date.
+Answers type themselves out word by word, can be copied with their sources,
+and are followed by more questions to ask. On a phone the chat gets a compact bar and
+a composer fixed above the keyboard; screen readers hear each answer once,
+whole. Every question goes through two daily limits kept in Cloudflare
 D1: 30 questions per visitor, and about $1 of model spend across everyone.
 Visitors are counted by a hash that changes every day, never by their IP.
 The live site has its API key and its limits in place, so the chat answers on

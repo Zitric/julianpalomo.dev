@@ -7,7 +7,7 @@ paths:
 # Styling
 
 Tailwind CSS 4 through `@tailwindcss/vite`. `src/styles/app.css` imports
-Tailwind, `tokens.css`, `fonts.css`, `landscape.css`, `play.css` and `cow.css`;
+Tailwind, `tokens.css`, `fonts.css`, `landscape.css`, `play.css`, `chat.css` and `cow.css`;
 `src/routes/__root.tsx` links `app.css`.
 
 ## Fonts live only in `src/styles/fonts.css`
@@ -30,11 +30,15 @@ Tailwind, `tokens.css`, `fonts.css`, `landscape.css`, `play.css` and `cow.css`;
 ## The one exception: the illustrations' palette
 
 - The colours of the illustrations (the landscape and the cows) are part of the artwork, not UI, so they are data in `src/lib/scene/palette.ts`, copied from `docs/design/landscape-palettes.json` (`DESIGN.md` section 2): the assistant cow, the five sky moments, the land per season, the herd, the particles, and `sceneFixed` for the few colours the reference SVGs' own stylesheets hold. `tests/unit/assistant-cow.test.ts` and `tests/unit/scene.test.ts` keep it equal to the JSON.
-- Only illustration components read it, and only for their drawing's fills and strokes. A bubble, chip or button on top of an illustration uses tokens like any other UI.
+- Only illustration components read it, and only for their drawing's fills and strokes; the compact bar's strip of hills (`src/components/bar/CompactBar.tsx`) is one. A bubble, chip or button on top of an illustration uses tokens like any other UI.
 
 ## The gear's panel styles live in `src/styles/play.css`
 
 - The third exception to "Tailwind utilities only": the `<dialog>`'s sheet and popover layout and its clear backdrop, the range inputs' gradient tracks and two-tone thumbs, and the gear's entrance. Colours are tokens only (the `track-*` tokens for the tracks); `tests/unit/tokens.test.ts` checks the thumbs reach 3:1 against every track and the panel. Everything that moves sits inside `prefers-reduced-motion: no-preference`.
+
+## The chat's motion lives in `src/styles/chat.css`
+
+- Each word fading in as an answer types itself out (the pace is in `src/components/chat/reveal.ts`), source chips rising, a claim opening, the visitor's bubble popping in and the status pill's dots, all inside `prefers-reduced-motion: no-preference` (`DESIGN.md` section 11), plus the citation numbers' 24px hit area, a pseudo-element that doesn't change the line. `src/components/chat/` sets the classes; a FLIP from a suggestion chip runs with the Web Animations API in `MessageList.tsx`, skipped with reduced motion.
 
 ## The landscape's SVG styles live in `src/styles/landscape.css`
 
@@ -67,4 +71,4 @@ Tailwind, `tokens.css`, `fonts.css`, `landscape.css`, `play.css` and `cow.css`;
 - Semantic elements first (`main`, `h1`, `nav`, `button`); the e2e test finds the page by role (`tests/e2e/home.spec.ts`).
 - The layout works at 375px wide (small phone) before anything else.
 
-If `tokens.css`, `fonts.css`, `cow.css`, `landscape.css`, `play.css`, `app.css`, `src/lib/scene/palette.ts` or `src/components/ui/` change shape, update this rule.
+If `tokens.css`, `fonts.css`, `cow.css`, `landscape.css`, `play.css`, `chat.css`, `app.css`, `src/lib/scene/palette.ts` or `src/components/ui/` change shape, update this rule.

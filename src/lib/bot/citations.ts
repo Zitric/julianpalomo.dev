@@ -9,8 +9,18 @@
 import { CLAIM_ID_PATTERN } from "../claim-id";
 import type { Claim } from "../claims";
 
-/** What the UI needs to show a claim as a source chip. */
-export type Source = Pick<Claim, "id" | "label" | "org" | "source">;
+/**
+ * What the UI needs to show a claim as a source chip and to open it: its
+ * text exactly as confirmed, and the date Julian confirmed it. The endpoint
+ * adds those two from `confirmedClaims()` after a tool returns the claim; the
+ * model never sees the date. Named `confirmedOn`, not `confirmedByJulian`,
+ * so tests/e2e/bundle.spec.ts can keep failing if that name reaches the
+ * browser.
+ */
+export type Source = Pick<Claim, "id" | "label" | "org" | "source" | "text"> & {
+  /** `YYYY-MM-DD`. */
+  confirmedOn: string;
+};
 
 type Segment = { type: "text"; text: string } | { type: "citation"; id: string };
 
@@ -53,7 +63,10 @@ export function parseCitations(
  * without an org. The source's name comes in the page's language; the claim's
  * org and label are English, like every claim.
  */
-export function chipLabel(source: Source, names: Record<Source["source"], string>): string {
+export function chipLabel(
+  source: Pick<Source, "label" | "org" | "source">,
+  names: Record<Source["source"], string>,
+): string {
   return [names[source.source], source.org, source.label]
     .filter((part) => part !== undefined)
     .join(" · ");
