@@ -248,3 +248,13 @@ export function confirmationLine(source: Source, locale: Locale): string {
     t(locale, source.source === "cv" ? "fromCv" : "fromJulian"),
   );
 }
+
+/**
+ * A ref callback that brings an element into view when it appears, such as an
+ * opened claim or an error. It's a module-level function, so React calls it on
+ * mount only, not on every render. Give the element `max-lg:scroll-mb-44` so it
+ * stops clear of the composer fixed to the bottom on phones.
+ */
+export function revealOnMount(node: HTMLElement | null): void {
+  node?.scrollIntoView({ block: "nearest" });
+}

@@ -8,6 +8,7 @@ import {
   confirmationLine,
   messageText,
   renderAnswer,
+  revealOnMount,
   splitIntoChunks,
   toolStatus,
 } from "./chat-view";
@@ -100,7 +101,9 @@ export function AssistantMessage({ message, streaming }: Props) {
           ))}
         </ol>
       )}
-      <div id={claimId}>{opened && <Claim number={opened.number} source={opened.source} />}</div>
+      <div id={claimId}>
+        {opened && <Claim key={opened.number} number={opened.number} source={opened.source} />}
+      </div>
       {!streaming && text.length > 0 && (
         <CopyButton text={answerAsText(text, chips, names, t(locale, "sourcesHeading"))} />
       )}
@@ -112,7 +115,10 @@ export function AssistantMessage({ message, streaming }: Props) {
 function Claim({ number, source }: { number: number; source: Source }) {
   const locale = useLocale();
   return (
-    <div className="claim-open flex flex-col gap-1 rounded-[14px] border-[1.5px] border-border bg-field p-3">
+    <div
+      ref={revealOnMount}
+      className="claim-open flex flex-col gap-1 rounded-[14px] border-[1.5px] border-border bg-field p-3 max-lg:scroll-mb-44"
+    >
       <p className="text-[12.5px] font-semibold text-accent">
         {number} · {chipLabel(source, t(locale, "sourceNames"))}
       </p>

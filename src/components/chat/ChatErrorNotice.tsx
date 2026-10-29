@@ -3,7 +3,7 @@ import { t } from "../../lib/i18n/t";
 import { site } from "../../lib/site";
 import { AssistantCow } from "../cow/AssistantCow";
 import { useLocale } from "../i18n/useLocale";
-import { chatErrorMessage } from "./chat-view";
+import { chatErrorMessage, revealOnMount } from "./chat-view";
 
 type Props = { error: Error; cowState: CowState | undefined };
 
@@ -23,7 +23,7 @@ export function ChatErrorNotice({ error, cowState }: Props) {
   const locale = useLocale();
   const contact = t(locale, "contact");
   return (
-    <div className="flex items-end gap-2">
+    <div ref={revealOnMount} className="flex items-end gap-2 max-lg:scroll-mb-44">
       <AssistantCow state={cowState ?? "idle"} size={58} animated={cowState !== undefined} />
       <div role="alert" className="flex min-w-0 flex-col gap-1 rounded-[20px] bg-tint px-4 py-3">
         <p>{chatErrorMessage(error, locale)}</p>

@@ -98,6 +98,31 @@ test("a phone gets the compact bar after the first question", async ({ page }) =
   await expect(page.locator("svg.landscape")).not.toBeInViewport();
 });
 
+test("on a phone, an opened claim and the limit error stop clear of the composer", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.reload();
+  const composer = page.locator("form").filter({ has: page.getByLabel("Your question") });
+  const above = async (element: import("@playwright/test").Locator) => {
+    const box = await element.boundingBox();
+    const fixed = await composer.boundingBox();
+    expect(box && fixed && box.y + box.height <= fixed.y).toBe(true);
+  };
+
+  await ask(page, "What has Julian worked on?");
+  const answer = page.getByRole("article", { name: "Answer" });
+  await answer.getByRole("list", { name: "Sources" }).getByRole("button").click();
+  await above(answer.getByText(/^Confirmed by Julian on /));
+
+  await page.route("**/api/chat", (route) =>
+    route.fulfill({ status: 429, json: chatErrorBody("visitor_limit") }),
+  );
+  await page.evaluate(() => window.scrollTo({ top: 0 }));
+  await ask(page, "One more?");
+  await above(page.getByRole("alert"));
+});
+
 test("a laptop never gets the compact bar", async ({ page }) => {
   await ask(page, "What has Julian worked on?");
   await expect(page.getByRole("article", { name: "Answer" })).toContainText(DEMO_ANSWER_INTRO);
