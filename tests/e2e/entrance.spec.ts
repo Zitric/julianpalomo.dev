@@ -134,6 +134,19 @@ for (const width of [320, 390]) {
     if (!bubble || !scene) throw new Error("not on screen");
     expect(bubble.x + bubble.width).toBeLessThanOrEqual(scene.x + scene.width);
     expect(bubble.x).toBeGreaterThan(scene.x + scene.width / 2);
+    // The tail's tip shows: nothing paints over it. The bubble ignores the
+    // pointer, which elementFromPoint honours, so it's turned on to look.
+    const tipShows = await hello.evaluate((element) => {
+      const tail = element.querySelector("svg");
+      if (!tail) return false;
+      const box = tail.getBoundingClientRect();
+      element.style.pointerEvents = "auto";
+      tail.style.pointerEvents = "auto";
+      // Inside the triangle, near its tip at (0.75, 15.25) of its 22 × 16.
+      const hit = document.elementFromPoint(box.left + 6, box.top + 12.5);
+      return hit !== null && element.contains(hit);
+    });
+    expect(tipShows).toBe(true);
     for (const button of await page.locator("header button").all()) {
       const box = await button.boundingBox();
       if (!box || box.y > bubble.y) continue;
