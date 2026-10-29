@@ -23,6 +23,22 @@ export function messageText(parts: readonly { type: string; text?: unknown }[]):
     .join("");
 }
 
+/**
+ * The latest `max` messages, starting with the visitor's: the oldest go first,
+ * then any answer left at the front, so the request opens with a question as
+ * a new conversation does. The screen keeps the whole conversation; only the
+ * request is trimmed.
+ */
+export function latestMessages<M extends { role: string }>(
+  messages: readonly M[],
+  max: number,
+): M[] {
+  // Not slice(-max): slice(-0) would keep everything.
+  const latest = messages.slice(Math.max(messages.length - max, 0));
+  const firstQuestion = latest.findIndex((message) => message.role === "user");
+  return firstQuestion === -1 ? [] : latest.slice(firstQuestion);
+}
+
 type AnswerPart = { type: "text"; text: string } | { type: "citation"; number: number };
 
 /**

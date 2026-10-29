@@ -1,6 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 import { chatErrorBody } from "../../src/lib/bot/chat-error";
 import { DEMO_ANSWER_INTRO } from "../../src/lib/bot/demo";
+import { MAX_MESSAGES } from "../../src/lib/bot/limits";
 import { site } from "../../src/lib/site";
 
 // The e2e build runs in demo mode (playwright.config.ts), so these answers come
@@ -56,6 +57,22 @@ test("focus moves to the question box after picking a suggestion", async ({ page
 
   await expect(page.getByRole("article", { name: "Answer" })).toContainText(DEMO_ANSWER_INTRO);
   await expect(page.getByLabel("Your question")).toBeFocused();
+});
+
+test("a conversation keeps getting answers past the server's message cap", async ({ page }) => {
+  // Each demo answer takes about 2s, so this many need more than the default 30s.
+  test.setTimeout(90_000);
+  // One question more than fits in the cap when the whole conversation is sent.
+  const questions = MAX_MESSAGES / 2 + 1;
+  const answers = page.getByRole("article", { name: "Answer" });
+
+  for (let i = 0; i < questions; i++) {
+    await ask(page, `Question ${i + 1}`);
+    await expect(answers.nth(i)).toContainText(DEMO_ANSWER_INTRO);
+    await expect(page.getByRole("button", { name: "Send" })).toBeVisible();
+    await expect(page.getByRole("alert")).toHaveCount(0);
+  }
+  await expect(answers).toHaveCount(questions);
 });
 
 test("the counter blocks a message over 1,000 characters", async ({ page }) => {

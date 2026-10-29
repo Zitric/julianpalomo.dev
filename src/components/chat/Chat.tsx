@@ -1,21 +1,33 @@
 import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { useRef, useState } from "react";
 import type { ChatUIMessage } from "../../lib/bot/chat-message";
+import { MAX_MESSAGES } from "../../lib/bot/limits";
 import { liveCowSlot } from "../../lib/cow-state";
 import { t } from "../../lib/i18n/t";
 import { useCowState } from "../cow/use-cow-state";
 import { useLocale } from "../i18n/useLocale";
 import { ChatErrorNotice } from "./ChatErrorNotice";
 import { Composer } from "./Composer";
-import { messageText, toolStatus } from "./chat-view";
+import { latestMessages, messageText, toolStatus } from "./chat-view";
 import { Greeting } from "./Greeting";
 import { MessageList } from "./MessageList";
 import { Suggestions } from "./Suggestions";
 
-/** The chat with the assistant. useChat posts to /api/chat, its default endpoint. */
+// Posts to /api/chat, the default endpoint, with the body the transport sends
+// by default except that only the latest MAX_MESSAGES messages go, so a long
+// conversation never reaches the endpoint's cap. Module-level so the
+// transport isn't rebuilt on every render.
+const transport = new DefaultChatTransport<ChatUIMessage>({
+  prepareSendMessagesRequest: ({ body, id, messages, trigger, messageId }) => ({
+    body: { ...body, id, messages: latestMessages(messages, MAX_MESSAGES), trigger, messageId },
+  }),
+});
+
+/** The chat with the assistant. */
 export function Chat() {
   const locale = useLocale();
-  const { messages, sendMessage, status, stop, error } = useChat<ChatUIMessage>();
+  const { messages, sendMessage, status, stop, error } = useChat<ChatUIMessage>({ transport });
   const [input, setInput] = useState("");
   const [composerFocused, setComposerFocused] = useState(false);
   const [stopped, setStopped] = useState(false);

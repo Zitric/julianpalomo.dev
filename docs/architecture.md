@@ -38,7 +38,9 @@ against a visitor's limit.
 
 **The chat.** [`src/components/chat/Chat.tsx`](../src/components/chat/Chat.tsx)
 uses the AI SDK's `useChat`, which posts the conversation to `/api/chat` and
-reads the streamed answer. A counter in
+reads the streamed answer. It sends only the latest 20 messages, starting with
+a question, so a long conversation never hits the endpoint's cap; the screen
+keeps the whole conversation, and the bot forgets the oldest turns. A counter in
 [`Composer.tsx`](../src/components/chat/Composer.tsx) keeps a question under
 1,000 characters, so the visitor never hits the endpoint's own limit.
 
@@ -54,7 +56,8 @@ neither, the endpoint answers `503`. A key without the D1 binding or the
 visitor salt also answers `503`, so a real model call never happens without the
 limits in front of it.
 
-**Validation.** The request body is parsed with Zod: at most 20 messages, at
+**Validation.** The request body is parsed with Zod: at most 20 messages
+(the chat never sends more, so this only stops forged requests), at
 most 1,000 characters per visitor message, and the conversation must end with
 the visitor's question. Only the text of earlier messages reaches the model,
 so a visitor can't forge a tool result in the history.
