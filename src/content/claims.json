@@ -407,5 +407,59 @@
     "org": "Microsoft",
     "source": "cv",
     "confirmedByJulian": "2026-10-27"
+  },
+  {
+    "id": "site-role",
+    "label": "Overview",
+    "text": "julianpalomo.dev, a personal site with an AI assistant that answers only from facts I have confirmed: personal project, October 2026 – present. Live at julianpalomo.dev; code at github.com/Zitric/julianpalomo.dev.",
+    "area": "project",
+    "org": "julianpalomo.dev",
+    "source": "cv",
+    "confirmedByJulian": "2026-10-29"
+  },
+  {
+    "id": "site-assistant",
+    "label": "Grounded assistant",
+    "text": "TanStack Start (React 19) on Cloudflare Workers. The assistant runs on Claude through the Vercel AI SDK, with read-only tools that only return facts I have confirmed, and every fact an answer cites must be one it looked up.",
+    "area": "project",
+    "org": "julianpalomo.dev",
+    "source": "cv",
+    "confirmedByJulian": "2026-10-29"
+  },
+  {
+    "id": "site-limits",
+    "label": "Daily limits",
+    "text": "Daily limits in Cloudflare D1: 30 questions per visitor and a global spend cap, with visitors counted by a hash that changes every day, never by their IP.",
+    "area": "project",
+    "org": "julianpalomo.dev",
+    "source": "cv",
+    "confirmedByJulian": "2026-10-29"
+  },
+  {
+    "id": "site-evals",
+    "label": "LLM evals",
+    "text": "LLM evals in CI: the real assistant answers the eval cases and a second model, calibrated before each run, judges every answer sentence by sentence. They run in CI when a run-evals label is added to a pull request that touches the assistant, its facts or the evals.",
+    "area": "project",
+    "org": "julianpalomo.dev",
+    "source": "cv",
+    "confirmedByJulian": "2026-10-29"
+  },
+  {
+    "id": "site-agent-setup",
+    "label": "Claude Code setup",
+    "text": "Built with Claude Code under a written agent setup: AGENTS.md, rules, hooks, skills and reviewer subagents.",
+    "area": "project",
+    "org": "julianpalomo.dev",
+    "source": "cv",
+    "confirmedByJulian": "2026-10-29"
+  },
+  {
+    "id": "site-landscape",
+    "label": "Live Highland landscape",
+    "text": "The home page shows a live Highland glen: its season follows the date, its sky follows the sun's real height over Glasgow, and it shows Glasgow's live weather (clouds, rain, snow, wind and haar) from Open-Meteo.",
+    "area": "project",
+    "org": "julianpalomo.dev",
+    "source": "julian",
+    "confirmedByJulian": "2026-10-29"
   }
 ]
