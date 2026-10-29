@@ -98,9 +98,10 @@ D1 still lands after they've gone. A
 step cut off halfway isn't counted ([`docs/tech-debt.md`](tech-debt.md)).
 
 **The answer on the page.** [`AssistantMessage.tsx`](../src/components/chat/AssistantMessage.tsx)
-renders the text with the same parser. A citation becomes a numbered marker and
-a source chip, such as "CV · Cazoo · Redux → Zustand", only when its id is both
-cited in the text and in `data-sources`.
+renders the text with the same parser. A citation becomes a numbered button and
+a source chip with the same number, such as "1 · CV · Cazoo · Redux → Zustand",
+only when its id is both cited in the text and in `data-sources`. Either one
+opens the claim under the answer, with its text and when Julian confirmed it.
 
 **The evals.** [`evals/run-case.ts`](../evals/run-case.ts) asks the real model
 its questions through `handleChat` itself, with a request shaped like
