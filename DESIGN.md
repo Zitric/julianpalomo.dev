@@ -485,16 +485,16 @@ through.
 
 ### Its states
 
-| State                | When                                        | What it does                                                                                                              |
-| -------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Idle                 | Nothing is happening                        | A 12s loop: tilts one way (18–26%), licks to the right (44–58%), tilts the other way (66–70%), licks to the left (76–90%) |
-| Listening            | The visitor is typing                       | Holds its head tilted, as if listening                                                                                    |
-| Thinking             | A question was sent and no text has arrived | Chews (the jaw moves side to side every 0.55s) with a slight thoughtful tilt                                              |
-| Talking              | The answer is streaming                     | The mouth opens and closes, irregularly, every 1.8s                                                                       |
-| Satisfied            | The answer just finished                    | Licks once (1.6s), then goes back to idle                                                                                 |
-| Sorry                | An error or the daily limit                 | Lowers its head and stays still                                                                                           |
-| Hover (pointer only) | The pointer is over it                      | Tilts and says "Moo!" in a small speech bubble                                                                            |
-| Tap                  | It's tapped                                 | Licks and, if sound is on, moos softly (at most once every 3s). While it talks it only moos: a lick would cover the mouth |
+| State                | When                                                             | What it does                                                                                                              |
+| -------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Idle                 | Nothing is happening                                             | A 12s loop: tilts one way (18–26%), licks to the right (44–58%), tilts the other way (66–70%), licks to the left (76–90%) |
+| Listening            | The visitor is typing                                            | Holds its head tilted, as if listening                                                                                    |
+| Thinking             | A question was sent and no word is on screen yet                 | Chews (the jaw moves side to side every 0.55s) with a slight thoughtful tilt                                              |
+| Talking              | The answer is typing itself out, from its first word to its last | The mouth opens and closes, irregularly, every 1.8s                                                                       |
+| Satisfied            | The answer just finished typing                                  | Licks once (1.6s), then goes back to idle                                                                                 |
+| Sorry                | An error or the daily limit                                      | Lowers its head and stays still                                                                                           |
+| Hover (pointer only) | The pointer is over it                                           | Tilts and says "Moo!" in a small speech bubble                                                                            |
+| Tap                  | It's tapped                                                      | Licks and, if sound is on, moos softly (at most once every 3s). While it talks it only moos: a lick would cover the mouth |
 - Only the cow next to the **latest** assistant message is animated. Earlier
   ones stay still, so a long conversation doesn't become a field of moving
   heads. Before the first answer that's the greeting's cow; while a question
@@ -518,12 +518,20 @@ mobile; desktop is the same inside the right-hand card.
 2. **Thinking.** The question jumps into place as a bubble, with a small
    bounce and a "pop". The cow chews. A status pill says what's happening in
    words ("Looking up claims…") with three bouncing dots. Send becomes Stop.
-3. **Answering.** The cow talks while the text arrives. Each new piece of text
-   fades in over 0.2s; earlier text never re-animates and the page never
-   jumps. Citations show as small green numbers. The view follows the answer
-   only if the visitor was already at the bottom; if they scrolled up to
-   read, a "New answer ↓" pill appears instead.
-4. **Done.** The cow licks once, satisfied. The sources rise in one by one
+3. **Answering.** The answer types itself out. What has arrived waits in a
+   buffer and appears word by word at a steady pace, whatever pace the
+   stream has: about 60 characters a second, faster when it falls more than
+   about 1.5s behind, so a long answer never lags far. Each word fades in
+   over 0.2s; earlier text never re-animates and the page never jumps. A
+   citation appears whole, with the word before it, as a small green
+   number. The cow talks from the first word to the last, even after the
+   stream has ended; while the typing waits for more text it keeps talking
+   rather than going back to thinking. Stop, or an error, shows the rest of
+   what has arrived at once. The view follows the typed text only if the
+   visitor was already at the bottom; if they scrolled up to read, a "New
+   answer ↓" pill appears instead.
+4. **Done**, when the last word is on screen, not when the stream ends. The
+   cow licks once, satisfied. The sources rise in one by one
    (80ms apart) as numbered chips, such as "1 · Julian · Work mode". Tapping
    a chip opens the claim exactly as Julian confirmed it, with "Confirmed by
    Julian on 27 Oct 2026 · from his CV". Under the answer: "Copy", and "Keep
@@ -546,10 +554,10 @@ mobile; desktop is the same inside the right-hand card.
 - **Copy** copies the answer as plain text with its sources listed at the
   end, ready to paste into an email.
 - **Screen readers:** "Answering…" is announced when an answer starts, and the
-  full answer once when it ends, never piece by piece. This settles the
+  full answer once when it has finished typing, never piece by piece. This settles the
   VoiceOver check left open in phase 4.
-- **Keyboard:** Enter sends, Shift+Enter adds a line, Escape stops a streaming
-  answer when focus is in the composer.
+- **Keyboard:** Enter sends, Shift+Enter adds a line, Escape stops an answer
+  that's still arriving or typing when focus is in the composer.
 - **Mobile:** the composer is fixed to the bottom above the keyboard, with
   the safe-area inset; every button is at least 44px.
 - **Greeting:** "Hi! Ask me about Julian's experience. I only answer with
@@ -560,21 +568,21 @@ text, in both languages, in the pull request that adds it.
 
 ## 11. Motion
 
-| What                              | Duration                                                                                                       | Easing                                             |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| UI colours on a theme change      | 0.6s                                                                                                           | `ease`                                             |
-| Theme toggle (sunset or sunrise)  | 1.7s                                                                                                           | Section 6                                          |
-| Theme change at Glasgow's dusk    | about 6s                                                                                                       | Same choreography, stretched                       |
-| Landscape colours (time, weather) | 1.1s                                                                                                           | `ease`                                             |
-| The visitor's bubble appears      | 0.5s                                                                                                           | `cubic-bezier(.3, 1.5, .5, 1)` (a small overshoot) |
-| Source chips rise                 | 0.45s, 80ms apart                                                                                              | `cubic-bezier(.3, 1.4, .5, 1)`                     |
-| A claim opens                     | 0.35s                                                                                                          | `ease`                                             |
-| New text in an answer             | 0.2s                                                                                                           | `ease`                                             |
-| Button press                      | 80ms                                                                                                           | `ease`                                             |
-| The gear spins in                 | 0.6s, after 2s                                                                                                 | Spring-like overshoot, then 3 pulses               |
-| Clouds cross the sky              | 1700 units in 120–190s, over a 2900-unit loop (205–324s)                                                       | `linear`                                           |
-| Particles, before the wind        | Leaves 7–11s, petals 8–12s, rain 0.6–0.9s and snow 6–10s a fall; midges buzz in 1.2–2s, glints twinkle in 2–4s | `linear` falls; sways and twinkles `ease-in-out`   |
-| The herd's loops                  | 11s, 16s, 19s                                                                                                  | `ease-in-out`                                      |
+| What                                    | Duration                                                                                                       | Easing                                             |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| UI colours on a theme change            | 0.6s                                                                                                           | `ease`                                             |
+| Theme toggle (sunset or sunrise)        | 1.7s                                                                                                           | Section 6                                          |
+| Theme change at Glasgow's dusk          | about 6s                                                                                                       | Same choreography, stretched                       |
+| Landscape colours (time, weather)       | 1.1s                                                                                                           | `ease`                                             |
+| The visitor's bubble appears            | 0.5s                                                                                                           | `cubic-bezier(.3, 1.5, .5, 1)` (a small overshoot) |
+| Source chips rise                       | 0.45s, 80ms apart                                                                                              | `cubic-bezier(.3, 1.4, .5, 1)`                     |
+| A claim opens                           | 0.35s                                                                                                          | `ease`                                             |
+| Each word as an answer types itself out | 0.2s fade; about 60 characters a second, faster when more than about 1.5s behind                               | `ease`                                             |
+| Button press                            | 80ms                                                                                                           | `ease`                                             |
+| The gear spins in                       | 0.6s, after 2s                                                                                                 | Spring-like overshoot, then 3 pulses               |
+| Clouds cross the sky                    | 1700 units in 120–190s, over a 2900-unit loop (205–324s)                                                       | `linear`                                           |
+| Particles, before the wind              | Leaves 7–11s, petals 8–12s, rain 0.6–0.9s and snow 6–10s a fall; midges buzz in 1.2–2s, glints twinkle in 2–4s | `linear` falls; sways and twinkles `ease-in-out`   |
+| The herd's loops                        | 11s, 16s, 19s                                                                                                  | `ease-in-out`                                      |
 
 ### Reduced motion
 
@@ -584,7 +592,8 @@ With `prefers-reduced-motion: reduce`:
   animation, no bounces, no FLIP;
 - the theme changes with a 0.3s crossfade, and the landscape's colours change
   instantly;
-- answer text appears without fading, sources without rising;
+- answer text appears as it arrives, without typing itself out or fading;
+  sources appear without rising;
 - the gear appears without spinning or pulsing.
 
 ## 12. Sound

@@ -41,8 +41,8 @@ an answer cites shows as a numbered citation and a source chip, such as "1 ·
 CV · Cazoo · Redux → Zustand", and a citation only counts if the model looked
 that fact up while answering. Tapping a number or a chip opens the claim as I
 confirmed it, with the date I confirmed it; the model never sees that date.
-Answers fade in as they stream, can be copied with their sources, and are
-followed by more questions to ask. On a phone the chat gets a compact bar and
+Answers type themselves out word by word, can be copied with their sources,
+and are followed by more questions to ask. On a phone the chat gets a compact bar and
 a composer fixed above the keyboard; screen readers hear each answer once,
 whole. Every question goes through two daily limits kept in Cloudflare
 D1: 30 questions per visitor, and about $1 of model spend across everyone.
