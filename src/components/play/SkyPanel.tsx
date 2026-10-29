@@ -124,16 +124,20 @@ export function SkyPanel({ open, position, onClose }: Props) {
             />
           </div>
 
-          <Button
-            look="primary"
-            onClick={() => {
-              dispatch({ type: "backToLive" });
-              onClose();
-            }}
-          >
-            <span aria-hidden="true" className="size-2 rounded-full bg-live" />
-            {t(locale, "backToLive")}
-          </Button>
+          {/* A sticky footer: the way back stays in view while the controls
+              above it scroll inside the sheet. */}
+          <div className="sticky bottom-0 -mx-5 -mb-5 border-t-2 border-border bg-background px-5 pt-3 pb-5">
+            <Button
+              look="primary"
+              onClick={() => {
+                dispatch({ type: "backToLive" });
+                onClose();
+              }}
+            >
+              <span aria-hidden="true" className="size-2 rounded-full bg-live" />
+              {t(locale, "backToLive")}
+            </Button>
+          </div>
         </div>
       )}
     </dialog>

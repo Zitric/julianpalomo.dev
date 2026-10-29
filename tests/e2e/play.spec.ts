@@ -114,3 +114,19 @@ test("the whole panel works with the keyboard alone", async ({ page }) => {
   for (let i = 0; i < 6; i++) await page.keyboard.press("Tab");
   await expect(panel(page).locator(":focus")).toHaveCount(1);
 });
+
+// The sheet's controls scroll; "Back to live Glasgow" stays in view at its foot.
+for (const height of [844, 664]) {
+  test(`on a 390 × ${height} phone the way back is always in view`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height });
+    await page.goto("/");
+    await gear(page).click();
+    const back = panel(page).getByRole("button", { name: "Back to live Glasgow" });
+    await expect(back).toBeInViewport({ ratio: 1 });
+    await panel(page).getByLabel("Wind").focus();
+    await expect(back).toBeInViewport({ ratio: 1 });
+    const hero = await page.locator("svg.landscape").boundingBox();
+    const sheet = await panel(page).boundingBox();
+    expect((sheet?.y ?? 0) >= (hero?.y ?? 0) + (hero?.height ?? 0)).toBe(true);
+  });
+}

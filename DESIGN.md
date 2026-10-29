@@ -437,7 +437,9 @@ Comeau's blog. It's a toy, and it's honest about being one.
   desktop (about 380px wide), with a "Close" button in its header. Title
   "Play with the sky", subtitle "Only on your screen, for as long as you
   like." Its backdrop stays clear and the sheet stops short of the hero, so
-  the sky can be watched while it changes.
+  the sky can be watched while it changes. In the sheet, "Back to live
+  Glasgow" is a sticky footer under the scrolling controls, so the way back
+  is always in view, even on a short phone.
   - **Season:** four segmented buttons.
   - **Time of day:** a slider from 00:00 to 23:00 whose track is a gradient
     from night through dawn, day and dusk back to night. Label: "15:00 · day",
