@@ -338,7 +338,9 @@ come from Glasgow (below); the gear lets visitors set them (section 8).
 - A route on our Worker (`GET /api/weather`) asks
   [Open-Meteo](https://open-meteo.com/) for Glasgow's current weather and
   caches the answer for 30 minutes, so the site makes at most about 48 calls
-  a day whatever the traffic. No cron, no API key.
+  a day per Cloudflare data centre whatever the traffic. A failure is cached
+  for 5 minutes, so the site doesn't call Open-Meteo on every page view while
+  it refuses, and each one is logged with its reason. No cron, no API key.
 - The page renders without weather (season and time only), then fetches
   `/api/weather` after hydration and lets the weather roll in with the 1.1s
   transition. A failed or slow fetch leaves the sky as it is; the chip then
