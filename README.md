@@ -69,8 +69,8 @@ What exists around it:
 - lefthook, which runs Biome on staged files before each commit
 - GitHub Actions, which run the checks, the unit tests, knip, the Claude Code
   hook tests and the Playwright tests on every pull request to `main`, and the
-  evals on every pull request that touches the assistant, its claims or the
-  evals
+  evals when the `run-evals` label is added to one that touches the assistant,
+  its claims or the evals
 - Cloudflare Workers Builds, which deploys `main` and gives every pull request
   its own preview URL
 - Instructions and tooling for AI coding agents: [`AGENTS.md`](AGENTS.md) (also
@@ -134,9 +134,10 @@ run in which the model API failed (no credit, a bad key, a rate limit, an
 overload) is inconclusive, neither a pass nor a failure of the bot.
 [`docs/evals.md`](docs/evals.md) has every baseline so far.
 
-CI runs `pnpm eval` once on every pull request that changes the assistant's
-code, the claims, the evals or the dependencies, on a separate API key, and
-writes the score, the critical failures and the cost to the job's summary.
+CI runs `pnpm eval` once when the `run-evals` label is added to a pull
+request that changes the assistant's code, the claims, the evals or the
+dependencies, never on a push. It runs on a separate API key and writes the
+score, the critical failures and the cost to the job's summary.
 There a pass rate below 90% is a warning, not a failure: one run of 40 answers
 is too small to tell a real drop from noise. Every other reason still fails
 the job.

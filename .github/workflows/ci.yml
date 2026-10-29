@@ -1,12 +1,17 @@
 name: CI
 
+# `labeled` is only for the evals job; every other job runs on it too, so the
+# newest check runs on the head are real results, never skipped ones.
 on:
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, labeled]
 
 permissions:
   contents: read
 
+# A new push or labelling cancels the run in progress, an eval run included:
+# that run would measure a stale commit.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -96,9 +101,10 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
-  # Says whether the pull request touches what the evals measure. A path filter
-  # on the workflow would leave the evals check pending on every other pull
-  # request; a job skipped by its `if` reports Success instead.
+  # Says whether the pull request touches what the evals measure, and when it
+  # does but this run doesn't measure it, says how to. A path filter on the
+  # workflow would leave the evals check pending on every other pull request; a
+  # job skipped by its `if` reports Success instead.
   changes:
     name: Changes to the bot
     runs-on: ubuntu-latest
@@ -127,15 +133,23 @@ jobs:
             1) echo "bot=true" >> "$GITHUB_OUTPUT" ;;
             *) exit "$status" ;;
           esac
+      # Single quotes: inside double quotes the backticks would run a command.
+      - if: steps.diff.outputs.bot == 'true' && !(github.event.action == 'labeled' && github.event.label.name == 'run-evals')
+        run: |
+          echo '::notice::This pull request changes what the bot sees. To measure this commit, add the `run-evals` label (or remove it and add it again).'
+          echo 'This pull request changes what the bot sees. To measure this commit, add the `run-evals` label (or remove it and add it again).' >> "$GITHUB_STEP_SUMMARY"
 
-  # One full eval run against the real models, on Julian's CI key. It fails on
-  # a critical case, the calibration, a provider error or the cost cap; a pass
-  # rate below 90% is only a warning (docs/adr/2026-10-28-evals-in-ci.md).
+  # One full eval run against the real models, on Julian's CI key, about $0.70.
+  # Only adding the `run-evals` label starts it, never a push; to measure a
+  # newer commit, remove the label and add it again
+  # (docs/adr/2026-10-29-evals-on-a-label.md). It fails on a critical case,
+  # the calibration, a provider error or the cost cap; a pass rate below 90% is
+  # only a warning (docs/adr/2026-10-28-evals-in-ci.md).
   # Never `pull_request_target`: it would run a fork's code with the key.
   evals:
     name: Evals
     needs: changes
-    if: needs.changes.outputs.bot == 'true'
+    if: needs.changes.outputs.bot == 'true' && github.event.action == 'labeled' && github.event.label.name == 'run-evals'
     runs-on: ubuntu-latest
     # The code's own limits: 10 minutes for the calibration, then 10 batches of
     # 4 cases at 3 minutes each.

@@ -21,6 +21,10 @@ A change that touches any of these needs one full run:
 CI's `changes` job and `.claude/rules/evals.md` list the same paths: keep the
 three in step. A new file the bot or `evals/` imports from `src/` joins all three.
 
+CI runs them only when the `run-evals` label is added to such a pull request,
+once per labelling. Julian or the cloud reviewer adds it; **never add it
+yourself**. Suggest it in the PR body instead.
+
 ## 2. Run
 
 | Command                             | When                                   | Cost, roughly |
