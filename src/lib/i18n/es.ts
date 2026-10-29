@@ -57,9 +57,12 @@ export const es: Messages = {
     `${numbers.format(over)} ${over === 1 ? "carácter" : "caracteres"} de más (máximo ${numbers.format(limit)})`,
 
   errorUnavailable: "El asistente no está disponible ahora mismo.",
-  errorVisitorLimit: "Has llegado al límite de preguntas de hoy.",
-  errorDailyBudget: "El asistente ha agotado su presupuesto de hoy. Vuelve a intentarlo mañana.",
-  errorGeneric: "Algo ha salido mal.",
+  errorVisitorLimit:
+    "Has llegado al límite de preguntas de hoy. Vuelve mañana o escribe a Julián directamente: lee todos los mensajes.",
+  errorDailyBudget:
+    "El asistente ha agotado el presupuesto de hoy. Vuelve mañana o escribe a Julián directamente: lee todos los mensajes.",
+  errorGeneric: "Algo ha salido mal por mi parte. Vuelve a intentarlo en un momento.",
+  questionsBackTomorrow: "Las preguntas vuelven mañana",
   contact: { before: "También puedes escribirme por", between: "o", after: "." },
 
   patTheCow: "Acaricia a la vaca",

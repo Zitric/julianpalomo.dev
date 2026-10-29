@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { chatErrorBody } from "../../src/lib/bot/chat-error";
 import { DEMO_ANSWER_INTRO } from "../../src/lib/bot/demo";
 
 // The demo answer quotes the first confirmed claim and cites it once
@@ -62,6 +63,24 @@ test("scrolling up while an answer streams shows the New answer pill", async ({ 
   await expect(pill).toBeVisible();
   await pill.click();
   await expect(page.getByRole("article", { name: "Answer" })).toBeInViewport();
+});
+
+test("the daily limit says so warmly, once, and closes the composer for today", async ({
+  page,
+}) => {
+  await page.route("**/api/chat", (route) =>
+    route.fulfill({ status: 429, json: chatErrorBody("visitor_limit") }),
+  );
+  await ask(page, "One more?");
+  const alert = page.getByRole("alert");
+  await expect(alert).toHaveCount(1);
+  await expect(alert).toContainText(
+    "You've reached today's limit for questions. Come back tomorrow, or write to Julian directly.",
+  );
+  await expect(alert.getByRole("link", { name: "LinkedIn" })).toBeVisible();
+  const box = page.getByLabel("Your question");
+  await expect(box).toBeDisabled();
+  await expect(box).toHaveAttribute("placeholder", "Questions are back tomorrow");
 });
 
 test.describe("with reduced motion", () => {

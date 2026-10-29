@@ -7,9 +7,17 @@ import { chatErrorMessage } from "./chat-view";
 
 type Props = { error: Error; cowState: CowState | undefined };
 
+// The other ways to reach Julian, in the order the notice lists them.
+const WAYS = [
+  { name: "LinkedIn", href: site.links.linkedin },
+  { name: "GitHub", href: site.links.github },
+] as const;
+
 /**
- * Why the last request failed, and where to reach Julian instead. The cow sits
- * beside the alert, not inside it, so its button isn't read out with the alert.
+ * Why the last request failed, warmly, and the other ways to reach Julian
+ * (DESIGN.md section 10). It's an alert, so screen readers announce it once
+ * when it appears. The cow sits beside the alert, not inside it, so its
+ * button isn't read out with the alert; it lowers its head.
  */
 export function ChatErrorNotice({ error, cowState }: Props) {
   const locale = useLocale();
@@ -21,13 +29,14 @@ export function ChatErrorNotice({ error, cowState }: Props) {
         <p>{chatErrorMessage(error, locale)}</p>
         <p className="text-[12.5px] text-muted">
           {contact.before}{" "}
-          <a href={site.links.linkedin} className="font-medium text-accent underline">
-            LinkedIn
-          </a>{" "}
-          {contact.between}{" "}
-          <a href={site.links.github} className="font-medium text-accent underline">
-            GitHub
-          </a>
+          {WAYS.map((way, index) => (
+            <span key={way.name}>
+              {index > 0 && ` ${contact.between} `}
+              <a href={way.href} className="font-medium text-accent underline">
+                {way.name}
+              </a>
+            </span>
+          ))}
           {contact.after}
         </p>
       </div>

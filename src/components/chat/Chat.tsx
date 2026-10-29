@@ -12,6 +12,7 @@ import { Composer } from "./Composer";
 import {
   latestMessages,
   messageText,
+  outOfQuestions,
   remainingSuggestions,
   shouldFollow,
   toolStatus,
@@ -137,6 +138,7 @@ export function Chat() {
         onFocus={() => setComposerFocused(true)}
         onBlur={() => setComposerFocused(false)}
         busy={busy}
+        closed={outOfQuestions(error)}
         ref={inputRef}
       />
     </section>

@@ -6,6 +6,7 @@ import {
   hideTrailingPartialMarker,
   latestMessages,
   messageText,
+  outOfQuestions,
   remainingSuggestions,
   renderAnswer,
   shouldFollow,
@@ -14,6 +15,7 @@ import {
 } from "../../src/components/chat/chat-view";
 import { chatErrorBody } from "../../src/lib/bot/chat-error";
 import type { Source } from "../../src/lib/bot/citations";
+import { t } from "../../src/lib/i18n/t";
 
 const zustand: Source = {
   id: "redux-zustand",
@@ -116,25 +118,21 @@ describe("toolStatus", () => {
 });
 
 describe("chatErrorMessage", () => {
+  const body = (code: Parameters<typeof chatErrorBody>[0]) =>
+    new Error(JSON.stringify(chatErrorBody(code)));
+
   it("says the assistant isn't available for the endpoint's 503 body", () => {
-    expect(chatErrorMessage(new Error(JSON.stringify(chatErrorBody("unavailable"))), "en")).toBe(
-      "The assistant isn't available here right now.",
-    );
+    expect(chatErrorMessage(body("unavailable"), "en")).toBe(t("en", "errorUnavailable"));
   });
 
-  it("says which daily limit was reached for each 429 body", () => {
-    expect(chatErrorMessage(new Error(JSON.stringify(chatErrorBody("visitor_limit"))), "en")).toBe(
-      "You've reached today's limit for questions.",
-    );
-    expect(chatErrorMessage(new Error(JSON.stringify(chatErrorBody("daily_budget"))), "en")).toBe(
-      "The assistant has reached its daily budget. Try again tomorrow.",
-    );
+  it("says which daily limit was reached for each 429 body, and offers another way", () => {
+    expect(chatErrorMessage(body("visitor_limit"), "en")).toBe(t("en", "errorVisitorLimit"));
+    expect(t("en", "errorVisitorLimit")).toMatch(/^You've reached today's limit for questions\. /);
+    expect(chatErrorMessage(body("daily_budget"), "en")).toBe(t("en", "errorDailyBudget"));
   });
 
   it("speaks the page's language", () => {
-    expect(chatErrorMessage(new Error(JSON.stringify(chatErrorBody("visitor_limit"))), "es")).toBe(
-      "Has llegado al límite de preguntas de hoy.",
-    );
+    expect(chatErrorMessage(body("visitor_limit"), "es")).toBe(t("es", "errorVisitorLimit"));
   });
 
   it.each([
@@ -144,7 +142,19 @@ describe("chatErrorMessage", () => {
     "Failed to fetch",
     '{"error":"something-new"}',
   ])("says something went wrong for %j", (message) => {
-    expect(chatErrorMessage(new Error(message), "en")).toBe("Something went wrong.");
+    expect(chatErrorMessage(new Error(message), "en")).toBe(t("en", "errorGeneric"));
+  });
+});
+
+describe("outOfQuestions", () => {
+  it("is true only at either daily limit", () => {
+    const body = (code: Parameters<typeof chatErrorBody>[0]) =>
+      new Error(JSON.stringify(chatErrorBody(code)));
+    expect(outOfQuestions(body("visitor_limit"))).toBe(true);
+    expect(outOfQuestions(body("daily_budget"))).toBe(true);
+    expect(outOfQuestions(body("unavailable"))).toBe(false);
+    expect(outOfQuestions(new Error("Failed to fetch"))).toBe(false);
+    expect(outOfQuestions(undefined)).toBe(false);
   });
 });
 

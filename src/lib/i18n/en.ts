@@ -66,9 +66,13 @@ export const en = {
     `${numbers.format(over)} ${over === 1 ? "character" : "characters"} over the ${numbers.format(limit)} limit`,
 
   errorUnavailable: "The assistant isn't available here right now.",
-  errorVisitorLimit: "You've reached today's limit for questions.",
-  errorDailyBudget: "The assistant has reached its daily budget. Try again tomorrow.",
-  errorGeneric: "Something went wrong.",
+  errorVisitorLimit:
+    "You've reached today's limit for questions. Come back tomorrow, or write to Julian directly. He reads every message.",
+  errorDailyBudget:
+    "The assistant has used up today's budget. Come back tomorrow, or write to Julian directly. He reads every message.",
+  errorGeneric: "Something went wrong on my side. Try again in a moment.",
+  // The composer's placeholder once no more questions can be asked today.
+  questionsBackTomorrow: "Questions are back tomorrow",
   // "You can still reach me on LinkedIn or GitHub.", around the two links.
   contact: { before: "You can still reach me on", between: "or", after: "." },
 

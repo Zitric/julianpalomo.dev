@@ -21,6 +21,8 @@ type Props = {
   onFocus: () => void;
   onBlur: () => void;
   busy: boolean;
+  /** No more questions today: the box is disabled and says when they're back. */
+  closed: boolean;
   ref?: Ref<HTMLTextAreaElement>;
 };
 
@@ -35,7 +37,17 @@ const COUNTER_FROM = 900;
  * a question that's too long. Below 1024px it's fixed to the bottom, above
  * the on-screen keyboard.
  */
-export function Composer({ value, onChange, onSend, onStop, onFocus, onBlur, busy, ref }: Props) {
+export function Composer({
+  value,
+  onChange,
+  onSend,
+  onStop,
+  onFocus,
+  onBlur,
+  busy,
+  closed,
+  ref,
+}: Props) {
   const locale = useLocale();
   const inputId = useId();
   const counterId = useId();
@@ -61,7 +73,7 @@ export function Composer({ value, onChange, onSend, onStop, onFocus, onBlur, bus
   }, [value]);
   const length = value.length;
   const over = length - MAX_VISITOR_TEXT;
-  const canSend = !busy && value.trim().length > 0 && over <= 0;
+  const canSend = !busy && !closed && value.trim().length > 0 && over <= 0;
 
   const counterText =
     over > 0
@@ -115,6 +127,8 @@ export function Composer({ value, onChange, onSend, onStop, onFocus, onBlur, bus
           onFocus={onFocus}
           onBlur={onBlur}
           readOnly={busy}
+          disabled={closed}
+          placeholder={closed ? t(locale, "questionsBackTomorrow") : undefined}
           rows={1}
           aria-invalid={over > 0}
           aria-describedby={describedBy}

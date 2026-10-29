@@ -182,18 +182,33 @@ export function toolStatus(
 }
 
 /**
+ * The endpoint's error code for a failed request, or undefined for a stream
+ * or network error. The transport puts the response body in the error's
+ * message.
+ */
+function chatErrorCode(error: Error): ChatErrorCode | undefined {
+  try {
+    const parsed = chatErrorSchema.safeParse(JSON.parse(error.message));
+    return parsed.success ? parsed.data.error : undefined;
+  } catch {
+    // Not JSON: a stream or network error.
+    return undefined;
+  }
+}
+
+/** Whether no more questions can be asked today: either daily limit was reached. */
+export function outOfQuestions(error: Error | undefined): boolean {
+  const code = error ? chatErrorCode(error) : undefined;
+  return code === "visitor_limit" || code === "daily_budget";
+}
+
+/**
  * What to tell the visitor when a request fails. The transport puts the
  * response body in the error's message, so a typed body from the endpoint
  * picks the text; anything else, a stream or network error, is generic.
  */
 export function chatErrorMessage(error: Error, locale: Locale): string {
-  let code: ChatErrorCode | undefined;
-  try {
-    const parsed = chatErrorSchema.safeParse(JSON.parse(error.message));
-    code = parsed.success ? parsed.data.error : undefined;
-  } catch {
-    // Not JSON: a stream or network error, which gets the generic text.
-  }
+  const code = chatErrorCode(error);
   switch (code) {
     case "unavailable":
       return t(locale, "errorUnavailable");
