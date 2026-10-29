@@ -5,6 +5,13 @@
  * and writing the counts lives in usage.ts, which only the server imports.
  */
 
+/**
+ * The most messages one request may carry. The endpoint rejects more, and the
+ * chat UI sends only the latest this many, so a long conversation never hits
+ * the cap.
+ */
+export const MAX_MESSAGES = 20;
+
 /** The most text one visitor message may hold, summed over its text parts. */
 export const MAX_VISITOR_TEXT = 1_000;
 

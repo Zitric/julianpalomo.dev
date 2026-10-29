@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   chatErrorMessage,
   hideTrailingPartialMarker,
+  latestMessages,
   messageText,
   renderAnswer,
   toolStatus,
@@ -142,5 +143,61 @@ describe("messageText", () => {
         { type: "text", text: "two." },
       ]),
     ).toBe("One two.");
+  });
+});
+
+describe("latestMessages", () => {
+  type Message = { id: string; role: "user" | "assistant" };
+  // What useChat sends on a new question: q1 a1 … q(n-1) a(n-1), then qn.
+  function asking(questions: number): Message[] {
+    const messages: Message[] = [];
+    for (let n = 1; n < questions; n++) {
+      messages.push({ id: `q${n}`, role: "user" }, { id: `a${n}`, role: "assistant" });
+    }
+    messages.push({ id: `q${questions}`, role: "user" });
+    return messages;
+  }
+  const ids = (messages: Message[]) => messages.map((message) => message.id);
+
+  it("returns a conversation shorter than max as it is", () => {
+    expect(ids(latestMessages(asking(3), 20))).toEqual(["q1", "a1", "q2", "a2", "q3"]);
+  });
+
+  it("returns exactly max messages as they are", () => {
+    expect(ids(latestMessages(asking(2), 3))).toEqual(["q1", "a1", "q2"]);
+  });
+
+  it("drops the oldest message, then the answer left at the front", () => {
+    // 21 messages: the last 20 would start with a1.
+    const trimmed = ids(latestMessages(asking(11), 20));
+    expect(trimmed).toHaveLength(19);
+    expect(trimmed.slice(0, 2)).toEqual(["q2", "a2"]);
+    expect(trimmed.at(-1)).toBe("q11");
+  });
+
+  it("keeps a failed question that never got an answer", () => {
+    // q2 failed, so the visitor asked q3 straight after it.
+    const messages: Message[] = [
+      { id: "q1", role: "user" },
+      { id: "a1", role: "assistant" },
+      { id: "q2", role: "user" },
+      { id: "q3", role: "user" },
+    ];
+    expect(ids(latestMessages(messages, 3))).toEqual(["q2", "q3"]);
+  });
+
+  it("treats a stopped answer like any other", () => {
+    const messages: Message[] = [
+      { id: "q1", role: "user" },
+      { id: "a1-stopped", role: "assistant" },
+      { id: "q2", role: "user" },
+    ];
+    expect(ids(latestMessages(messages, 3))).toEqual(["q1", "a1-stopped", "q2"]);
+    expect(ids(latestMessages(messages, 2))).toEqual(["q2"]);
+  });
+
+  it("returns an empty list for an empty conversation or a max of 0", () => {
+    expect(latestMessages([], 20)).toEqual([]);
+    expect(latestMessages(asking(2), 0)).toEqual([]);
   });
 });
