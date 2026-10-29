@@ -1,6 +1,6 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ChatUIMessage } from "../../lib/bot/chat-message";
 import { MAX_MESSAGES } from "../../lib/bot/limits";
 import { liveCowSlot } from "../../lib/cow-state";
@@ -9,7 +9,13 @@ import { useCowState } from "../cow/use-cow-state";
 import { useLocale } from "../i18n/useLocale";
 import { ChatErrorNotice } from "./ChatErrorNotice";
 import { Composer } from "./Composer";
-import { latestMessages, messageText, toolStatus } from "./chat-view";
+import {
+  latestMessages,
+  messageText,
+  remainingSuggestions,
+  shouldFollow,
+  toolStatus,
+} from "./chat-view";
 import { Greeting } from "./Greeting";
 import { MessageList } from "./MessageList";
 import { Suggestions } from "./Suggestions";
@@ -56,6 +62,23 @@ export function Chat() {
     inputRef.current?.focus();
   }
 
+  // Follow a streaming answer only from the bottom of the page; a visitor who
+  // scrolled up to read gets a "New answer ↓" pill instead.
+  const atBottom = useAtBottom();
+  const streamingLength = messageText(streamingParts).length;
+  useEffect(() => {
+    if (streamingLength > 0 && shouldFollow({ atBottom, streaming: streamingId !== undefined })) {
+      scrollToBottom();
+    }
+  }, [streamingLength, atBottom, streamingId]);
+  const showNewAnswer = streamingId !== undefined && !atBottom;
+
+  const asked = messages.filter((m) => m.role === "user").map((m) => messageText(m.parts));
+  const keepAsking =
+    !busy && last?.role === "assistant"
+      ? remainingSuggestions(t(locale, "suggestions"), asked, 3)
+      : [];
+
   function stopAnswer() {
     setStopped(true);
     void stop();
@@ -65,7 +88,13 @@ export function Chat() {
   return (
     <section aria-label={t(locale, "chatLabel")} className="flex flex-col gap-6">
       <Greeting cowState={cowSlot.kind === "greeting" ? cowState : undefined} />
-      {messages.length === 0 && <Suggestions onPick={send} />}
+      {messages.length === 0 && (
+        <Suggestions
+          label={t(locale, "suggestionsLabel")}
+          questions={t(locale, "suggestions").slice(0, 3)}
+          onPick={send}
+        />
+      )}
       {messages.length > 0 && (
         <MessageList
           messages={messages}
@@ -73,6 +102,23 @@ export function Chat() {
           cowSlot={cowSlot}
           cowState={cowState}
         />
+      )}
+      {keepAsking.length > 0 && (
+        <Suggestions
+          label={t(locale, "keepAsking")}
+          heading={t(locale, "keepAsking")}
+          questions={keepAsking}
+          onPick={send}
+        />
+      )}
+      {showNewAnswer && (
+        <button
+          type="button"
+          onClick={scrollToBottom}
+          className="fixed bottom-6 left-1/2 z-20 min-h-11 -translate-x-1/2 rounded-full bg-accent px-4 text-[13px] font-semibold text-on-accent"
+        >
+          {t(locale, "newAnswer")}
+        </button>
       )}
       {error && (
         <ChatErrorNotice error={error} cowState={cowSlot.kind === "error" ? cowState : undefined} />
@@ -89,4 +135,26 @@ export function Chat() {
       />
     </section>
   );
+}
+
+function scrollToBottom() {
+  window.scrollTo({ top: document.documentElement.scrollHeight });
+}
+
+/** Whether the page is scrolled to (near) its bottom, kept current on scroll and resize. */
+function useAtBottom(): boolean {
+  const [atBottom, setAtBottom] = useState(true);
+  useEffect(() => {
+    const check = () =>
+      setAtBottom(
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 48,
+      );
+    window.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", check);
+    return () => {
+      window.removeEventListener("scroll", check);
+      window.removeEventListener("resize", check);
+    };
+  }, []);
+  return atBottom;
 }

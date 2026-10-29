@@ -1,0 +1,115 @@
+/*
+ * The chat's motion (DESIGN.md sections 10 and 11) and the citation numbers'
+ * hit area. Classes set by src/components/chat/. Colours are tokens only;
+ * everything that moves sits inside the no-preference block, so with reduced
+ * motion text, chips, claims and bubbles simply appear.
+ */
+
+/* A citation is a small green number in the line. Its button is wider than
+   it looks: a 24px target (WCAG 2.5.8) that doesn't change the line. */
+.citation {
+  position: relative;
+  margin: 0 0.1em;
+  vertical-align: super;
+  font-size: 0.75em;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-accent);
+}
+.citation::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+}
+
+/* Three dots after the status pill's words. */
+.status-dots {
+  display: inline-flex;
+  gap: 3px;
+}
+.status-dots span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentcolor;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* New text in an answer: 0.2s. */
+  .answer-chunk {
+    animation: chat-fade 0.2s ease;
+  }
+  /* Source chips rise, 0.45s each; their delays are inline, 80ms apart. */
+  .chip-rise {
+    animation: chat-rise 0.45s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+  }
+  /* A claim opens: 0.35s. */
+  .claim-open {
+    animation: chat-open 0.35s ease;
+  }
+  /* The visitor's bubble appears with a small overshoot: 0.5s. */
+  .bubble-pop {
+    animation: chat-pop 0.5s cubic-bezier(0.3, 1.5, 0.5, 1);
+  }
+  .status-dots span {
+    animation: chat-dot 1s ease-in-out infinite;
+  }
+  .status-dots span:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .status-dots span:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+}
+
+@keyframes chat-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes chat-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes chat-open {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes chat-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes chat-dot {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}

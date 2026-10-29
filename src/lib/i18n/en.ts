@@ -27,12 +27,28 @@ export const en = {
   greeting:
     "Hi! Ask me about Julian's experience. I only answer with facts he has confirmed, and I show where each one comes from.",
   suggestionsLabel: "Suggested questions",
+  // The first three start the chat; the rest come back under each answer as
+  // "Keep asking". Each one is answered by a confirmed claim.
   suggestions: [
     "What did Julian do at Cazoo?",
     "What is Form:at?",
     "Is Julian open to remote work?",
+    "Which languages does Julian speak?",
+    "Does Julian need visa sponsorship?",
+    "How did Julian upgrade React at Cazoo?",
   ],
   conversationLabel: "Conversation",
+  keepAsking: "Keep asking",
+  copy: "Copy",
+  copied: "Copied",
+  couldntCopy: "Couldn't copy",
+  // The heading of the sources in a copied answer.
+  sourcesHeading: "Sources:",
+  citationLabel: (number: number, label: string) => `Source ${number}: ${label}`,
+  confirmedBy: (date: string, from: string) => `Confirmed by Julian on ${date} · ${from}`,
+  fromCv: "from his CV",
+  fromJulian: "from Julian",
+  newAnswer: "New answer ↓",
   answerLabel: "Answer",
   sourcesLabel: "Sources",
   sourceNames: { cv: "CV", julian: "Julian" },
