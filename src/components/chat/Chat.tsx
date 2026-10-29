@@ -10,6 +10,7 @@ import { useLocale } from "../i18n/useLocale";
 import { ChatErrorNotice } from "./ChatErrorNotice";
 import { Composer } from "./Composer";
 import {
+  answerAsText,
   latestMessages,
   messageText,
   outOfQuestions,
@@ -70,6 +71,18 @@ export function Chat({ onStarted }: { onStarted?: () => void }) {
     inputRef.current?.focus();
   }
 
+  // For screen readers: "Answering…" when an answer starts, then the whole
+  // answer once, as plain text, when it ends; never piece by piece.
+  const [announcement, setAnnouncement] = useState("");
+  const [seenStatus, setSeenStatus] = useState(status);
+  if (status !== seenStatus) {
+    setSeenStatus(status);
+    if (status === "submitted") setAnnouncement(t(locale, "answering"));
+    if (status === "ready" && last?.role === "assistant") {
+      setAnnouncement(answerAsText(messageText(last.parts), [], t(locale, "sourceNames"), ""));
+    }
+  }
+
   // Follow a streaming answer only from the bottom of the page; a visitor who
   // scrolled up to read gets a "New answer ↓" pill instead.
   const atBottom = useAtBottom();
@@ -95,6 +108,9 @@ export function Chat({ onStarted }: { onStarted?: () => void }) {
 
   return (
     <section aria-label={t(locale, "chatLabel")} className="flex flex-col gap-6">
+      <p aria-live="polite" className="sr-only" data-testid="chat-announcer">
+        {announcement}
+      </p>
       <Greeting cowState={cowSlot.kind === "greeting" ? cowState : undefined} />
       {messages.length === 0 && (
         <Suggestions

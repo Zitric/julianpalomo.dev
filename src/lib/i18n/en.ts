@@ -50,6 +50,8 @@ export const en = {
   fromJulian: "from Julian",
   newAnswer: "New answer ↓",
   composerHint: "Enter to send · Shift+Enter for a new line",
+  // Announced to screen readers when an answer starts.
+  answering: "Answering…",
   answerLabel: "Answer",
   sourcesLabel: "Sources",
   sourceNames: { cv: "CV", julian: "Julian" },

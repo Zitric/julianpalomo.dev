@@ -107,6 +107,17 @@ test("a laptop never gets the compact bar", async ({ page }) => {
   await expect(bar).toBeHidden();
 });
 
+test("screen readers hear Answering…, then the whole answer once", async ({ page }) => {
+  const announcer = page.getByTestId("chat-announcer");
+  await expect(announcer).toHaveAttribute("aria-live", "polite");
+  // Nothing else in the conversation is a live region, so it's never read piece by piece.
+  await ask(page, "What has Julian worked on?");
+  await expect(announcer).toHaveText("Answering…");
+  await expect(announcer).toContainText(DEMO_ANSWER_INTRO);
+  await expect(announcer).not.toContainText("[[");
+  expect(await page.locator("[aria-live]").count()).toBe(1);
+});
+
 test.describe("with reduced motion", () => {
   test.use({ reducedMotion: "reduce" });
 
