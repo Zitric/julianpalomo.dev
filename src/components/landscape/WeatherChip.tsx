@@ -6,7 +6,7 @@ import { useNow } from "../clock/Clock";
 import { useLocale } from "../i18n/useLocale";
 
 const pill =
-  "inline-flex h-11 items-center rounded-full px-4 text-[13px] font-semibold transition-transform duration-[80ms] motion-safe:active:scale-[0.97]";
+  "inline-flex h-11 items-center rounded-full px-4 text-[13px] font-semibold whitespace-nowrap transition-transform duration-[80ms] motion-safe:active:scale-[0.97]";
 const glass = "bg-glass text-foreground backdrop-blur-[6px]";
 const accent = "bg-accent text-on-accent hover:brightness-110";
 
@@ -23,8 +23,8 @@ type Props = {
  * Glasgow's time and weather on the landscape, as a button: "Glasgow · 15:04 ·
  * 9°C · Drizzle" from 640px, "9°C · Drizzle" below, or only the time without
  * weather; pressing it opens the gear's panel. While the visitor plays, it
- * turns accent and reads "Your sky · 15:00 · tap to reset", and pressing it
- * goes back to live.
+ * turns accent and reads "Your sky · 15:00 · tap to reset" ("Your sky ·
+ * 15:00" below 640px), and pressing it goes back to live.
  */
 export function WeatherChip({ weather, playingHour, onOpen, onBackToLive }: Props) {
   const locale = useLocale();
@@ -39,7 +39,10 @@ export function WeatherChip({ weather, playingHour, onOpen, onBackToLive }: Prop
         aria-label={t(locale, "chipPlayingName")(hour)}
         onClick={onBackToLive}
       >
-        {`${t(locale, "yourSky")} · ${hour} · ${t(locale, "tapToReset")}`}
+        <span>
+          {t(locale, "yourSky")} · {hour}
+          <span className="hidden sm:inline"> · {t(locale, "tapToReset")}</span>
+        </span>
       </button>
     );
   }
