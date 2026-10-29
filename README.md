@@ -59,9 +59,10 @@ What exists around it:
   chat, with code checks and a second model that judges every answer sentence
   by sentence, calibrated before each run, and a score and a cost per run
 - lefthook, which runs Biome on staged files before each commit
-- GitHub Actions, which run the checks, the unit tests, knip and the
-  Playwright tests on every pull request to `main`, and the evals on every
-  pull request that touches the assistant, its claims or the evals
+- GitHub Actions, which run the checks, the unit tests, knip, the Claude Code
+  hook tests and the Playwright tests on every pull request to `main`, and the
+  evals on every pull request that touches the assistant, its claims or the
+  evals
 - Cloudflare Workers Builds, which deploys `main` and gives every pull request
   its own preview URL
 - Instructions and tooling for AI coding agents: [`AGENTS.md`](AGENTS.md) (also
@@ -94,6 +95,7 @@ pnpm dev
 | `pnpm check`            | Runs Biome (lint and format), then `tsc`.                                                                                                                   |
 | `pnpm test`             | Runs the unit tests once with Vitest.                                                                                                                       |
 | `pnpm test:e2e`         | Builds, serves and runs the Playwright tests in Chromium.                                                                                                   |
+| `pnpm test:hooks`       | Runs the tests for the Claude Code hooks in `.claude/hooks/`.                                                                                               |
 | `pnpm eval`             | Asks the real assistant the eval cases and has a second model judge the answers. Costs money: about $0.09, then $0.01–0.02 a case. `-t <case-id>` runs one. |
 | `pnpm knip`             | Reports unused files, exports and dependencies.                                                                                                             |
 | `pnpm db:migrate:local` | Applies the D1 migrations to the local database in `.wrangler/state`.                                                                                       |

@@ -49,8 +49,8 @@ No attribution anywhere in the title or body. `.claude/settings.json` sets
 gh pr checks <number> --watch
 ```
 
-`--watch` waits for the six jobs in `.github/workflows/ci.yml` (check, unit,
-knip, e2e, changes, evals); `evals` shows as skipped on a pull request that
+`--watch` waits for the seven jobs in `.github/workflows/ci.yml` (check, unit,
+knip, hooks, e2e, changes, evals); `evals` shows as skipped on a pull request that
 doesn't touch the bot, and takes several minutes when it runs. Don't wrap it in
 `timeout`, which macOS doesn't have. On a failure,
 read the log (`gh run view <run-id> --log-failed`), say what failed, and fix it

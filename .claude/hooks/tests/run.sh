@@ -4,7 +4,9 @@
 # once with the node fallback), plus fixtures for check-invariants.sh and
 # format-on-edit.sh. Prints one line per failure and a summary; exits 1 if
 # anything failed. Portable between macOS and Linux, like the hooks.
-# Usage: bash .claude/hooks/tests/run.sh
+# Without jq or node_modules/.bin/biome some cases can't run: locally that is a
+# note, but with CI set it is a failure, so a green CI run never hides them.
+# Usage: pnpm test:hooks (or bash .claude/hooks/tests/run.sh)
 
 set -u
 
@@ -25,6 +27,15 @@ report() { # expected actual label
   else
     failures=$((failures + 1))
     printf 'FAIL  expected %-5s got %-9s  %s\n' "$1" "$2" "$3"
+  fi
+}
+
+skipped() { # what was skipped and why
+  if [ -n "${CI:-}" ]; then
+    failures=$((failures + 1))
+    printf 'FAIL  %s\n' "$1"
+  else
+    printf 'note: %s\n' "$1"
   fi
 }
 
@@ -81,7 +92,7 @@ run_cases() { # label
 if command -v jq >/dev/null 2>&1; then
   run_cases jq
 else
-  printf 'note: jq not found, the jq pass is skipped\n'
+  skipped "jq not found, the guard-bash jq pass is skipped"
 fi
 HOOK_JSON_PARSER=node run_cases node
 
@@ -129,7 +140,7 @@ run_claims_cases() { # label
 if command -v jq >/dev/null 2>&1; then
   run_claims_cases jq
 else
-  printf 'note: jq not found, the guard-claims jq pass is skipped\n'
+  skipped "jq not found, the guard-claims jq pass is skipped"
 fi
 HOOK_JSON_PARSER=node run_claims_cases node
 
@@ -218,7 +229,7 @@ if [ -x "$repo/node_modules/.bin/biome" ]; then
   grep -q 'a   =' "$scratch/outside.ts" && got=untouched || got=rewritten
   report untouched "$got" "format-on-edit: the file outside the repo is untouched"
 else
-  printf 'note: node_modules/.bin/biome missing (run pnpm install), format-on-edit cases skipped\n'
+  skipped "node_modules/.bin/biome missing (run pnpm install), format-on-edit cases skipped"
 fi
 
 printf '%d passed, %d failed\n' "$pass" "$failures"
