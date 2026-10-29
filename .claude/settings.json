@@ -72,7 +72,9 @@
       "Bash(pnpm test:e2e *)",
       "Bash(pnpm exec biome check *)",
       "Bash(bash .claude/hooks/tests/run.sh)",
-      "Bash(pnpm test:hooks)"
+      "Bash(pnpm test:hooks)",
+      "Bash(bash .claude/skills/implement-issue/wait-for-reply.sh *)",
+      "Bash(bash .claude/skills/mailbox/post.sh *)"
     ]
   },
   "hooks": {
