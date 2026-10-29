@@ -19,7 +19,7 @@ import { localeFromParam } from "../../lib/i18n/locale";
 import { rootLanguage } from "../../lib/i18n/root-language";
 import { t } from "../../lib/i18n/t";
 import { defaultSky, withWeather } from "../../lib/scene/sky-state";
-import { pageTitle, site } from "../../lib/site";
+import { shareHead } from "../../lib/share";
 
 // `/` is English and `/es` is Spanish: one route, so switching language keeps
 // the page, and the conversation in it, mounted. Any other first segment is a
@@ -42,20 +42,7 @@ export const Route = createFileRoute("/{-$locale}/")({
       headers: { "Cache-Control": "private, no-store", Vary: "Cookie" },
     });
   },
-  head: ({ params }) => {
-    const locale = localeFromParam(params.locale);
-    return {
-      meta: [
-        { title: pageTitle(undefined, { name: t(locale, "name"), role: t(locale, "role") }) },
-        { name: "description", content: t(locale, "metaDescription") },
-      ],
-      links: [
-        { rel: "alternate", hrefLang: "en", href: `${site.url}/` },
-        { rel: "alternate", hrefLang: "es", href: `${site.url}/es` },
-        { rel: "alternate", hrefLang: "x-default", href: `${site.url}/` },
-      ],
-    };
-  },
+  head: ({ params }) => shareHead(localeFromParam(params.locale)),
   component: Home,
 });
 

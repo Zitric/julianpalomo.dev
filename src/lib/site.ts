@@ -1,6 +1,6 @@
 export const site = {
   name: "Julian Palomo",
-  role: "Senior Frontend | Full-stack Engineer",
+  role: "Senior Software Engineer",
   url: "https://julianpalomo.dev",
   links: {
     linkedin: "https://www.linkedin.com/in/julianpalomodeonis",

@@ -15,6 +15,11 @@ export const en = {
   intro:
     "Ask about my experience. Answers come only from facts I've confirmed, with their sources.",
   portraitAlt: "Pixel-art portrait of Julian Palomo",
+  // The cow's speech bubble on the link preview image (scripts/og/).
+  ogBubble: "Ask me about Julian's experience",
+  // The link preview image (public/og/), for screen readers on LinkedIn and others.
+  ogImageAlt:
+    "Julian Palomo's pixel-art portrait over a Highland glen on an autumn afternoon, with a Highland cow asking you to ask about his experience",
   metaDescription:
     "Ask about Julian Palomo's experience. Answers come only from facts he has confirmed, with their sources.",
 

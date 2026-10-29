@@ -663,6 +663,22 @@ centred and the background left exactly as it is: no blur, no fade.
   repo or the page. Success: "Thanks! Julian will get back to you." and the
   cow licks, satisfied.
 
+### Sharing
+
+- **The link preview** (`og:image`) is a 1200 × 630 card per language,
+  `public/og/en.png` and `public/og/es.png`. It shows the landscape, still, on
+  a warm autumn afternoon (the sun low, at 8°, at 17:10 on 15 October) with a
+  clear sky and the herd; the
+  portrait with its ring; the name and the role from `src/lib/site.ts`; and
+  the assistant cow with a speech bubble: "Ask me about Julian's experience"
+  ("Pregúntame por la experiencia de Julián"). Light theme only: previews
+  have no dark mode.
+- **The icon** is the cow's head, from the assistant cow's drawing without
+  its mouth and tongue: `favicon.svg`, a 32px `favicon.ico`, and a 180px
+  `apple-touch-icon.png` on `tint`.
+- `pnpm og` draws all of them with the site's own components (`scripts/og/`),
+  so they never drift from the site; nothing is drawn by hand.
+
 ## 15. Accessibility
 
 - Contrast: WCAG AA for every text and UI pair, in both themes (section 2).

@@ -42,9 +42,10 @@ CV · Cazoo · Redux → Zustand", and a citation only counts if the model looke
 that fact up while answering. Tapping a number or a chip opens the claim as I
 confirmed it, with the date I confirmed it; the model never sees that date.
 Answers type themselves out word by word, can be copied with their sources,
-and are followed by more questions to ask. On a phone the chat gets a compact bar and
-a composer fixed above the keyboard; screen readers hear each answer once,
-whole. Every question goes through two daily limits kept in Cloudflare
+and are followed by more questions to ask. On a phone the chat gets a compact
+bar and a composer fixed above the keyboard; screen readers hear each answer
+once, whole. A shared link shows a preview card in its language, the tab shows
+the cow's head, and search engines get a sitemap and a schema.org `Person`. Every question goes through two daily limits kept in Cloudflare
 D1: 30 questions per visitor, and about $1 of model spend across everyone.
 Visitors are counted by a hash that changes every day, never by their IP.
 The live site has its API key and its limits in place, so the chat answers on
@@ -94,18 +95,19 @@ pnpm install
 pnpm dev
 ```
 
-| Command                 | What it does                                                                                                                                                |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm dev`              | Starts the dev server. Add `--host` to open it from a phone on the same wifi.                                                                               |
-| `pnpm build`            | Builds the app for production into `dist/`.                                                                                                                 |
-| `pnpm preview`          | Serves the last build in the local Workers runtime. Run `pnpm build` first.                                                                                 |
-| `pnpm check`            | Runs Biome (lint and format), then `tsc`.                                                                                                                   |
-| `pnpm test`             | Runs the unit tests once with Vitest.                                                                                                                       |
-| `pnpm test:e2e`         | Builds, serves and runs the Playwright tests in Chromium.                                                                                                   |
-| `pnpm test:hooks`       | Runs the tests for the Claude Code hooks in `.claude/hooks/`.                                                                                               |
-| `pnpm eval`             | Asks the real assistant the eval cases and has a second model judge the answers. Costs money: about $0.09, then $0.01–0.02 a case. `-t <case-id>` runs one. |
-| `pnpm knip`             | Reports unused files, exports and dependencies.                                                                                                             |
-| `pnpm db:migrate:local` | Applies the D1 migrations to the local database in `.wrangler/state`.                                                                                       |
+| Command                 | What it does                                                                                                                                                              |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm dev`              | Starts the dev server. Add `--host` to open it from a phone on the same wifi.                                                                                             |
+| `pnpm build`            | Builds the app for production into `dist/`.                                                                                                                               |
+| `pnpm preview`          | Serves the last build in the local Workers runtime. Run `pnpm build` first.                                                                                               |
+| `pnpm check`            | Runs Biome (lint and format), then `tsc`.                                                                                                                                 |
+| `pnpm test`             | Runs the unit tests once with Vitest.                                                                                                                                     |
+| `pnpm test:e2e`         | Builds, serves and runs the Playwright tests in Chromium.                                                                                                                 |
+| `pnpm test:hooks`       | Runs the tests for the Claude Code hooks in `.claude/hooks/`.                                                                                                             |
+| `pnpm eval`             | Asks the real assistant the eval cases and has a second model judge the answers. Costs money: about $0.09, then $0.01–0.02 a case. `-t <case-id>` runs one.               |
+| `pnpm knip`             | Reports unused files, exports and dependencies.                                                                                                                           |
+| `pnpm db:migrate:local` | Applies the D1 migrations to the local database in `.wrangler/state`.                                                                                                     |
+| `pnpm og`               | Rewrites the link preview images and the icons in `public/` from a card drawn with the site's own components (`scripts/og/`). Run it after changing the name or the role. |
 
 To try the assistant locally, copy `.dev.vars.example` to `.dev.vars` (it's
 gitignored), put an Anthropic API key in it, and set `VISITOR_SALT` to any long

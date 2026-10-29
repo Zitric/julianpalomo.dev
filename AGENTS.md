@@ -62,10 +62,16 @@ blocks something, change course; don't look for another way to run it.
 | `pnpm eval`             | Evals: the real bot and its judge. Costs money (`evals.md`).  |
 | `pnpm test:hooks`       | Tests for the Claude Code hooks.                              |
 | `pnpm db:migrate:local` | Applies the D1 migrations to the local database only.         |
+| `pnpm og`               | Rewrites the link preview images and icons in `public/`.      |
 
 Run `pnpm build` and `pnpm test:e2e` without asking when the change touches
 routes, components, styles, the landscape, the build or CI, and say so in one
 line before starting. Neither costs money: the e2e build never calls the model.
+
+Run `pnpm og` after changing the name or the role in `src/lib/site.ts`, and
+commit what it writes. LinkedIn keeps a link's preview for a while and the
+image URLs don't change, so after that change is merged, Julián reruns
+LinkedIn's Post Inspector on production to make it fetch the new image.
 
 `pnpm add` and `pnpm install` change the lockfile: ask first. Nothing writes to
 Cloudflare without Julián, except the preview build Workers Builds runs when a
@@ -86,6 +92,7 @@ wrangler commands that change Cloudflare.
 - `tests/unit/`: Vitest. `tests/e2e/`: Playwright, against a production build of the `e2e` environment, in demo mode (`.claude/rules/tests.md`).
 - `.github/workflows/ci.yml`: CI on every pull request to `main`; the evals only on the `run-evals` label. Deploys aren't here: Cloudflare Workers Builds deploys `main` and comments a preview URL on every PR.
 - `docs/adr/`: one file per decision. `docs/tech-debt.md`: shortcuts taken on purpose.
+- `scripts/og/`: the card and the icon that `pnpm og` draws with the site's own components and screenshots into `public/` (the link preview images and the icons). It never reaches the site's bundle.
 - `.claude/`: rules, hooks, skills and subagents for Claude Code; `.claude/README.md` explains them.
 
 ## 5. Docs map
