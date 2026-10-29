@@ -15,8 +15,16 @@ const zustand: Source = {
   label: "Redux → Zustand",
   org: "Cazoo",
   source: "cv",
+  text: "Replaced Redux with Zustand.",
+  confirmedOn: "2026-10-27",
 };
-const remote: Source = { id: "remote-work", label: "Remote work", source: "julian" };
+const remote: Source = {
+  id: "remote-work",
+  label: "Remote work",
+  source: "julian",
+  text: "Open to remote roles.",
+  confirmedOn: "2026-10-27",
+};
 
 describe("hideTrailingPartialMarker", () => {
   it.each(["Text [", "Text [[", "Text [[cazo", "Text [[redux-"])(

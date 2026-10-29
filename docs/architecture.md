@@ -82,7 +82,11 @@ has confirmed ([`src/lib/claims.ts`](../src/lib/claims.ts)). Demo mode,
 the same `get_claims` tool and quotes the first claim it returns.
 
 **Sources and citations.** Every claim a tool returns while answering is sent
-to the browser as one `data-sources` part. The answer cites claims as
+to the browser as one `data-sources` part: its chip fields (`id`, `label`,
+`org`, `source`), its text exactly as confirmed and `confirmedOn`, the date
+Julian confirmed it, looked up in `confirmedClaims()` after the tool ran. The
+UI shows the text and date when a claim is opened; the model never sees the
+date, since the tools' output doesn't carry it. The answer cites claims as
 `[[claim-id]]`; when it ends, the server parses the text with
 [`src/lib/bot/citations.ts`](../src/lib/bot/citations.ts) and logs the ids of
 any citation that no tool returned. Then the token usage of every step that

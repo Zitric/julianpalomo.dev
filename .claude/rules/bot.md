@@ -32,6 +32,7 @@ must keep doing; the ADRs say why.
 ## Citations
 
 - **A citation becomes a source only if a tool returned that claim while producing the same answer.** `src/lib/bot/citations.ts` is the one place `[[claim-id]]` markers are parsed, on the server and in the UI. The endpoint sends those claims as one `data-sources` part, and logs the ids of invalid citations, never the text.
+- **Sources carry each claim's text and confirmation date, for the UI only.** After a tool runs, the endpoint looks each returned id up in `confirmedClaims()` and adds its `text` and `confirmedOn` (the date) to the `data-sources` part, so the UI can open a claim with "Confirmed by Julian on …". The date never reaches the model: the tools' output and the prompt don't change. The field is `confirmedOn` so `tests/e2e/bundle.spec.ts` can keep checking for `confirmedByJulian`.
 
 ## Limits
 
