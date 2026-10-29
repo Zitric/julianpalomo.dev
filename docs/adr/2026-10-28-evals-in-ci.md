@@ -1,5 +1,7 @@
 # Evals in CI, with the pass rate reported, not enforced
 
+Partly superseded by [`2026-10-29-evals-on-a-label.md`](2026-10-29-evals-on-a-label.md): the evals run on a label, not on every push.
+
 - **Status:** Accepted
 - **Date:** 2026-10-28
 
