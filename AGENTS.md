@@ -69,6 +69,7 @@ wrangler commands that change Cloudflare.
 - `src/routes/`: file-based routes. `src/routeTree.gen.ts` is generated; never edit it by hand.
 - `src/lib/`: plain TypeScript modules, such as `site.ts`.
 - `src/lib/bot/`: the assistant: model settings, the system prompt, the read-only tools, the citation parser, demo mode, the daily limits and the chat logic. `src/routes/api/chat.ts` is its endpoint, `POST /api/chat`.
+- `src/lib/weather/`: Glasgow's live weather: the Open-Meteo request, its mapping to the landscape's levels and the endpoint's logic, with the 30-minute cache. `src/routes/api/weather.ts` is its endpoint, `GET /api/weather`.
 - `migrations/`: D1 migrations for the daily limits. `pnpm db:migrate:local` applies them locally; only Julián applies them to production.
 - `src/components/`: React components, one folder per feature, such as `chat/` (the chat on the home page); shared pieces such as `IconButton` live in `ui/`.
 - `src/content/`: personal content, such as `claims.json`. It isn't MIT (`LICENSE`, section 2), and in `src/` only `src/lib/claims.ts` reads it.
