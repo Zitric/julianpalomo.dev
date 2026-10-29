@@ -4,6 +4,10 @@ import { Chat } from "../../components/chat/Chat";
 import { LanguageToggle } from "../../components/i18n/LanguageToggle";
 import { useLocale } from "../../components/i18n/useLocale";
 import { HeroLandscape } from "../../components/landscape/HeroLandscape";
+import { useLiveWeather } from "../../components/landscape/useLiveWeather";
+import { useSceneOverride } from "../../components/landscape/useSceneOverride";
+import { WeatherChip } from "../../components/landscape/WeatherChip";
+import { SiteFooter } from "../../components/SiteFooter";
 import { ThemeToggle } from "../../components/theme/ThemeToggle";
 import { localeFromParam } from "../../lib/i18n/locale";
 import { rootLanguage } from "../../lib/i18n/root-language";
@@ -64,14 +68,20 @@ const chatCard =
 function Home() {
   const locale = useLocale();
   const { sky } = Route.useSearch();
+  const override = useSceneOverride(sky);
+  // An override is a fixed scene, so it doesn't wait for the real weather.
+  const weather = useLiveWeather(override === null);
   return (
     <div className={page}>
       <header className={header}>
         <div className="relative h-[230px] overflow-hidden bg-tint lg:col-span-full lg:h-80">
-          <HeroLandscape skyParam={sky} />
-          <div className="absolute inset-x-3 top-3 flex justify-end gap-2">
-            <LanguageToggle />
-            <ThemeToggle />
+          <HeroLandscape override={override} weather={weather} />
+          <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
+            <WeatherChip weather={weather} />
+            <div className="flex gap-2">
+              <LanguageToggle />
+              <ThemeToggle />
+            </div>
           </div>
         </div>
         <div className="flex flex-col px-4 sm:px-6 lg:col-start-2 lg:px-0">
@@ -94,6 +104,7 @@ function Home() {
       <main className={chatCard}>
         <Chat />
       </main>
+      <SiteFooter className="lg:col-start-2 lg:col-end-4 lg:px-0" />
     </div>
   );
 }

@@ -57,6 +57,38 @@ export const en = {
 
   patTheCow: "Pat the cow",
   moo: "Moo!",
+
+  // The weather chip and the footer's credit. The words follow the levels 0–10 (DESIGN.md section 8).
+  glasgow: "Glasgow",
+  weatherClouds: [
+    "Clear",
+    "Clear",
+    "A few clouds",
+    "A few clouds",
+    "Some clouds",
+    "Cloudy",
+    "Cloudy",
+    "Mostly cloudy",
+    "Mostly cloudy",
+    "Overcast",
+    "Overcast",
+  ],
+  weatherRain: [
+    "Dry",
+    "Drizzle",
+    "Drizzle",
+    "Light rain",
+    "Light rain",
+    "Steady rain",
+    "Steady rain",
+    "Heavy rain",
+    "Heavy rain",
+    "Downpour",
+    "Downpour",
+  ],
+  weatherSnow: "Snow",
+  weatherHaar: "Haar",
+  weatherCredit: { before: "Weather data by", link: "Open-Meteo.com" },
 };
 
 export type Messages = typeof en;

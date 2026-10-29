@@ -17,12 +17,21 @@ fonts, the layout and the assistant are in, and the theme follows day and
 night in Glasgow unless the visitor picks one with the toggle. The hero is a
 live Highland glen: its season follows the date and its sky the sun's real
 height over Glasgow, a small herd grazes, and the sun sets when the visitor
-switches to the dark theme. Live weather comes next. The assistant is a
+switches to the dark theme. Glasgow's live weather rolls into it: clouds,
+rain, snow, wind and haar, with leaves, petals, midges or frost by season, and
+a chip with the time and the temperature. The assistant is a
 Highland cow that greets you and follows the chat: it listens while you type,
 chews while it looks things up, talks while the answer streams, licks its lips
 when it's done and lowers its head when something goes wrong. The site is in
 English at `/` and Spanish at `/es`: visitors in Spain get Spanish by default,
 everyone else English, and the language toggle always wins.
+
+The weather comes from [Open-Meteo](https://open-meteo.com/) through our
+Worker, at `GET /api/weather`, so the visitor's IP never reaches Open-Meteo.
+The Worker keeps each answer for 30 minutes (5 after a failure), so the site
+calls Open-Meteo at most about 48 times a day per Cloudflare data centre, and
+needs no key and no cron. The page fetches it after it loads and keeps a clear
+sky when it fails. The footer credits Open-Meteo, as its CC BY 4.0 terms ask.
 
 You ask a question and the answer streams in from Claude (Sonnet 5.5, through
 the Vercel AI SDK), which can only look up the facts I've confirmed. Each fact

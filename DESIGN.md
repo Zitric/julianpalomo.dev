@@ -338,7 +338,9 @@ come from Glasgow (below); the gear lets visitors set them (section 8).
 - A route on our Worker (`GET /api/weather`) asks
   [Open-Meteo](https://open-meteo.com/) for Glasgow's current weather and
   caches the answer for 30 minutes, so the site makes at most about 48 calls
-  a day whatever the traffic. No cron, no API key.
+  a day per Cloudflare data centre whatever the traffic. A failure is cached
+  for 5 minutes, so the site doesn't call Open-Meteo on every page view while
+  it refuses, and each one is logged with its reason. No cron, no API key.
 - The page renders without weather (season and time only), then fetches
   `/api/weather` after hydration and lets the weather roll in with the 1.1s
   transition. A failed or slow fetch leaves the sky as it is; the chip then
@@ -363,8 +365,10 @@ come from Glasgow (below); the gear lets visitors set them (section 8).
 ### Particles
 
 Particles are HTML elements over the hero, in their own layer, with
-`pointer-events: none` and a mask that fades them out from 34% to 70% of the
-hero's height, so they never fall over the name or the chat.
+`pointer-events: none`. The ones that fall (leaves, petals, rain and snow) sit
+under a mask that fades them out from 34% to 70% of the hero's height, so they
+never fall over the name or the chat. Midges and glints stay where the scene
+has them, over the loch and on the near meadow, outside the mask.
 
 | Particle | When                                                       | How many                                      |
 | -------- | ---------------------------------------------------------- | --------------------------------------------- |
@@ -545,20 +549,21 @@ text, in both languages, in the pull request that adds it.
 
 ## 11. Motion
 
-| What                              | Duration                                                 | Easing                                             |
-| --------------------------------- | -------------------------------------------------------- | -------------------------------------------------- |
-| UI colours on a theme change      | 0.6s                                                     | `ease`                                             |
-| Theme toggle (sunset or sunrise)  | 1.7s                                                     | Section 6                                          |
-| Theme change at Glasgow's dusk    | about 6s                                                 | Same choreography, stretched                       |
-| Landscape colours (time, weather) | 1.1s                                                     | `ease`                                             |
-| The visitor's bubble appears      | 0.5s                                                     | `cubic-bezier(.3, 1.5, .5, 1)` (a small overshoot) |
-| Source chips rise                 | 0.45s, 80ms apart                                        | `cubic-bezier(.3, 1.4, .5, 1)`                     |
-| A claim opens                     | 0.35s                                                    | `ease`                                             |
-| New text in an answer             | 0.2s                                                     | `ease`                                             |
-| Button press                      | 80ms                                                     | `ease`                                             |
-| The gear spins in                 | 0.6s, after 2s                                           | Spring-like overshoot, then 3 pulses               |
-| Clouds cross the sky              | 1700 units in 120–190s, over a 2900-unit loop (205–324s) | `linear`                                           |
-| The herd's loops                  | 11s, 16s, 19s                                            | `ease-in-out`                                      |
+| What                              | Duration                                                                                                       | Easing                                             |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| UI colours on a theme change      | 0.6s                                                                                                           | `ease`                                             |
+| Theme toggle (sunset or sunrise)  | 1.7s                                                                                                           | Section 6                                          |
+| Theme change at Glasgow's dusk    | about 6s                                                                                                       | Same choreography, stretched                       |
+| Landscape colours (time, weather) | 1.1s                                                                                                           | `ease`                                             |
+| The visitor's bubble appears      | 0.5s                                                                                                           | `cubic-bezier(.3, 1.5, .5, 1)` (a small overshoot) |
+| Source chips rise                 | 0.45s, 80ms apart                                                                                              | `cubic-bezier(.3, 1.4, .5, 1)`                     |
+| A claim opens                     | 0.35s                                                                                                          | `ease`                                             |
+| New text in an answer             | 0.2s                                                                                                           | `ease`                                             |
+| Button press                      | 80ms                                                                                                           | `ease`                                             |
+| The gear spins in                 | 0.6s, after 2s                                                                                                 | Spring-like overshoot, then 3 pulses               |
+| Clouds cross the sky              | 1700 units in 120–190s, over a 2900-unit loop (205–324s)                                                       | `linear`                                           |
+| Particles, before the wind        | Leaves 7–11s, petals 8–12s, rain 0.6–0.9s and snow 6–10s a fall; midges buzz in 1.2–2s, glints twinkle in 2–4s | `linear` falls; sways and twinkles `ease-in-out`   |
+| The herd's loops                  | 11s, 16s, 19s                                                                                                  | `ease-in-out`                                      |
 
 ### Reduced motion
 

@@ -32,7 +32,7 @@ Compiler.
 
 ## TanStack Start and the server
 
-- **Client code reaches the server through `createServerFn`**, never a raw `fetch` to an internal route. The one exception is the chat stream: `useChat` may read it from `/api/chat` (`.claude/rules/bot.md`).
+- **Client code reaches the server through `createServerFn`**, never a raw `fetch` to an internal route. Two exceptions: the chat stream, which `useChat` reads from `/api/chat` (`.claude/rules/bot.md`), and the weather, a public GET that browsers may cache and e2e can answer with `page.route`, which the page fetches from `/api/weather` and parses with `weatherBodySchema` (`src/lib/weather/weather.ts`).
 - **A server function that takes input chains `.validator()`** with a Zod schema. That is the method's name in the installed `@tanstack/start-client-core`; check its types before trusting another name from memory or docs for a different version.
 - **Secrets, including the Anthropic API key, are read only in server code**: inside a server function handler or a server route. Never in a module a component imports, never in a `VITE_`-prefixed variable (Vite inlines those into the browser bundle), and never returned to the client.
 
