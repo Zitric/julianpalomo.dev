@@ -160,7 +160,9 @@ From top to bottom:
    and the composer.
 
 Once the visitor sends a first question, the page scrolls so the chat fills
-the screen, and a **compact bar** sticks to the top: the square portrait at
+the screen, with the greeting just under the bar (the chat is at least a
+screen tall from then on, so there's always room to scroll it up), and a
+**compact bar** sticks to the top: the square portrait at
 34px, the name, and the sound and theme toggles, 58px tall, with a thin strip
 of hills along its bottom edge. The composer stays fixed at the bottom, above
 the on-screen keyboard.
@@ -559,7 +561,9 @@ mobile; desktop is the same inside the right-hand card.
 - **Keyboard:** Enter sends, Shift+Enter adds a line, Escape stops an answer
   that's still arriving or typing when focus is in the composer.
 - **Mobile:** the composer is fixed to the bottom above the keyboard, with
-  the safe-area inset; every button is at least 44px.
+  the safe-area inset; its "Your question" label is hidden visually there, to
+  save height, and stays as the box's accessible name. Every button is at
+  least 44px.
 - **Greeting:** "Hi! Ask me about Julian's experience. I only answer with
   facts he has confirmed, and I show where each one comes from."
 
