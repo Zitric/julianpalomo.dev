@@ -23,8 +23,8 @@ a chip with the time and the temperature. A gear lets visitors play with
 the sky on their own screen (season, time of day, clouds, rain or snow, wind
 and haar) until they go back to live Glasgow. The assistant is a
 Highland cow that greets you and follows the chat: it listens while you type,
-chews while it looks things up, talks while the answer streams, licks its lips
-when it's done and lowers its head when something goes wrong. The site is in
+chews while it looks things up, talks while the answer types itself out, licks
+its lips when it's done and lowers its head when something goes wrong. The site is in
 English at `/` and Spanish at `/es`: visitors in Spain get Spanish by default,
 everyone else English, and the language toggle always wins.
 

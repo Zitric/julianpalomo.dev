@@ -102,6 +102,11 @@ renders the text with the same parser. A citation becomes a numbered button and
 a source chip with the same number, such as "1 · CV · Cazoo · Redux → Zustand",
 only when its id is both cited in the text and in `data-sources`. Either one
 opens the claim under the answer, with its text and when Julian confirmed it.
+The text doesn't show at the stream's pace: what has arrived waits in a buffer
+in the browser and types itself out word by word
+([`reveal.ts`](../src/components/chat/reveal.ts)), and the chips, Copy and the
+screen-reader announcement wait for the last word. The server and the model
+know nothing of it.
 
 **The evals.** [`evals/run-case.ts`](../evals/run-case.ts) asks the real model
 its questions through `handleChat` itself, with a request shaped like

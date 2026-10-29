@@ -43,7 +43,7 @@ export function latestMessages<M extends { role: string }>(
  * A piece of the answer as rendered. `start` is its offset in rendered
  * length, where each character of text counts one and each citation counts
  * one: the hidden partial marker and any dropped marker count nothing, so
- * the length only grows while an answer streams.
+ * the length only grows while an answer types itself out.
  */
 type AnswerPart =
   | { type: "text"; text: string; start: number }
@@ -92,9 +92,9 @@ export type AnswerChunk =
 
 /**
  * Cuts the answer's parts at `boundaries`, the rendered lengths it had on
- * earlier renders while streaming. Each chunk is keyed by its start, so a
- * chunk that was already on screen keeps its key and never remounts: only the
- * text that arrived since the last render mounts, and fades in. A citation is
+ * earlier renders while it typed itself out. Each chunk is keyed by its
+ * start, so a chunk that was already on screen keeps its key and never
+ * remounts: only the words typed since the last render mount, and fade in. A citation is
  * never cut.
  */
 export function splitIntoChunks(
@@ -154,8 +154,9 @@ export function remainingSuggestions(
 }
 
 /**
- * Whether the view follows a streaming answer: only when the visitor was
- * already at the bottom. Otherwise a "New answer ↓" pill offers the way down.
+ * Whether the view follows an answer that's typing itself out, which can go
+ * on after its stream has ended: only when the visitor was already at the
+ * bottom. Otherwise a "New answer ↓" pill offers the way down.
  */
 export function shouldFollow({ atBottom, streaming }: { atBottom: boolean; streaming: boolean }) {
   return streaming && atBottom;
