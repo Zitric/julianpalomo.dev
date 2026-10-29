@@ -13,7 +13,9 @@ files are the answer, written down at the time instead of remembered later.
   considered, consequences.
 - **Records are history.** Once a decision is accepted, its file isn't
   rewritten. If we change our minds, a new ADR explains the new decision and
-  the old one gets a single line at the top: `Superseded by <new file>`.
+  the old one gets a single line at the top: `Superseded by <new file>`, or
+  `Partly superseded by <new file>: <what changed>` when the new ADR replaces
+  only part of it.
 - **Short is fine.** A good ADR is a page, not an essay.
 
 ## Decisions so far
@@ -35,3 +37,4 @@ files are the answer, written down at the time instead of remembered later.
 | 2026-10-28 | [Claude Sonnet 5.5 for the bot, at low effort](2026-10-28-claude-sonnet-for-the-bot.md)              |
 | 2026-10-28 | [One URL per language: / in English, /es in Spanish](2026-10-28-language-urls.md)                    |
 | 2026-10-28 | [Evals in CI, with the pass rate reported, not enforced](2026-10-28-evals-in-ci.md)                  |
+| 2026-10-29 | [The CI evals run on a label, not on every push](2026-10-29-evals-on-a-label.md)                     |

@@ -50,8 +50,11 @@ gh pr checks <number> --watch
 ```
 
 `--watch` waits for the seven jobs in `.github/workflows/ci.yml` (check, unit,
-knip, hooks, e2e, changes, evals); `evals` shows as skipped on a pull request that
-doesn't touch the bot, and takes several minutes when it runs. Don't wrap it in
+knip, hooks, e2e, changes, evals). `evals` shows as skipped on every push: it
+runs only when Julian or the cloud reviewer adds the `run-evals` label to a pull
+request that touches the bot, and then takes several minutes. On such a pull
+request, `changes` writes a notice saying to add the label. Never add the label
+yourself; the PR body suggests it. Don't wrap it in
 `timeout`, which macOS doesn't have. On a failure,
 read the log (`gh run view <run-id> --log-failed`), say what failed, and fix it
 on the same branch with a new commit.
