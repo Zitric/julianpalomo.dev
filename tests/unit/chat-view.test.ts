@@ -1,22 +1,37 @@
 import { describe, expect, it } from "vitest";
 import {
+  answerAsText,
   chatErrorMessage,
+  confirmationLine,
   hideTrailingPartialMarker,
   latestMessages,
   messageText,
+  outOfQuestions,
+  remainingSuggestions,
   renderAnswer,
+  shouldFollow,
+  splitIntoChunks,
   toolStatus,
 } from "../../src/components/chat/chat-view";
 import { chatErrorBody } from "../../src/lib/bot/chat-error";
 import type { Source } from "../../src/lib/bot/citations";
+import { t } from "../../src/lib/i18n/t";
 
 const zustand: Source = {
   id: "redux-zustand",
   label: "Redux → Zustand",
   org: "Cazoo",
   source: "cv",
+  text: "Replaced Redux with Zustand.",
+  confirmedOn: "2026-10-27",
 };
-const remote: Source = { id: "remote-work", label: "Remote work", source: "julian" };
+const remote: Source = {
+  id: "remote-work",
+  label: "Remote work",
+  source: "julian",
+  text: "Open to remote roles.",
+  confirmedOn: "2026-10-27",
+};
 
 describe("hideTrailingPartialMarker", () => {
   it.each(["Text [", "Text [[", "Text [[cazo", "Text [[redux-"])(
@@ -43,13 +58,14 @@ describe("renderAnswer", () => {
       { number: 1, source: remote },
       { number: 2, source: zustand },
     ]);
+    // Offsets in rendered length: each citation counts one.
     expect(parts).toEqual([
-      { type: "text", text: "A." },
-      { type: "citation", number: 1 },
-      { type: "text", text: " B." },
-      { type: "citation", number: 2 },
-      { type: "text", text: " C." },
-      { type: "citation", number: 1 },
+      { type: "text", text: "A.", start: 0 },
+      { type: "citation", number: 1, start: 2 },
+      { type: "text", text: " B.", start: 3 },
+      { type: "citation", number: 2, start: 6 },
+      { type: "text", text: " C.", start: 7 },
+      { type: "citation", number: 1, start: 10 },
     ]);
   });
 
@@ -61,17 +77,18 @@ describe("renderAnswer", () => {
 
   it("drops a cited id the server didn't send as a source", () => {
     expect(renderAnswer("Made up.[[made-up]]", [zustand], false)).toEqual({
-      parts: [{ type: "text", text: "Made up." }],
+      parts: [{ type: "text", text: "Made up.", start: 0 }],
       chips: [],
+      length: 8,
     });
   });
 
   it("hides a trailing partial marker only while streaming", () => {
     expect(renderAnswer("Wait [[redu", [zustand], true).parts).toEqual([
-      { type: "text", text: "Wait " },
+      { type: "text", text: "Wait ", start: 0 },
     ]);
     expect(renderAnswer("Wait [[redu", [zustand], false).parts).toEqual([
-      { type: "text", text: "Wait [[redu" },
+      { type: "text", text: "Wait [[redu", start: 0 },
     ]);
   });
 });
@@ -101,25 +118,21 @@ describe("toolStatus", () => {
 });
 
 describe("chatErrorMessage", () => {
+  const body = (code: Parameters<typeof chatErrorBody>[0]) =>
+    new Error(JSON.stringify(chatErrorBody(code)));
+
   it("says the assistant isn't available for the endpoint's 503 body", () => {
-    expect(chatErrorMessage(new Error(JSON.stringify(chatErrorBody("unavailable"))), "en")).toBe(
-      "The assistant isn't available here right now.",
-    );
+    expect(chatErrorMessage(body("unavailable"), "en")).toBe(t("en", "errorUnavailable"));
   });
 
-  it("says which daily limit was reached for each 429 body", () => {
-    expect(chatErrorMessage(new Error(JSON.stringify(chatErrorBody("visitor_limit"))), "en")).toBe(
-      "You've reached today's limit for questions.",
-    );
-    expect(chatErrorMessage(new Error(JSON.stringify(chatErrorBody("daily_budget"))), "en")).toBe(
-      "The assistant has reached its daily budget. Try again tomorrow.",
-    );
+  it("says which daily limit was reached for each 429 body, and offers another way", () => {
+    expect(chatErrorMessage(body("visitor_limit"), "en")).toBe(t("en", "errorVisitorLimit"));
+    expect(t("en", "errorVisitorLimit")).toMatch(/^You've reached today's limit for questions\. /);
+    expect(chatErrorMessage(body("daily_budget"), "en")).toBe(t("en", "errorDailyBudget"));
   });
 
   it("speaks the page's language", () => {
-    expect(chatErrorMessage(new Error(JSON.stringify(chatErrorBody("visitor_limit"))), "es")).toBe(
-      "Has llegado al límite de preguntas de hoy.",
-    );
+    expect(chatErrorMessage(body("visitor_limit"), "es")).toBe(t("es", "errorVisitorLimit"));
   });
 
   it.each([
@@ -129,7 +142,19 @@ describe("chatErrorMessage", () => {
     "Failed to fetch",
     '{"error":"something-new"}',
   ])("says something went wrong for %j", (message) => {
-    expect(chatErrorMessage(new Error(message), "en")).toBe("Something went wrong.");
+    expect(chatErrorMessage(new Error(message), "en")).toBe(t("en", "errorGeneric"));
+  });
+});
+
+describe("outOfQuestions", () => {
+  it("is true only at either daily limit", () => {
+    const body = (code: Parameters<typeof chatErrorBody>[0]) =>
+      new Error(JSON.stringify(chatErrorBody(code)));
+    expect(outOfQuestions(body("visitor_limit"))).toBe(true);
+    expect(outOfQuestions(body("daily_budget"))).toBe(true);
+    expect(outOfQuestions(body("unavailable"))).toBe(false);
+    expect(outOfQuestions(new Error("Failed to fetch"))).toBe(false);
+    expect(outOfQuestions(undefined)).toBe(false);
   });
 });
 
@@ -199,5 +224,92 @@ describe("latestMessages", () => {
   it("returns an empty list for an empty conversation or a max of 0", () => {
     expect(latestMessages([], 20)).toEqual([]);
     expect(latestMessages(asking(2), 0)).toEqual([]);
+  });
+});
+
+describe("splitIntoChunks", () => {
+  const sources = [zustand];
+
+  it("keeps earlier chunks' keys as the text grows, so they never remount", () => {
+    const first = renderAnswer("Hello there", sources, true);
+    const later = renderAnswer("Hello there, Julian", sources, true);
+    const before = splitIntoChunks(first.parts, [first.length]);
+    const after = splitIntoChunks(later.parts, [first.length, later.length]);
+    expect(before.map(({ key }) => key)).toEqual(["t0"]);
+    expect(after).toEqual([
+      { key: "t0", type: "text", text: "Hello there" },
+      { key: "t11", type: "text", text: ", Julian" },
+    ]);
+  });
+
+  it("never cuts inside a marker that is still arriving", () => {
+    const partial = renderAnswer("Moved to Zustand [[redux-zu", sources, true);
+    expect(partial.length).toBe("Moved to Zustand ".length);
+    const done = renderAnswer("Moved to Zustand [[redux-zustand]] in 2024.", sources, true);
+    const chunks = splitIntoChunks(done.parts, [partial.length, done.length]);
+    expect(chunks).toEqual([
+      { key: "t0", type: "text", text: "Moved to Zustand " },
+      { key: "c17", type: "citation", number: 1 },
+      { key: "t18", type: "text", text: " in 2024." },
+    ]);
+  });
+});
+
+describe("answerAsText", () => {
+  it("drops the citations and lists the sources at the end", () => {
+    const { chips } = renderAnswer("It moved to Zustand [[redux-zustand]].", [zustand], false);
+    expect(
+      answerAsText(
+        "It moved to Zustand [[redux-zustand]].",
+        chips,
+        { cv: "CV", julian: "Julian" },
+        "Sources:",
+      ),
+    ).toBe("It moved to Zustand.\n\nSources:\n1. CV · Cazoo · Redux → Zustand");
+  });
+
+  it("is just the text when nothing was cited", () => {
+    expect(answerAsText("No sources here.", [], { cv: "CV", julian: "Julian" }, "Sources:")).toBe(
+      "No sources here.",
+    );
+  });
+});
+
+describe("remainingSuggestions", () => {
+  it("leaves out what was asked and keeps at most the limit", () => {
+    expect(remainingSuggestions(["a", "b", "c", "d", "e"], ["b", " d "], 3)).toEqual([
+      "a",
+      "c",
+      "e",
+    ]);
+    expect(remainingSuggestions(["a", "b"], ["a", "b"], 3)).toEqual([]);
+  });
+});
+
+describe("shouldFollow", () => {
+  it("follows only a streaming answer, and only from the bottom", () => {
+    expect(shouldFollow({ atBottom: true, streaming: true })).toBe(true);
+    expect(shouldFollow({ atBottom: false, streaming: true })).toBe(false);
+    expect(shouldFollow({ atBottom: true, streaming: false })).toBe(false);
+  });
+});
+
+describe("confirmationLine", () => {
+  it("says when and where Julian confirmed the claim, in each language", () => {
+    expect(confirmationLine(zustand, "en")).toBe(
+      "Confirmed by Julian on 27 Oct 2026 · from his CV",
+    );
+    expect(confirmationLine(remote, "en")).toBe("Confirmed by Julian on 27 Oct 2026 · from Julian");
+    expect(confirmationLine(zustand, "es")).toBe("Confirmado por Julián el 27 oct 2026 · de su CV");
+  });
+
+  it("keeps the confirmed day west of UTC, where midnight UTC is the evening before", () => {
+    const midnightUtc = Date.UTC(2026, 9, 27);
+    const naive = new Intl.DateTimeFormat("en-GB", {
+      day: "numeric",
+      timeZone: "America/New_York",
+    });
+    expect(naive.format(midnightUtc)).toBe("26");
+    expect(confirmationLine(zustand, "en")).toContain("27 Oct 2026");
   });
 });

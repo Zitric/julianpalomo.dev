@@ -16,7 +16,7 @@ import {
   toUIMessageStream,
 } from "ai";
 import { z } from "zod";
-import { confirmedClaims } from "../claims";
+import { type Claim, confirmedClaims } from "../claims";
 import { type ChatErrorCode, chatErrorBody } from "./chat-error";
 import type { ChatUIMessage } from "./chat-message";
 import { parseCitations, type Source } from "./citations";
@@ -52,18 +52,28 @@ const envSchema = z.object({
   DB: z.unknown().optional(),
 });
 
-// What get_claims and search_claims return, read down to the fields a source
-// needs. z.object drops the rest (text, area), so a source never carries them.
-const claimsOutputSchema = z.object({
-  claims: z.array(
-    z.object({
-      id: z.string(),
-      label: z.string(),
-      org: z.string().optional(),
-      source: z.enum(["cv", "julian"]) satisfies z.ZodType<Source["source"]>,
-    }),
-  ),
-});
+// What get_claims and search_claims return, read down to the ids: each
+// source is built from the confirmed claim with that id, not from the tool's
+// output, which is all the model sees.
+const claimsOutputSchema = z.object({ claims: z.array(z.object({ id: z.string() })) });
+
+/**
+ * A claim as a source for the UI: its chip fields, its text exactly as
+ * confirmed and the date Julian confirmed it. The date never reaches the
+ * model; the UI shows it next to the claim.
+ */
+function toSource(claim: Claim): Source | null {
+  if (claim.confirmedByJulian === null) return null;
+  const { id, label, org, source, text } = claim;
+  return {
+    id,
+    label,
+    ...(org === undefined ? {} : { org }),
+    source,
+    text,
+    confirmedOn: claim.confirmedByJulian,
+  };
+}
 
 // Only text parts reach the model. Tool results and any other part type in the
 // history are dropped, because the visitor controls the history and could
@@ -212,7 +222,9 @@ export async function handleChat(
     const messages = await convertToModelMessages(
       body.data.messages.filter((message) => message.parts.length > 0),
     );
-    const tools = buildTools(confirmedClaims());
+    const claims = confirmedClaims();
+    const tools = buildTools(claims);
+    const claimsById = new Map(claims.map((claim) => [claim.id, claim]));
     const model = apiKey === undefined ? createDemoModel() : deps.createModel(apiKey);
     const logStreamError = (error: unknown) => console.error("chat stream failed", error);
 
@@ -253,8 +265,10 @@ export async function handleChat(
             const output = claimsOutputSchema.safeParse(toolOutput.output);
             if (!output.success) return;
             const before = sources.size;
-            for (const claim of output.data.claims) {
-              if (!sources.has(claim.id)) sources.set(claim.id, claim);
+            for (const { id } of output.data.claims) {
+              const claim = claimsById.get(id);
+              const source = claim && !sources.has(id) ? toSource(claim) : null;
+              if (source) sources.set(id, source);
             }
             if (sources.size === before) return;
             // The same id each time, so the UI updates one part instead of adding another.

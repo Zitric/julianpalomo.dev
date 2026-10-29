@@ -27,12 +27,31 @@ export const en = {
   greeting:
     "Hi! Ask me about Julian's experience. I only answer with facts he has confirmed, and I show where each one comes from.",
   suggestionsLabel: "Suggested questions",
+  // The first three start the chat; the rest come back under each answer as
+  // "Keep asking". Each one is answered by a confirmed claim.
   suggestions: [
     "What did Julian do at Cazoo?",
     "What is Form:at?",
     "Is Julian open to remote work?",
+    "Which languages does Julian speak?",
+    "Does Julian need visa sponsorship?",
+    "How did Julian upgrade React at Cazoo?",
   ],
   conversationLabel: "Conversation",
+  keepAsking: "Keep asking",
+  copy: "Copy",
+  copied: "Copied",
+  couldntCopy: "Couldn't copy",
+  // The heading of the sources in a copied answer.
+  sourcesHeading: "Sources:",
+  citationLabel: (number: number, label: string) => `Source ${number}: ${label}`,
+  confirmedBy: (date: string, from: string) => `Confirmed by Julian on ${date} · ${from}`,
+  fromCv: "from his CV",
+  fromJulian: "from Julian",
+  newAnswer: "New answer ↓",
+  composerHint: "Enter to send · Shift+Enter for a new line",
+  // Announced to screen readers when an answer starts.
+  answering: "Answering…",
   answerLabel: "Answer",
   sourcesLabel: "Sources",
   sourceNames: { cv: "CV", julian: "Julian" },
@@ -49,9 +68,13 @@ export const en = {
     `${numbers.format(over)} ${over === 1 ? "character" : "characters"} over the ${numbers.format(limit)} limit`,
 
   errorUnavailable: "The assistant isn't available here right now.",
-  errorVisitorLimit: "You've reached today's limit for questions.",
-  errorDailyBudget: "The assistant has reached its daily budget. Try again tomorrow.",
-  errorGeneric: "Something went wrong.",
+  errorVisitorLimit:
+    "You've reached today's limit for questions. Come back tomorrow, or write to Julian directly. He reads every message.",
+  errorDailyBudget:
+    "The assistant has used up today's budget. Come back tomorrow, or write to Julian directly. He reads every message.",
+  errorGeneric: "Something went wrong on my side. Try again in a moment.",
+  // The composer's placeholder once no more questions can be asked today.
+  questionsBackTomorrow: "Questions are back tomorrow",
   // "You can still reach me on LinkedIn or GitHub.", around the two links.
   contact: { before: "You can still reach me on", between: "or", after: "." },
 

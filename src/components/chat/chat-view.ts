@@ -3,7 +3,7 @@
  * Kept free of React so they can be unit-tested.
  */
 import { type ChatErrorCode, chatErrorSchema } from "../../lib/bot/chat-error";
-import { parseCitations, type Source } from "../../lib/bot/citations";
+import { chipLabel, parseCitations, type Source } from "../../lib/bot/citations";
 import type { Locale } from "../../lib/i18n/locale";
 import { t } from "../../lib/i18n/t";
 
@@ -39,7 +39,15 @@ export function latestMessages<M extends { role: string }>(
   return firstQuestion === -1 ? [] : latest.slice(firstQuestion);
 }
 
-type AnswerPart = { type: "text"; text: string } | { type: "citation"; number: number };
+/**
+ * A piece of the answer as rendered. `start` is its offset in rendered
+ * length, where each character of text counts one and each citation counts
+ * one: the hidden partial marker and any dropped marker count nothing, so
+ * the length only grows while an answer types itself out.
+ */
+type AnswerPart =
+  | { type: "text"; text: string; start: number }
+  | { type: "citation"; number: number; start: number };
 
 /**
  * Splits an answer into text and numbered citations, and lists the chips to
@@ -51,15 +59,18 @@ export function renderAnswer(
   text: string,
   sources: readonly Source[],
   streaming: boolean,
-): { parts: AnswerPart[]; chips: { number: number; source: Source }[] } {
+): { parts: AnswerPart[]; chips: { number: number; source: Source }[]; length: number } {
   const byId = new Map(sources.map((source) => [source.id, source]));
   const visible = streaming ? hideTrailingPartialMarker(text) : text;
   const { segments } = parseCitations(visible, new Set(byId.keys()));
 
   const numbers = new Map<string, number>();
   const chips: { number: number; source: Source }[] = [];
+  let length = 0;
   const parts = segments.map((segment): AnswerPart => {
-    if (segment.type === "text") return segment;
+    const start = length;
+    length += segment.type === "text" ? segment.text.length : 1;
+    if (segment.type === "text") return { ...segment, start };
     let number = numbers.get(segment.id);
     const source = byId.get(segment.id);
     if (number === undefined && source) {
@@ -69,9 +80,86 @@ export function renderAnswer(
     }
     // parseCitations only returns allowed ids, which are all in byId, so a
     // number is always set by here.
-    return { type: "citation", number: number ?? 0 };
+    return { type: "citation", number: number ?? 0, start };
   });
-  return { parts, chips };
+  return { parts, chips, length };
+}
+
+/** A span of the rendered answer, keyed by where it starts so it never remounts. */
+export type AnswerChunk =
+  | { key: string; type: "text"; text: string }
+  | { key: string; type: "citation"; number: number };
+
+/**
+ * Cuts the answer's parts at `boundaries`, the rendered lengths it had on
+ * earlier renders while it typed itself out. Each chunk is keyed by its
+ * start, so a chunk that was already on screen keeps its key and never
+ * remounts: only the words typed since the last render mount, and fade in. A citation is
+ * never cut.
+ */
+export function splitIntoChunks(
+  parts: readonly AnswerPart[],
+  boundaries: readonly number[],
+): AnswerChunk[] {
+  const chunks: AnswerChunk[] = [];
+  for (const part of parts) {
+    if (part.type === "citation") {
+      chunks.push({ key: `c${part.start}`, type: "citation", number: part.number });
+      continue;
+    }
+    const end = part.start + part.text.length;
+    const cuts = boundaries.filter((at) => at > part.start && at < end);
+    let from = part.start;
+    for (const at of [...cuts, end]) {
+      chunks.push({
+        key: `t${from}`,
+        type: "text",
+        text: part.text.slice(from - part.start, at - part.start),
+      });
+      from = at;
+    }
+  }
+  return chunks;
+}
+
+/**
+ * The answer as plain text for the clipboard: citations removed, then the
+ * numbered sources, ready to paste into an email.
+ */
+export function answerAsText(
+  text: string,
+  chips: readonly { number: number; source: Source }[],
+  names: Record<Source["source"], string>,
+  sourcesHeading: string,
+): string {
+  const { segments } = parseCitations(text, new Set(chips.map(({ source }) => source.id)));
+  const prose = segments
+    .flatMap((segment) => (segment.type === "text" ? [segment.text] : []))
+    .join("")
+    .replace(/[ \t]+([.,;:!?])/g, "$1")
+    .trim();
+  if (chips.length === 0) return prose;
+  const lines = chips.map(({ number, source }) => `${number}. ${chipLabel(source, names)}`);
+  return `${prose}\n\n${sourcesHeading}\n${lines.join("\n")}`;
+}
+
+/** The suggested questions this conversation hasn't asked yet, at most `limit`. */
+export function remainingSuggestions(
+  suggestions: readonly string[],
+  asked: readonly string[],
+  limit: number,
+): string[] {
+  const seen = new Set(asked.map((question) => question.trim()));
+  return suggestions.filter((question) => !seen.has(question)).slice(0, limit);
+}
+
+/**
+ * Whether the view follows an answer that's typing itself out, which can go
+ * on after its stream has ended: only when the visitor was already at the
+ * bottom. Otherwise a "New answer ↓" pill offers the way down.
+ */
+export function shouldFollow({ atBottom, streaming }: { atBottom: boolean; streaming: boolean }) {
+  return streaming && atBottom;
 }
 
 const TOOL_STATUS: Record<string, "lookingUpClaims" | "checkingTopics"> = {
@@ -95,18 +183,33 @@ export function toolStatus(
 }
 
 /**
+ * The endpoint's error code for a failed request, or undefined for a stream
+ * or network error. The transport puts the response body in the error's
+ * message.
+ */
+function chatErrorCode(error: Error): ChatErrorCode | undefined {
+  try {
+    const parsed = chatErrorSchema.safeParse(JSON.parse(error.message));
+    return parsed.success ? parsed.data.error : undefined;
+  } catch {
+    // Not JSON: a stream or network error.
+    return undefined;
+  }
+}
+
+/** Whether no more questions can be asked today: either daily limit was reached. */
+export function outOfQuestions(error: Error | undefined): boolean {
+  const code = error ? chatErrorCode(error) : undefined;
+  return code === "visitor_limit" || code === "daily_budget";
+}
+
+/**
  * What to tell the visitor when a request fails. The transport puts the
  * response body in the error's message, so a typed body from the endpoint
  * picks the text; anything else, a stream or network error, is generic.
  */
 export function chatErrorMessage(error: Error, locale: Locale): string {
-  let code: ChatErrorCode | undefined;
-  try {
-    const parsed = chatErrorSchema.safeParse(JSON.parse(error.message));
-    code = parsed.success ? parsed.data.error : undefined;
-  } catch {
-    // Not JSON: a stream or network error, which gets the generic text.
-  }
+  const code = chatErrorCode(error);
   switch (code) {
     case "unavailable":
       return t(locale, "errorUnavailable");
@@ -123,4 +226,36 @@ export function chatErrorMessage(error: Error, locale: Locale): string {
       throw new Error(String(unhandled));
     }
   }
+}
+
+// Dates read the way DESIGN.md writes them: "27 Oct 2026", "27 oct 2026".
+const DATE_LOCALE: Record<Locale, string> = { en: "en-GB", es: "es-ES" };
+
+/**
+ * "Confirmed by Julian on 27 Oct 2026 · from his CV". The date is formatted
+ * in UTC: `YYYY-MM-DD` is midnight UTC, which a browser west of UTC would
+ * otherwise show as the day before.
+ */
+export function confirmationLine(source: Source, locale: Locale): string {
+  const [year = 0, month = 1, day = 1] = source.confirmedOn.split("-").map(Number);
+  const date = new Intl.DateTimeFormat(DATE_LOCALE[locale], {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(Date.UTC(year, month - 1, day));
+  return t(locale, "confirmedBy")(
+    date,
+    t(locale, source.source === "cv" ? "fromCv" : "fromJulian"),
+  );
+}
+
+/**
+ * A ref callback that brings an element into view when it appears, such as an
+ * opened claim or an error. It's a module-level function, so React calls it on
+ * mount only, not on every render. Give the element `max-lg:scroll-mb-44` so it
+ * stops clear of the composer fixed to the bottom on phones.
+ */
+export function revealOnMount(node: HTMLElement | null): void {
+  node?.scrollIntoView({ block: "nearest" });
 }

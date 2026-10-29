@@ -1,7 +1,9 @@
 /**
  * The assistant's tools. Every one is read-only: it returns pieces of the
  * claims it was built from and never writes, sends or fetches anything.
- * `confirmedByJulian` never leaves this module.
+ * No tool returns `confirmedByJulian`, so the date never reaches the model;
+ * the chat endpoint adds it to the UI's sources from `confirmedClaims()`
+ * (src/lib/bot/chat.ts), which the UI shows next to the claim.
  */
 import { tool } from "ai";
 import { z } from "zod";

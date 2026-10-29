@@ -82,7 +82,11 @@ has confirmed ([`src/lib/claims.ts`](../src/lib/claims.ts)). Demo mode,
 the same `get_claims` tool and quotes the first claim it returns.
 
 **Sources and citations.** Every claim a tool returns while answering is sent
-to the browser as one `data-sources` part. The answer cites claims as
+to the browser as one `data-sources` part: its chip fields (`id`, `label`,
+`org`, `source`), its text exactly as confirmed and `confirmedOn`, the date
+Julian confirmed it, looked up in `confirmedClaims()` after the tool ran. The
+UI shows the text and date when a claim is opened; the model never sees the
+date, since the tools' output doesn't carry it. The answer cites claims as
 `[[claim-id]]`; when it ends, the server parses the text with
 [`src/lib/bot/citations.ts`](../src/lib/bot/citations.ts) and logs the ids of
 any citation that no tool returned. Then the token usage of every step that
@@ -94,9 +98,15 @@ D1 still lands after they've gone. A
 step cut off halfway isn't counted ([`docs/tech-debt.md`](tech-debt.md)).
 
 **The answer on the page.** [`AssistantMessage.tsx`](../src/components/chat/AssistantMessage.tsx)
-renders the text with the same parser. A citation becomes a numbered marker and
-a source chip, such as "CV · Cazoo · Redux → Zustand", only when its id is both
-cited in the text and in `data-sources`.
+renders the text with the same parser. A citation becomes a numbered button and
+a source chip with the same number, such as "1 · CV · Cazoo · Redux → Zustand",
+only when its id is both cited in the text and in `data-sources`. Either one
+opens the claim under the answer, with its text and when Julian confirmed it.
+The text doesn't show at the stream's pace: what has arrived waits in a buffer
+in the browser and types itself out word by word
+([`reveal.ts`](../src/components/chat/reveal.ts)), and the chips, Copy and the
+screen-reader announcement wait for the last word. The server and the model
+know nothing of it.
 
 **The evals.** [`evals/run-case.ts`](../evals/run-case.ts) asks the real model
 its questions through `handleChat` itself, with a request shaped like

@@ -23,10 +23,12 @@ test("a question streams the demo answer with a source chip and the demo label",
 
   const answer = page.getByRole("article", { name: "Answer" });
   await expect(answer).toContainText(DEMO_ANSWER_INTRO);
-  await expect(answer.getByText("Demo", { exact: true })).toBeVisible();
+  // The label, not the answer's first word: streamed text arrives in pieces,
+  // and one of them can be the word "Demo" on its own.
+  await expect(answer.locator("p").filter({ hasText: /^Demo$/ })).toBeVisible();
   const chips = answer.getByRole("list", { name: "Sources" }).getByRole("listitem");
   await expect(chips).toHaveCount(1);
-  await expect(chips.first()).toHaveText(/^\[1\] (CV|Julian) · /);
+  await expect(chips.first()).toHaveText(/^1 · (CV|Julian) · /);
   await expect(answer).not.toContainText("[[");
 });
 

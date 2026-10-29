@@ -16,7 +16,7 @@ const rays =
 const RAY_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
 
 /** Switches between the light and dark themes, and remembers the choice. */
-export function ThemeToggle() {
+export function ThemeToggle({ look = "glass" }: { look?: "glass" | "tint" }) {
   const { theme, toggle } = useTheme();
   const locale = useLocale();
   const maskId = useId();
@@ -28,7 +28,7 @@ export function ThemeToggle() {
   const moon = isDark ? "opacity-100" : "opacity-0 motion-safe:scale-50 motion-safe:-rotate-90";
 
   return (
-    <IconButton look="glass" label={label} onClick={toggle}>
+    <IconButton look={look} label={label} onClick={toggle}>
       <span className="relative block size-5">
         <svg
           aria-hidden="true"
