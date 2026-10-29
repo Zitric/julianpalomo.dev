@@ -2,6 +2,7 @@
 @import "./tokens.css";
 @import "./fonts.css";
 @import "./landscape.css";
+@import "./play.css";
 @import "./cow.css";
 
 /* The focus ring on every interactive element: 3px of accent, 2px away (DESIGN.md section 15). */
@@ -21,7 +22,7 @@
 :root[data-theme-change] {
   transition-property:
     --background, --foreground, --muted, --border, --accent, --on-accent, --tint, --field,
-    --field-border, --user, --on-user, --glass, --danger, --live;
+    --field-border, --user, --on-user, --glass, --danger, --live, --track-night, --track-dawn, --track-day, --track-dusk, --track-clear, --track-overcast, --track-dry, --track-wet, --track-calm, --track-gale;
   transition-duration: 0.6s;
   transition-timing-function: ease;
 }

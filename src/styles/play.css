@@ -1,0 +1,112 @@
+/*
+ * The gear and its panel (src/components/play/), DESIGN.md section 8. Range
+ * tracks and thumbs, the dialog's layout and the gear's entrance have no
+ * Tailwind utilities. Colours are tokens only; everything that moves sits
+ * inside the no-preference block at the bottom.
+ */
+
+/* The panel: a bottom sheet that leaves the 230px hero uncovered, and from
+   1024px a popover under the gear. The backdrop stays clear, so the sky can
+   be watched while it changes. */
+.sky-panel {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--color-foreground);
+  background: var(--color-background);
+  inset: auto 0 0 0;
+  width: 100%;
+  max-width: 100%;
+  max-height: calc(100dvh - 238px);
+  border-radius: 20px 20px 0 0;
+  overflow: auto;
+}
+.sky-panel::backdrop {
+  background: transparent;
+}
+@media (min-width: 1024px) {
+  .sky-panel {
+    inset: auto;
+    top: var(--panel-top, 64px);
+    left: var(--panel-left, 12px);
+    width: 380px;
+    max-height: calc(100dvh - var(--panel-top, 64px) - 16px);
+    border: 2px solid var(--color-border);
+    border-radius: 20px;
+  }
+}
+
+/* Range inputs: a gradient track that shows what the slider does, and a
+   two-tone thumb (a field fill in a foreground ring) that stands out from any
+   track; tests/unit/tokens.test.ts checks the contrast. */
+.sky-range {
+  appearance: none;
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--track);
+}
+.sky-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-field);
+  border: 3px solid var(--color-foreground);
+}
+.sky-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-field);
+  border: 3px solid var(--color-foreground);
+}
+.sky-range.track-time {
+  --track: linear-gradient(
+    to right,
+    var(--color-track-night),
+    var(--color-track-dawn) 27%,
+    var(--color-track-day) 50%,
+    var(--color-track-dusk) 77%,
+    var(--color-track-night)
+  );
+}
+.sky-range.track-clouds {
+  --track: linear-gradient(to right, var(--color-track-clear), var(--color-track-overcast));
+}
+.sky-range.track-rain {
+  --track: linear-gradient(to right, var(--color-track-dry), var(--color-track-wet));
+}
+.sky-range.track-wind {
+  --track: linear-gradient(to right, var(--color-track-calm), var(--color-track-gale));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The gear spins in with a little overshoot, then pulses three times so
+     it's noticed (DESIGN.md section 11). */
+  .gear-in {
+    animation:
+      gear-spin 0.6s cubic-bezier(0.3, 1.5, 0.5, 1),
+      gear-pulse 0.5s ease-in-out 0.7s 3;
+  }
+}
+
+@keyframes gear-spin {
+  from {
+    transform: rotate(-180deg) scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes gear-pulse {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}

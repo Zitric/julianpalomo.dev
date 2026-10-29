@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { effects } from "../../lib/scene/effects";
 import { glasgowElevation, sceneInstant, skyMix } from "../../lib/scene/moment";
 import { playInstant, playSky } from "../../lib/scene/play";
-import { defaultSky, type SkyState } from "../../lib/scene/sky-state";
+import { defaultSky, type SkyState, withWeather } from "../../lib/scene/sky-state";
 import type { LiveWeather } from "../../lib/weather/weather";
 import { useNow } from "../clock/Clock";
 import { usePlay } from "../play/Play";
@@ -32,8 +32,7 @@ export function HeroLandscape({ override, weather }: Props) {
 
   // The visitor's own sky wins, then `?sky=`, then Glasgow's. While playing
   // the theme follows the slider, so no representative moment applies.
-  const live = defaultSky(now);
-  const shown = override ?? (weather ? { ...live, ...weather } : live);
+  const shown = override ?? withWeather(defaultSky(now), weather);
   const sky = play.status === "playing" ? playSky(play, now) : shown;
   let at = override ? override.at.getTime() : sceneInstant(now, theme);
   if (play.status === "playing") at = playInstant(play, now);

@@ -14,7 +14,7 @@ async function answerWeather(page: Page, body: WeatherBody | "fail") {
 // The chip hides part of its text by width, so its checks read only what shows.
 const chip = (page: Page) =>
   page
-    .locator("header p")
+    .locator("header button")
     .filter({ hasText: /\d{2}:\d{2}/ })
     .first();
 

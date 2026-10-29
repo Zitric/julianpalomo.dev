@@ -88,6 +88,29 @@ describe("tokens.css", () => {
     expect(transitioned.sort()).toEqual(names.sort());
   });
 
+  // The panel's range thumbs are two-tone, a `field` fill in a `foreground`
+  // ring, so one of the two always stands out from a strong track colour
+  // (WCAG 1.4.11), and the ring from the panel.
+  for (const [theme, tokens] of [
+    ["light", light],
+    ["dark", dark],
+  ] as const) {
+    it(`gives the range thumbs 3:1 against every track and the panel in the ${theme} theme`, () => {
+      const fill = tokens.field ?? "";
+      const ring = tokens.foreground ?? "";
+      const tracks = Object.keys(tokens).filter((name) => name.startsWith("track-"));
+      expect(tracks.length).toBe(10);
+      for (const track of tracks) {
+        const colour = tokens[track] ?? "";
+        expect(
+          Math.max(contrast(fill, colour), contrast(ring, colour)),
+          track,
+        ).toBeGreaterThanOrEqual(UI);
+      }
+      expect(contrast(ring, tokens.background ?? "")).toBeGreaterThanOrEqual(UI);
+    });
+  }
+
   for (const [theme, tokens] of [
     ["light", light],
     ["dark", dark],

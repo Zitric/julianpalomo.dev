@@ -85,3 +85,13 @@ export function skyFromOverride({
   sky.at = new Date(glasgowInstant(day, time.hour, time.minute));
   return sky;
 }
+
+/** The weather levels a sky takes from live weather; the temperature stays out. */
+type Levels = Pick<SkyState, "clouds" | "rain" | "wind" | "snow" | "haar">;
+
+/** `sky` with Glasgow's live weather in it, once it has arrived. */
+export function withWeather(sky: SkyState, weather: Levels | null): SkyState {
+  if (!weather) return sky;
+  const { clouds, rain, wind, snow, haar } = weather;
+  return { ...sky, clouds, rain, wind, snow, haar };
+}
