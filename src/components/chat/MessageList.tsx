@@ -1,8 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import type { ChatUIMessage } from "../../lib/bot/chat-message";
-import type { CowSlot, CowState } from "../../lib/cow-state";
 import { t } from "../../lib/i18n/t";
-import { AssistantCow } from "../cow/AssistantCow";
 import { useLocale } from "../i18n/useLocale";
 import { AssistantMessage } from "./AssistantMessage";
 import { messageText } from "./chat-view";
@@ -11,17 +9,14 @@ type Props = {
   messages: ChatUIMessage[];
   /** The answer still typing itself out, and how much of its text is on screen. */
   typing: { id: string | undefined; shown: number } | undefined;
-  /** Where the one animated cow is, and what it's doing. */
-  cowSlot: CowSlot;
-  cowState: CowState;
   /** The question a suggestion chip sent, and where the chip was. */
   flight: { text: string; from: DOMRect } | null;
   /** Called once when the visitor's newest bubble appears, so a sound can play with it. */
   onBubbleShown?: () => void;
 };
 
-/** The conversation in order. */
-export function MessageList({ messages, typing, cowSlot, cowState, flight, onBubbleShown }: Props) {
+/** The conversation in order. The answers have no cow: the one on the chat's edge is theirs. */
+export function MessageList({ messages, typing, flight, onBubbleShown }: Props) {
   const locale = useLocale();
   const newestQuestion = messages.filter((message) => message.role === "user").at(-1)?.id;
   return (
@@ -40,10 +35,8 @@ export function MessageList({ messages, typing, cowSlot, cowState, flight, onBub
             </li>
           );
         }
-        const live = cowSlot.kind === "answer" && cowSlot.id === message.id;
         return (
-          <li key={message.id} className="flex items-end gap-2">
-            <AssistantCow state={live ? cowState : "idle"} size={58} animated={live} />
+          <li key={message.id}>
             <AssistantMessage
               message={message}
               typed={typing?.id === message.id ? typing.shown : undefined}
@@ -51,12 +44,6 @@ export function MessageList({ messages, typing, cowSlot, cowState, flight, onBub
           </li>
         );
       })}
-      {/* Where the answer will appear, until its first chunk arrives. */}
-      {cowSlot.kind === "pending" && (
-        <li>
-          <AssistantCow state={cowState} size={58} animated />
-        </li>
-      )}
     </ol>
   );
 }

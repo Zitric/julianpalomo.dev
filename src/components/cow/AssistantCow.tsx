@@ -3,26 +3,29 @@ import { type CowState, LICK_MS } from "../../lib/cow-state";
 import { t } from "../../lib/i18n/t";
 import { assistantCow as cow } from "../../lib/scene/palette";
 import { useLocale } from "../i18n/useLocale";
+import { BubbleTail } from "../ui/BubbleTail";
 
 type Props = {
   state: CowState;
-  /** Width in px: 66 next to the greeting, 58 next to answers. */
-  size: 66 | 58;
-  /** Only the latest cow animates; the others are still and hidden from screen readers. */
+  /** Width in px: 132 on the chat's edge, 66 on the link preview card and the icons. */
+  size: 132 | 66;
+  /** The chat's cow animates; the link preview card's and the icons' are still and hidden. */
   animated: boolean;
   /** Called on every pat; the caller decides whether to moo. */
   onMoo?: () => void;
+  /** Classes for the drawing, to size it with CSS where `size` doesn't fit, as on a phone. */
+  drawingClassName?: string;
 };
 
 const mooBubble =
-  "pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 rounded-full border-[1.5px] border-border bg-field px-2.5 py-0.5 font-display text-[13px] font-bold whitespace-nowrap text-foreground opacity-0 group-hover:opacity-100 motion-safe:translate-y-1 motion-safe:transition motion-safe:duration-200 motion-safe:group-hover:translate-y-0";
+  "pointer-events-none absolute bottom-full left-1/2 mb-2.5 -translate-x-1/2 rounded-full border-[1.5px] border-border bg-field px-2.5 py-0.5 font-display text-[13px] font-bold whitespace-nowrap text-foreground opacity-0 group-hover:opacity-100 motion-safe:translate-y-1 motion-safe:transition motion-safe:duration-200 motion-safe:group-hover:translate-y-0";
 
 /**
  * The assistant, a Highland cow (DESIGN.md section 9). Its animations live in
  * src/styles/cow.css, keyed by `data-state` and `data-pat`; only an animated
  * cow gets them.
  */
-export function AssistantCow({ state, size, animated, onMoo }: Props) {
+export function AssistantCow({ state, size, animated, onMoo, drawingClassName }: Props) {
   const locale = useLocale();
   const [patting, setPatting] = useState(false);
 
@@ -35,7 +38,7 @@ export function AssistantCow({ state, size, animated, onMoo }: Props) {
   if (!animated) {
     return (
       <span aria-hidden="true" data-state={state} className="cow inline-flex shrink-0">
-        <CowDrawing size={size} />
+        <CowDrawing size={size} className={drawingClassName} />
       </span>
     );
   }
@@ -57,8 +60,16 @@ export function AssistantCow({ state, size, animated, onMoo }: Props) {
     >
       <span aria-hidden="true" className={mooBubble}>
         {t(locale, "moo")}
+        {/* Pointing down at the cow that speaks. */}
+        <BubbleTail
+          edge="bottom"
+          width={12}
+          height={8}
+          base={8}
+          className="top-[calc(100%-1.5px)] left-1/2 -translate-x-1/2"
+        />
       </span>
-      <CowDrawing size={size} />
+      <CowDrawing size={size} className={drawingClassName} />
     </button>
   );
 }
@@ -68,9 +79,10 @@ export function AssistantCow({ state, size, animated, onMoo }: Props) {
  * the same order, in the same groups. Never redraw or simplify it;
  * tests/unit/assistant-cow.test.ts checks it against the reference.
  */
-function CowDrawing({ size }: { size: number }) {
+function CowDrawing({ size, className }: { size: number; className: string | undefined }) {
   return (
     <svg
+      className={className}
       aria-hidden="true"
       viewBox="5 26 190 150"
       width={size}

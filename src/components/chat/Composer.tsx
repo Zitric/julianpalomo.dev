@@ -106,7 +106,7 @@ export function Composer({
       // Below 1024px the form is fixed to the bottom; on a keyboard that
       // overlays the page (iOS Safari) it moves up by what the keyboard covers.
       style={{ bottom: keyboard }}
-      className="flex flex-col gap-2 max-lg:fixed max-lg:inset-x-0 max-lg:z-30 max-lg:border-t-2 max-lg:border-border max-lg:bg-background max-lg:px-4 max-lg:pt-3 max-lg:pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:max-lg:px-6"
+      className="enter-chat-later flex flex-col gap-2 max-lg:fixed max-lg:inset-x-0 max-lg:z-30 max-lg:border-t-2 max-lg:border-border max-lg:bg-background max-lg:px-4 max-lg:pt-3 max-lg:pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:max-lg:px-6"
     >
       {/* Fixed to the bottom of a phone, the box speaks for itself: the label
           stays as its accessible name, hidden to save height. */}

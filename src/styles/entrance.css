@@ -1,0 +1,302 @@
+/*
+ * The page's entrance (DESIGN.md section 11, "Entrance"). The server renders
+ * the page's root with data-entrance="full" on a first visit, or the first in
+ * a week, and "short" on any other; src/components/entrance/Entrance.tsx
+ * removes it when the entrance is over or skipped, which puts everything in
+ * its end state at once. Every time here is from the first paint, when these
+ * animations start; src/lib/entrance.ts holds the same beats for what only
+ * JavaScript does (the cow's flight and states, the greeting typing itself
+ * out). Without JavaScript this file alone ends with everything visible.
+ *
+ * Keyframes name only where they start, so each part ends as it is without
+ * the entrance: a haar that's off stays off. Only transform and opacity
+ * animate, and nothing here applies with reduced motion. The one exception
+ * is entrance-clock, which moves an unused custom property and draws
+ * nothing: Entrance.tsx only reads its time.
+ */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The clock Entrance.tsx reads the entrance's time from. */
+  [data-entrance] {
+    animation: entrance-clock 60s linear;
+  }
+
+  /* Trees grow and the cottage pops from their base; the line grows from the left. */
+  .enter-tree,
+  .enter-cottage {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+  }
+  .chat-line {
+    transform-origin: left;
+  }
+
+  /* ---- The full entrance ---- */
+
+  /* The name, the role and the line rise, 80ms apart; the portrait drops in;
+     the hero's buttons pop in, 70ms apart. */
+  [data-entrance="full"] .enter-intro {
+    animation: entrance-rise 0.45s ease both;
+  }
+  [data-entrance="full"] .enter-intro-1 {
+    animation-delay: 0.08s;
+  }
+  [data-entrance="full"] .enter-intro-2 {
+    animation-delay: 0.16s;
+  }
+  [data-entrance="full"] .enter-intro-3 {
+    animation-delay: 0.24s;
+  }
+  [data-entrance="full"] .enter-portrait {
+    animation: entrance-drop 0.6s cubic-bezier(0.3, 1.4, 0.5, 1) 0.1s both;
+  }
+  [data-entrance="full"] .enter-control {
+    animation: entrance-pop 0.45s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+  }
+  [data-entrance="full"] .enter-control-1 {
+    animation-delay: 0.3s;
+  }
+  [data-entrance="full"] .enter-control-2 {
+    animation-delay: 0.37s;
+  }
+  [data-entrance="full"] .enter-control-3 {
+    animation-delay: 0.44s;
+  }
+
+  /* The glen wakes, slowly: the sky, then the land back to front, the loch,
+     the trees one after another, the cottage, the haar, the herd and the
+     particles. */
+  [data-entrance="full"] .enter-sky,
+  [data-entrance="full"] .enter-clouds {
+    animation: entrance-fade 1.05s ease 0.6s both;
+  }
+  [data-entrance="full"] .enter-far {
+    animation: entrance-land 1.5s cubic-bezier(0.2, 0.7, 0.3, 1) 0.68s both;
+  }
+  [data-entrance="full"] .enter-mid {
+    animation: entrance-land 1.5s cubic-bezier(0.2, 0.7, 0.3, 1) 0.87s both;
+  }
+  [data-entrance="full"] .enter-near {
+    animation: entrance-land 1.5s cubic-bezier(0.2, 0.7, 0.3, 1) 1.05s both;
+  }
+  [data-entrance="full"] .enter-loch {
+    animation: entrance-fade 0.8s ease 1.2s both;
+  }
+  [data-entrance="full"] .enter-tree {
+    animation: entrance-grow 0.6s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+  }
+  [data-entrance="full"] .enter-tree:nth-child(1) {
+    animation-delay: 1.43s;
+  }
+  [data-entrance="full"] .enter-tree:nth-child(2) {
+    animation-delay: 1.535s;
+  }
+  [data-entrance="full"] .enter-tree:nth-child(3) {
+    animation-delay: 1.64s;
+  }
+  [data-entrance="full"] .enter-tree:nth-child(4) {
+    animation-delay: 1.745s;
+  }
+  [data-entrance="full"] .enter-tree:nth-child(5) {
+    animation-delay: 1.85s;
+  }
+  [data-entrance="full"] .enter-cottage {
+    animation: entrance-pop 0.5s cubic-bezier(0.3, 1.5, 0.5, 1) 1.73s both;
+  }
+  [data-entrance="full"] .enter-haar {
+    animation: entrance-fade 1s ease 1.5s both;
+  }
+  [data-entrance="full"] .enter-herd-1 {
+    animation: entrance-walk 1.8s ease-out 1.88s both;
+  }
+  [data-entrance="full"] .enter-herd-2 {
+    animation: entrance-walk 1.8s ease-out 2.03s both;
+  }
+  [data-entrance="full"] .particles {
+    animation: entrance-fade 1s ease 2.4s both;
+  }
+
+  /* The chat's edge draws itself: the card's border fades in on desktop and
+     the line grows from left to right on a phone. */
+  [data-entrance="full"] .chat-frame {
+    animation: entrance-fade 0.6s ease 4.3s both;
+  }
+  [data-entrance="full"] .chat-line {
+    animation: entrance-draw 0.7s ease-out 4.3s both;
+  }
+
+  /* The cow lands at 5.15s. JavaScript flies it there from the hero, over
+     this; without JavaScript it simply appears on the edge. */
+  [data-entrance="full"] .edge-cow {
+    animation: entrance-fade 0.4s ease 5.15s both;
+  }
+
+  /* The chat appears when the cow lands; until then it takes its space,
+     invisible, so nothing shifts. The suggestions and the composer follow. */
+  [data-entrance="full"] .enter-chat {
+    animation: entrance-rise 0.5s ease 5.15s both;
+  }
+  [data-entrance="full"] .enter-chat-later {
+    animation: entrance-rise 0.5s ease 5.3s both;
+  }
+  /* With JavaScript the suggestions wait for the greeting to type itself
+     out, then rise one by one, like source chips. */
+  [data-entrance="full"] .enter-chat-later[data-suggestions="wait"] {
+    animation: none;
+    opacity: 0;
+  }
+  [data-entrance="full"] .enter-chat-later[data-suggestions="rise"] {
+    animation: none;
+  }
+  [data-entrance="full"] [data-suggestions="rise"] li {
+    animation: entrance-rise 0.45s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+  }
+  [data-entrance="full"] [data-suggestions="rise"] li:nth-child(2) {
+    animation-delay: 0.08s;
+  }
+  [data-entrance="full"] [data-suggestions="rise"] li:nth-child(3) {
+    animation-delay: 0.16s;
+  }
+
+  /* ---- The short entrance: over in about 2s ---- */
+
+  [data-entrance="short"] .enter-intro {
+    animation: entrance-rise 0.45s ease both;
+  }
+  [data-entrance="short"] .enter-intro-2 {
+    animation-delay: 0.08s;
+  }
+  [data-entrance="short"] .enter-intro-3 {
+    animation-delay: 0.16s;
+  }
+  [data-entrance="short"] .enter-portrait {
+    animation: entrance-drop 0.6s cubic-bezier(0.3, 1.4, 0.5, 1) 0.25s both;
+  }
+  [data-entrance="short"] .enter-control {
+    animation: entrance-pop 0.45s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+  }
+  [data-entrance="short"] .enter-control-2 {
+    animation-delay: 0.07s;
+  }
+  [data-entrance="short"] .enter-control-3 {
+    animation-delay: 0.14s;
+  }
+
+  /* The glen wakes at its quick pace. */
+  [data-entrance="short"] .enter-sky {
+    animation: entrance-fade 0.7s ease both;
+  }
+  [data-entrance="short"] .orb-c {
+    animation: entrance-sun 1.1s cubic-bezier(0.2, 0.7, 0.3, 1) 0.15s both;
+  }
+  [data-entrance="short"] .enter-far {
+    animation: entrance-land 1s cubic-bezier(0.2, 0.7, 0.3, 1) 0.05s both;
+  }
+  [data-entrance="short"] .enter-mid {
+    animation: entrance-land 1s cubic-bezier(0.2, 0.7, 0.3, 1) 0.18s both;
+  }
+  [data-entrance="short"] .enter-near {
+    animation: entrance-land 1s cubic-bezier(0.2, 0.7, 0.3, 1) 0.3s both;
+  }
+  [data-entrance="short"] .enter-loch {
+    animation: entrance-fade 0.8s ease 0.4s both;
+  }
+  [data-entrance="short"] .enter-clouds {
+    animation: entrance-fade 1.2s ease 0.25s both;
+  }
+  [data-entrance="short"] .enter-tree {
+    animation: entrance-grow 0.7s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+  }
+  [data-entrance="short"] .enter-tree:nth-child(1) {
+    animation-delay: 0.55s;
+  }
+  [data-entrance="short"] .enter-tree:nth-child(2) {
+    animation-delay: 0.62s;
+  }
+  [data-entrance="short"] .enter-tree:nth-child(3) {
+    animation-delay: 0.69s;
+  }
+  [data-entrance="short"] .enter-tree:nth-child(4) {
+    animation-delay: 0.76s;
+  }
+  [data-entrance="short"] .enter-tree:nth-child(5) {
+    animation-delay: 0.83s;
+  }
+  [data-entrance="short"] .enter-cottage {
+    animation: entrance-pop 0.5s cubic-bezier(0.3, 1.5, 0.5, 1) 0.75s both;
+  }
+  [data-entrance="short"] .enter-haar {
+    animation: entrance-fade 0.8s ease 0.6s both;
+  }
+  [data-entrance="short"] .enter-herd-1 {
+    animation: entrance-walk 1.2s ease-out 0.85s both;
+  }
+  [data-entrance="short"] .enter-herd-2 {
+    animation: entrance-walk 1.2s ease-out 0.95s both;
+  }
+  [data-entrance="short"] .particles {
+    animation: entrance-fade 0.8s ease 1.2s both;
+  }
+
+  /* The chat fades in all at once, the cow already on its edge. */
+  [data-entrance="short"] .enter-chat-all {
+    animation: entrance-fade 0.4s ease 0.2s both;
+  }
+}
+
+@keyframes entrance-clock {
+  to {
+    --entrance-clock: 1;
+  }
+}
+@keyframes entrance-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@keyframes entrance-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-24px);
+  }
+}
+@keyframes entrance-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+@keyframes entrance-fade {
+  from {
+    opacity: 0;
+  }
+}
+/* In the landscape's own units: the land rises from a little below. */
+@keyframes entrance-land {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+}
+@keyframes entrance-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+@keyframes entrance-walk {
+  from {
+    opacity: 0;
+    transform: translateX(-80px);
+  }
+}
+@keyframes entrance-draw {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes entrance-sun {
+  from {
+    transform: translateY(80px);
+  }
+}

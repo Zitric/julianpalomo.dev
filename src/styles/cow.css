@@ -1,9 +1,9 @@
 /*
  * The assistant cow's motion (DESIGN.md section 9), from the <style> of
  * docs/design/assistant-cow.svg. src/components/cow/AssistantCow.tsx sets
- * `data-state` and, while a pat plays, `data-pat`; only the latest cow has
- * `.cow-live`, so earlier ones stay still. Everything animates only transform
- * and opacity.
+ * `data-state` and, while a pat plays, `data-pat`; only the chat's cow has
+ * `.cow-live`, so the link preview card's stays still. Everything animates
+ * only transform and opacity.
  *
  * The SVG's own `transform="scale(0)"` and `opacity="0"` hide the tongue and
  * the open mouth; never set `transform` or `opacity` on those groups outside
@@ -84,6 +84,20 @@
   @media (hover: hover) {
     .cow-live:hover .tilt {
       animation: cow-tilt 4s ease-in-out infinite;
+    }
+  }
+
+  /* On the chat's edge (src/components/chat/ChatEdge.tsx), it rises 8px
+     over the edge while it thinks and while a pointer is over it. */
+  .edge-lift {
+    transition: transform 0.3s ease;
+  }
+  .edge-lift[data-state="thinking"] {
+    transform: translateY(-8px);
+  }
+  @media (hover: hover) {
+    .edge-cow:hover .edge-lift {
+      transform: translateY(-8px);
     }
   }
 }

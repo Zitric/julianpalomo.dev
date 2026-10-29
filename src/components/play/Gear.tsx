@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { t } from "../../lib/i18n/t";
+import { useEntrance } from "../entrance/Entrance";
 import { useLocale } from "../i18n/useLocale";
+import { BubbleTail } from "../ui/BubbleTail";
 import { IconButton } from "../ui/IconButton";
 
-// The gear isn't there at first: it spins in this long after the page is ready.
+// The gear isn't there at first: it spins in this long after the entrance ends.
 const GEAR_DELAY_MS = 2000;
 // The first-visit bubble goes away after this long, or on any tap.
 const BUBBLE_MS = 5000;
@@ -29,17 +31,20 @@ function rememberBubble(): void {
 /**
  * The gear that opens "Play with the sky" (DESIGN.md section 8). It holds a
  * 44px slot from the start, so the chip beside it never moves, and appears in
- * it after 2s; on a first visit, a bubble beside it says what it does.
+ * it 2s after the page's entrance (at once with reduced motion, so 2s after
+ * the page is ready); on a first visit, a bubble beside it says what it does.
  */
 export function Gear({ onOpen }: { onOpen: (trigger: HTMLElement) => void }) {
   const locale = useLocale();
   const [shown, setShown] = useState(false);
   const [bubble, setBubble] = useState(false);
+  const entranceOver = useEntrance().playing === undefined;
 
   useEffect(() => {
+    if (!entranceOver) return;
     const timer = setTimeout(() => setShown(true), GEAR_DELAY_MS);
     return () => clearTimeout(timer);
-  }, []);
+  }, [entranceOver]);
 
   useEffect(() => {
     if (!shown || bubbleSeen()) return;
@@ -70,9 +75,17 @@ export function Gear({ onOpen }: { onOpen: (trigger: HTMLElement) => void }) {
       {bubble && (
         <p
           role="status"
-          className="absolute top-full left-0 mt-2 w-max max-w-[220px] rounded-[14px] rounded-tl-[6px] border-[1.5px] border-border bg-field px-3 py-2 text-[13px] font-semibold text-foreground"
+          className="absolute top-full left-0 mt-3 w-max max-w-[220px] rounded-[14px] border-[1.5px] border-border bg-field px-3 py-2 text-[13px] font-semibold text-foreground"
         >
           {t(locale, "playBubble")}
+          {/* Pointing up at the gear, whose centre is 22px in. */}
+          <BubbleTail
+            edge="top"
+            width={14}
+            height={9}
+            base={9}
+            className="bottom-[calc(100%-1.5px)] left-[13.5px]"
+          />
         </p>
       )}
     </div>

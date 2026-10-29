@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  type CowSituation,
-  type CowState,
-  liveCowSlot,
-  nextCowState,
-} from "../../src/lib/cow-state";
+import { type CowSituation, type CowState, nextCowState } from "../../src/lib/cow-state";
 
 const quiet: CowSituation = {
   status: "ready",
@@ -12,6 +7,7 @@ const quiet: CowSituation = {
   revealing: false,
   stopped: false,
   composer: { hasText: false, focused: false },
+  entrance: null,
 };
 
 function situation(change: Partial<CowSituation>): CowSituation {
@@ -150,6 +146,15 @@ describe("nextCowState", () => {
     expect(nextCowState("sorry", submitted)).toBe("thinking");
   });
 
+  it("does what the entrance says while it plays", () => {
+    expect(nextCowState("idle", situation({ entrance: "talking" }))).toBe("talking");
+    expect(nextCowState("idle", situation({ ...typing, entrance: "satisfied" }))).toBe("satisfied");
+  });
+
+  it("licks once when the entrance's greeting has typed itself out", () => {
+    expect(play(situation({ entrance: "talking" }), quiet)).toEqual(["talking", "satisfied"]);
+  });
+
   it("gives the same state when applied twice to the same situation", () => {
     const states: CowState[] = ["idle", "listening", "thinking", "talking", "satisfied", "sorry"];
     const situations = [quiet, typing, submitted, lookingUp, streamingText, typingOut, done];
@@ -159,41 +164,5 @@ describe("nextCowState", () => {
         expect(nextCowState(once, now)).toBe(once);
       }
     }
-  });
-});
-
-describe("liveCowSlot", () => {
-  const question = { id: "q1", role: "user" };
-  const answer = { id: "a1", role: "assistant" };
-
-  it("is the greeting before any answer", () => {
-    expect(liveCowSlot("ready", [])).toEqual({ kind: "greeting" });
-  });
-
-  it("is a pending row while a question waits for its first chunk", () => {
-    expect(liveCowSlot("submitted", [question])).toEqual({ kind: "pending" });
-    expect(liveCowSlot("submitted", [question, answer, { id: "q2", role: "user" }])).toEqual({
-      kind: "pending",
-    });
-  });
-
-  it("is the latest answer once one exists", () => {
-    const later = { id: "a2", role: "assistant" };
-    expect(liveCowSlot("streaming", [question, answer])).toEqual({ kind: "answer", id: "a1" });
-    expect(liveCowSlot("ready", [question, answer, question, later])).toEqual({
-      kind: "answer",
-      id: "a2",
-    });
-  });
-
-  it("stays on the last answer when a question is stopped before its first chunk", () => {
-    expect(liveCowSlot("ready", [question, answer, { id: "q2", role: "user" }])).toEqual({
-      kind: "answer",
-      id: "a1",
-    });
-  });
-
-  it("is the error notice after a failure", () => {
-    expect(liveCowSlot("error", [question, answer])).toEqual({ kind: "error" });
   });
 });

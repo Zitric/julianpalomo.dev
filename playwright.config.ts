@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { ENTRANCE_COOKIE } from "./src/lib/entrance";
 
 const port = 4173;
 const isCI = Boolean(process.env.CI);
@@ -11,6 +12,25 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${port}`,
     trace: "on-first-retry",
+    // Every test is a later visit, so it gets the short entrance and never
+    // waits for the first visit's (tests/e2e/entrance.spec.ts clears it).
+    // Reduced motion would skip it too, but it also stills the cow and the
+    // answer's typing, which other tests check.
+    storageState: {
+      cookies: [
+        {
+          name: ENTRANCE_COOKIE,
+          value: "1",
+          domain: "localhost",
+          path: "/",
+          expires: -1,
+          httpOnly: true,
+          secure: false,
+          sameSite: "Lax",
+        },
+      ],
+      origins: [],
+    },
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   // Runs against a production build served by the Workers runtime, not the dev

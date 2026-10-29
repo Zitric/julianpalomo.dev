@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 
 // Play with the sky (DESIGN.md section 8). /api/weather is answered here, so
 // the live sky is fixed: clear and dry, so any rain on screen is the visitor's.
@@ -13,22 +13,47 @@ test.beforeEach(async ({ page, context, baseURL }) => {
   );
 });
 
+/**
+ * Whether the bubble's tail shows at a point inside it, near its tip: nothing
+ * paints over it. The bubble ignores the pointer, which elementFromPoint
+ * honours, so it's turned on to look.
+ */
+function tailShows(bubble: Locator, x: number, y: number): Promise<boolean> {
+  return bubble.evaluate(
+    (element, at) => {
+      const tail = element.querySelector("svg");
+      if (!(element instanceof HTMLElement) || !tail) return false;
+      const box = tail.getBoundingClientRect();
+      element.style.pointerEvents = "auto";
+      tail.style.pointerEvents = "auto";
+      const hit = document.elementFromPoint(box.left + at.x, box.top + at.y);
+      return hit !== null && element.contains(hit);
+    },
+    { x, y },
+  );
+}
+
+// The gear spins in 2s after the entrance; these tests get the short one, about 2s.
+const GEAR_WAIT = 6000;
+
 // Exact: the chip's own name ends with "Play with the sky" too.
 const gear = (page: Page) => page.getByRole("button", { name: "Play with the sky", exact: true });
 const panel = (page: Page) => page.getByRole("dialog", { name: "Play with the sky" });
 
-test("the gear isn't there at first and spins in after 2s", async ({ page }) => {
+test("the gear isn't there at first and spins in 2s after the entrance", async ({ page }) => {
   await page.goto("/");
   await expect(gear(page)).toHaveCount(0);
-  await expect(gear(page)).toBeVisible({ timeout: 4000 });
+  await expect(gear(page)).toBeVisible({ timeout: GEAR_WAIT });
 });
 
 test("the bubble shows on a first visit only", async ({ page }) => {
   await page.goto("/");
   const bubble = page.getByText("Psst… you can change the weather");
-  await expect(bubble).toBeVisible({ timeout: 4000 });
+  await expect(bubble).toBeVisible({ timeout: GEAR_WAIT });
+  // Its tail, 14 × 9, points up at the gear from (7, 0.75).
+  expect(await tailShows(bubble, 7, 3)).toBe(true);
   await page.reload();
-  await expect(gear(page)).toBeVisible({ timeout: 4000 });
+  await expect(gear(page)).toBeVisible({ timeout: GEAR_WAIT });
   await expect(bubble).toHaveCount(0);
 });
 
@@ -85,7 +110,7 @@ test("Escape closes the panel and gives focus back to the gear", async ({ page }
 
 test("the whole panel works with the keyboard alone", async ({ page }) => {
   await page.goto("/");
-  await expect(gear(page)).toBeVisible({ timeout: 4000 });
+  await expect(gear(page)).toBeVisible({ timeout: GEAR_WAIT });
   await gear(page).focus();
   await page.keyboard.press("Enter");
   await expect(panel(page)).toBeVisible();

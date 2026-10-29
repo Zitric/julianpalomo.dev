@@ -1,9 +1,11 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, getRouteApi, redirect } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { z } from "zod";
 import { CompactBar } from "../../components/bar/CompactBar";
 import { Chat } from "../../components/chat/Chat";
 import { useNow } from "../../components/clock/Clock";
+import { Entrance } from "../../components/entrance/Entrance";
+import { HeroBubble } from "../../components/entrance/HeroBubble";
 import { LanguageToggle } from "../../components/i18n/LanguageToggle";
 import { useLocale } from "../../components/i18n/useLocale";
 import { HeroLandscape } from "../../components/landscape/HeroLandscape";
@@ -57,13 +59,20 @@ const header =
   "lg:col-span-full lg:row-span-2 lg:row-start-1 lg:grid lg:grid-cols-subgrid lg:grid-rows-subgrid";
 const portrait =
   "ml-1 -mt-[60px] h-[120px] w-24 -scale-x-100 rounded-[26px] ring-4 ring-background [image-rendering:pixelated] sm:ml-0 lg:-mt-[75px] lg:h-[150px] lg:w-[120px] lg:rounded-[32px] lg:ring-[6px]";
+// From lg the chat is a card whose top edge the cow rests on (Chat draws the
+// border), so it starts low enough for the cow and its heading above it.
 const chatCard =
-  "scroll-mt-[58px] px-4 pt-8 sm:px-6 lg:col-start-3 lg:row-start-2 lg:mt-8 lg:self-start lg:rounded-[20px] lg:border-2 lg:border-border lg:p-6";
+  "scroll-mt-[58px] px-4 pt-6 sm:px-6 lg:col-start-3 lg:row-start-2 lg:mt-10 lg:self-start lg:px-0 lg:pt-0";
+
+const rootRoute = getRouteApi("__root__");
 
 type PanelState = { open: boolean; position: { top: number; left: number } | null };
 
 function Home() {
   const locale = useLocale();
+  // Read once by Entrance, when the page mounts, so a language switch never replays it.
+  const { entrance } = rootRoute.useLoaderData();
+  const heroRef = useRef<HTMLDivElement>(null);
   const { sky } = Route.useSearch();
   const override = useSceneOverride(sky);
   // An override is a fixed scene, so it doesn't wait for the real weather.
@@ -94,23 +103,33 @@ function Home() {
   }
 
   return (
-    <div className={page}>
+    <Entrance kind={entrance} greeting={t(locale, "greeting")} hero={heroRef} className={page}>
       <header className={header}>
-        <div className="relative h-[230px] overflow-hidden bg-tint lg:col-span-full lg:h-80">
+        <div
+          ref={heroRef}
+          className="relative h-[230px] overflow-hidden bg-tint lg:col-span-full lg:h-80"
+        >
           <HeroLandscape override={override} weather={weather} />
+          <HeroBubble />
           <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
             <div className="flex items-start gap-2">
               <Gear onOpen={openPanel} />
-              <WeatherChip
-                weather={weather}
-                playingHour={play.status === "playing" ? play.hour : null}
-                onOpen={openPanel}
-                onBackToLive={() => dispatch({ type: "backToLive" })}
-              />
+              <div className="enter-control enter-control-1">
+                <WeatherChip
+                  weather={weather}
+                  playingHour={play.status === "playing" ? play.hour : null}
+                  onOpen={openPanel}
+                  onBackToLive={() => dispatch({ type: "backToLive" })}
+                />
+              </div>
             </div>
             <div className="flex gap-2">
-              <LanguageToggle />
-              <ThemeToggle />
+              <div className="enter-control enter-control-2">
+                <LanguageToggle />
+              </div>
+              <div className="enter-control enter-control-3">
+                <ThemeToggle />
+              </div>
             </div>
           </div>
         </div>
@@ -120,15 +139,15 @@ function Home() {
             alt={t(locale, "portraitAlt")}
             width={96}
             height={120}
-            className={portrait}
+            className={`enter-portrait ${portrait}`}
           />
-          <h1 className="mt-4 font-display text-[34px] leading-tight font-extrabold tracking-[-0.02em] sm:text-[44px]">
+          <h1 className="enter-intro enter-intro-1 mt-4 font-display text-[34px] leading-tight font-extrabold tracking-[-0.02em] sm:text-[44px]">
             {t(locale, "name")}
           </h1>
-          <p className="mt-1 font-display text-lg font-bold text-accent lg:text-xl">
+          <p className="enter-intro enter-intro-2 mt-1 font-display text-lg font-bold text-accent lg:text-xl">
             {t(locale, "role")}
           </p>
-          <p className="mt-3 text-muted">{t(locale, "intro")}</p>
+          <p className="enter-intro enter-intro-3 mt-3 text-muted">{t(locale, "intro")}</p>
         </div>
       </header>
       {started && <CompactBar />}
@@ -144,6 +163,6 @@ function Home() {
         position={panel.position}
         onClose={() => setPanel((current) => ({ ...current, open: false }))}
       />
-    </div>
+    </Entrance>
   );
 }

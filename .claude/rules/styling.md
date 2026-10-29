@@ -7,7 +7,7 @@ paths:
 # Styling
 
 Tailwind CSS 4 through `@tailwindcss/vite`. `src/styles/app.css` imports
-Tailwind, `tokens.css`, `fonts.css`, `landscape.css`, `play.css`, `chat.css` and `cow.css`;
+Tailwind, `tokens.css`, `fonts.css`, `landscape.css`, `play.css`, `chat.css`, `cow.css` and `entrance.css`;
 `src/routes/__root.tsx` links `app.css`.
 
 ## Fonts live only in `src/styles/fonts.css`
@@ -49,9 +49,14 @@ Tailwind, `tokens.css`, `fonts.css`, `landscape.css`, `play.css`, `chat.css` and
 
 ## The assistant cow's motion lives in `src/styles/cow.css`
 
-- Its keyframes come from the `<style>` of `docs/design/assistant-cow.svg`, prefixed `cow-`, and are keyed by the `data-state` and `data-pat` that `src/components/cow/AssistantCow.tsx` sets. Only the latest cow has `.cow-live`, so only it moves.
+- Its keyframes come from the `<style>` of `docs/design/assistant-cow.svg`, prefixed `cow-`, and are keyed by the `data-state` and `data-pat` that `src/components/cow/AssistantCow.tsx` sets. Only the chat's cow has `.cow-live`, so the link preview card's stays still. Its 8px rise over the chat's edge (`.edge-lift`, `src/components/chat/ChatEdge.tsx`) lives here too.
 - Every rule that moves it sits inside `prefers-reduced-motion: no-preference`, so with reduced motion it's the still drawing in every state. Only `transform` and `opacity` animate.
 - The lick lasts 1.6s here and in `LICK_MS` (`src/lib/cow-state.ts`); keep the two in step.
+
+## The page's entrance lives in `src/styles/entrance.css`
+
+- Every beat of both entrances (`DESIGN.md` section 11, "Entrance") as a CSS animation, keyed by the `data-entrance` the server renders on the page's root and timed from the first paint, inside `prefers-reduced-motion: no-preference`. Keyframes, prefixed `entrance-`, name only where they start, so each part ends as it is without the entrance: never give one a `to` that would override a part's own state, like a haar that's off. It targets `enter-*` classes (in the landscape, groups that wrap its parts, so a part's own animation is never replaced) and the chat's `edge-cow`, `chat-frame` and `chat-line`.
+- `src/components/entrance/Entrance.tsx` reads the time from the root's `entrance-clock` animation and removes `data-entrance` to end the entrance; the cow's flight runs with the Web Animations API in `ChatEdge.tsx`, over the CSS. `src/lib/entrance.ts` holds the same beats; change a time in both.
 
 ## Focus
 
@@ -61,6 +66,7 @@ Tailwind, `tokens.css`, `fonts.css`, `landscape.css`, `play.css`, `chat.css` and
 ## Shared pieces live in `src/components/ui/`
 
 - Small, typed and feature-free. `IconButton` is a round, flat, 44px icon-only button with a required `label` (its accessible name) and a `look`: `accent`, `glass` (`bg-glass` with a 6px blur) for buttons on the landscape, or `tint` for buttons on a panel. Its press scale (0.92 over 80ms) runs only under `motion-safe`.
+- `BubbleTail` is a speech bubble's comic-style tail (`DESIGN.md` section 4), on the bubble's `left`, `top` or `bottom` edge, in `field` and `border`. Its callers place it so its joining edge covers the bubble's 1.5px border: the hero's hello, the cow's "Moo!" and the gear's hint.
 - `Button` is the wide, flat, fully round button (`DESIGN.md` section 4), with a `look` (`primary` today) and a 0.97 press scale under `motion-safe`. "Back to live Glasgow" is its first caller.
 - A piece, or a new look of one, is added with its first caller, not ahead of it.
 
@@ -71,4 +77,4 @@ Tailwind, `tokens.css`, `fonts.css`, `landscape.css`, `play.css`, `chat.css` and
 - Semantic elements first (`main`, `h1`, `nav`, `button`); the e2e test finds the page by role (`tests/e2e/home.spec.ts`).
 - The layout works at 375px wide (small phone) before anything else.
 
-If `tokens.css`, `fonts.css`, `cow.css`, `landscape.css`, `play.css`, `chat.css`, `app.css`, `src/lib/scene/palette.ts` or `src/components/ui/` change shape, update this rule.
+If `tokens.css`, `fonts.css`, `cow.css`, `landscape.css`, `play.css`, `chat.css`, `entrance.css`, `app.css`, `src/lib/scene/palette.ts` or `src/components/ui/` change shape, update this rule.

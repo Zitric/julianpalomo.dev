@@ -122,18 +122,39 @@ export function Landscape({ sky, at, choreography, paused }: Props) {
           <stop offset="1" className="aurora-stop aurora-end" stopOpacity="0" />
         </linearGradient>
       </defs>
-      <Sky skyGradient={skyGradient} auroraGradient={auroraGradient} sun={sun} moon={moon} />
-      <Clouds visible={fx.visibleClouds} dark={fx.darkClouds} speed={fx.cloudSpeed} />
+      {/* The enter- groups are for the page's entrance (src/styles/entrance.css). */}
+      <g className="enter-sky">
+        <Sky skyGradient={skyGradient} auroraGradient={auroraGradient} sun={sun} moon={moon} />
+      </g>
+      <g className="enter-clouds">
+        <Clouds visible={fx.visibleClouds} dark={fx.darkClouds} speed={fx.cloudSpeed} />
+      </g>
       <Mountains />
-      <Cottage />
-      <FarCow />
-      <HaarBand band={1} />
-      <Loch />
-      <Meadow />
-      <NearHerd />
-      <Pines />
-      <HaarBand band={2} />
-      <HaarBand band={3} />
+      <g className="enter-cottage">
+        <Cottage />
+      </g>
+      <g className="enter-herd enter-herd-1">
+        <FarCow />
+      </g>
+      <g className="enter-haar">
+        <HaarBand band={1} />
+      </g>
+      <g className="enter-loch">
+        <Loch />
+      </g>
+      <g className="enter-near">
+        <Meadow />
+      </g>
+      <g className="enter-herd enter-herd-2">
+        <NearHerd />
+      </g>
+      <g className="enter-pines">
+        <Pines />
+      </g>
+      <g className="enter-haar">
+        <HaarBand band={2} />
+        <HaarBand band={3} />
+      </g>
       <rect className="golden" x="-600" width="2400" height="320" />
       <rect className="glow" x="-600" width="2400" height="320" />
     </svg>
