@@ -154,6 +154,22 @@ while IFS= read -r raw; do
     if [ "$(current_branch)" = "main" ]; then
       block "the current branch is main. Create a feat/, fix/, chore/ or docs/ branch."
     fi
+    # A mailbox branch is pushed once, by /mailbox create, and never again: a
+    # push would run CI and a preview build, and a delete would close the PR
+    # the cloud thread listens on. "Once" means origin's tracking ref doesn't
+    # exist yet. A branch named in the command wins; the current branch counts
+    # only when the push names none (`git push`, `git push origin`) or HEAD.
+    mailbox=$(printf '%s' "$g" | grep -oE 'chore/mailbox-[A-Za-z0-9._-]+' | head -1)
+    push_args=$(printf '%s' "$g" | sed -E 's/^git +push//; s/(^| )-[^ ]*//g')
+    if [ -z "$mailbox" ] &&
+      { [ "$(printf '%s' "$push_args" | wc -w)" -le 1 ] ||
+        printf '%s' "$push_args" | grep -qE '(^| )HEAD(:|$| )'; }; then
+      case "$(current_branch)" in chore/mailbox-*) mailbox=$(current_branch) ;; esac
+    fi
+    if [ -n "$mailbox" ] &&
+      git -C "$repo_dir" rev-parse --verify -q "refs/remotes/origin/$mailbox" >/dev/null; then
+      block "$mailbox is a mailbox, and origin already has it. A mailbox branch never changes after /mailbox create."
+    fi
   fi
   if printf '%s' "$seg" | grep -qE '^gh +pr +merge( |$)'; then
     block "PRs are merged by the repo owner, never by an agent (and never with auto-merge)."

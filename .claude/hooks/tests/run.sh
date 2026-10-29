@@ -56,6 +56,9 @@ make_repo() { # name branch dirty?
 }
 make_repo feature-dirty feat/x dirty
 make_repo main-clean main clean
+make_repo mailbox-pushed chore/mailbox-design clean
+git -C "$scratch/mailbox-pushed" update-ref refs/remotes/origin/chore/mailbox-design HEAD
+make_repo mailbox-new chore/mailbox-new clean
 
 verdict_of() { # repo-dir command
   local out code

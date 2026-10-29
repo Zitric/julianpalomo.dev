@@ -3,6 +3,8 @@
 # `@repo <name>` switches the scratch repo the following cases run against:
 #   feature-dirty  on branch feat/x with an uncommitted change to a tracked file
 #   main-clean     on branch main, clean
+#   mailbox-pushed on branch chore/mailbox-design, which origin already has
+#   mailbox-new    on branch chore/mailbox-new, which origin doesn't have yet
 # run.sh runs every case twice: with jq, and with the node fallback.
 # Run with: bash .claude/hooks/tests/run.sh
 
@@ -135,3 +137,19 @@ pass  | git checkout feat/x
 pass  | git switch -c chore/claude-config
 block | git push
 block | git push -u origin HEAD
+
+@repo mailbox-pushed
+pass  | git status
+pass  | git fetch origin
+pass  | git push -u origin feat/x
+block | git push
+block | git push origin HEAD
+block | git push -u origin
+block | git push -u origin chore/mailbox-design
+block | git push origin --delete chore/mailbox-design
+block | git push origin :chore/mailbox-design
+block | git -C . push origin chore/mailbox-design
+
+@repo mailbox-new
+pass  | git push -u origin chore/mailbox-new
+pass  | git push
