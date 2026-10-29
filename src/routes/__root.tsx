@@ -4,6 +4,7 @@ import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { ClockProvider } from "../components/clock/Clock";
 import { useLocale } from "../components/i18n/useLocale";
+import { PlayProvider } from "../components/play/Play";
 import { ThemeDocument } from "../components/theme/Theme";
 import { getFirstRender } from "../lib/first-render";
 import { pageTitle } from "../lib/site";
@@ -44,15 +45,17 @@ function RootDocument({ children }: { children: ReactNode }) {
   const locale = useLocale();
   return (
     <ClockProvider start={now}>
-      <ThemeDocument initialChoice={choice} lang={locale}>
-        <head>
-          <HeadContent />
-        </head>
-        <body className="bg-background text-[15.5px] leading-[1.55] text-foreground antialiased">
-          {children}
-          <Scripts />
-        </body>
-      </ThemeDocument>
+      <PlayProvider>
+        <ThemeDocument initialChoice={choice} lang={locale}>
+          <head>
+            <HeadContent />
+          </head>
+          <body className="bg-background text-[15.5px] leading-[1.55] text-foreground antialiased">
+            {children}
+            <Scripts />
+          </body>
+        </ThemeDocument>
+      </PlayProvider>
     </ClockProvider>
   );
 }

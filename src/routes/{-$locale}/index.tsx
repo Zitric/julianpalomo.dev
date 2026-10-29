@@ -1,17 +1,23 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { useState } from "react";
 import { z } from "zod";
 import { Chat } from "../../components/chat/Chat";
+import { useNow } from "../../components/clock/Clock";
 import { LanguageToggle } from "../../components/i18n/LanguageToggle";
 import { useLocale } from "../../components/i18n/useLocale";
 import { HeroLandscape } from "../../components/landscape/HeroLandscape";
 import { useLiveWeather } from "../../components/landscape/useLiveWeather";
 import { useSceneOverride } from "../../components/landscape/useSceneOverride";
 import { WeatherChip } from "../../components/landscape/WeatherChip";
+import { Gear } from "../../components/play/Gear";
+import { usePlay } from "../../components/play/Play";
+import { SkyPanel } from "../../components/play/SkyPanel";
 import { SiteFooter } from "../../components/SiteFooter";
 import { ThemeToggle } from "../../components/theme/ThemeToggle";
 import { localeFromParam } from "../../lib/i18n/locale";
 import { rootLanguage } from "../../lib/i18n/root-language";
 import { t } from "../../lib/i18n/t";
+import { defaultSky, withWeather } from "../../lib/scene/sky-state";
 import { pageTitle, site } from "../../lib/site";
 
 // `/` is English and `/es` is Spanish: one route, so switching language keeps
@@ -65,19 +71,41 @@ const portrait =
 const chatCard =
   "px-4 pt-8 sm:px-6 lg:col-start-3 lg:row-start-2 lg:mt-8 lg:self-start lg:rounded-[20px] lg:border-2 lg:border-border lg:p-6";
 
+type PanelState = { open: boolean; position: { top: number; left: number } | null };
+
 function Home() {
   const locale = useLocale();
   const { sky } = Route.useSearch();
   const override = useSceneOverride(sky);
   // An override is a fixed scene, so it doesn't wait for the real weather.
   const weather = useLiveWeather(override === null);
+  const now = useNow();
+  const { state: play, dispatch } = usePlay();
+  const [panel, setPanel] = useState<PanelState>({ open: false, position: null });
+
+  // The gear and the chip open the panel; playing starts from the sky on
+  // screen, and the popover sits under whichever was pressed.
+  function openPanel(trigger: HTMLElement) {
+    dispatch({ type: "play", from: override ?? withWeather(defaultSky(now), weather) });
+    const { bottom, left } = trigger.getBoundingClientRect();
+    setPanel({ open: true, position: { top: bottom + 8, left } });
+  }
+
   return (
     <div className={page}>
       <header className={header}>
         <div className="relative h-[230px] overflow-hidden bg-tint lg:col-span-full lg:h-80">
           <HeroLandscape override={override} weather={weather} />
           <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
-            <WeatherChip weather={weather} />
+            <div className="flex items-start gap-2">
+              <Gear onOpen={openPanel} />
+              <WeatherChip
+                weather={weather}
+                playingHour={play.status === "playing" ? play.hour : null}
+                onOpen={openPanel}
+                onBackToLive={() => dispatch({ type: "backToLive" })}
+              />
+            </div>
             <div className="flex gap-2">
               <LanguageToggle />
               <ThemeToggle />
@@ -105,6 +133,11 @@ function Home() {
         <Chat />
       </main>
       <SiteFooter className="lg:col-start-2 lg:col-end-4 lg:px-0" />
+      <SkyPanel
+        open={panel.open}
+        position={panel.position}
+        onClose={() => setPanel((current) => ({ ...current, open: false }))}
+      />
     </div>
   );
 }

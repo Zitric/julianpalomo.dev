@@ -1,19 +1,23 @@
 import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import { rememberChoice } from "../../lib/cookie";
 import type { Locale } from "../../lib/i18n/locale";
+import { playTheme } from "../../lib/scene/play";
 import { resolveTheme, THEME_COOKIE, type Theme } from "../../lib/theme";
 import { useNow } from "../clock/Clock";
+import { usePlay } from "../play/Play";
 
 /**
- * A theme change in progress: the visitor pressed the toggle, or Glasgow's
- * dusk or dawn arrived. A new object on every change, so a second press
- * restarts the timer that ends it.
+ * A theme change in progress: the visitor pressed the toggle, Glasgow's dusk
+ * or dawn arrived, or the gear's panel moved the sky across dusk or dawn. A
+ * new object on every change, so a second press restarts the timer that ends
+ * it. Only "toggle" runs the landscape's sunset or sunrise: with the panel,
+ * the scene already follows the slider.
  */
-type ThemeChange = { kind: "toggle" | "auto" };
+type ThemeChange = { kind: "toggle" | "auto" | "panel" };
 
 // How long <html data-theme-change> stays set: the UI colours' transition in
 // src/styles/app.css. Keep the two in step.
-const CHANGE_MS: Record<ThemeChange["kind"], number> = { toggle: 600, auto: 6000 };
+const CHANGE_MS: Record<ThemeChange["kind"], number> = { toggle: 600, auto: 6000, panel: 600 };
 
 type ThemeState = {
   /** The theme on screen. */
@@ -24,6 +28,8 @@ type ThemeState = {
   glasgowTheme: Theme;
   /** The change running now, if any. The landscape's sunset and sunrise start from it. */
   change: ThemeChange | null;
+  /** The theme follows the visitor's own sky from the gear, not their choice or Glasgow. */
+  fromToy: boolean;
   toggle: () => void;
 };
 
@@ -43,15 +49,22 @@ export function ThemeDocument({ initialChoice, lang, children }: Props) {
   const now = useNow();
   const [choice, setChoice] = useState(initialChoice);
   const [change, setChange] = useState<ThemeChange | null>(null);
+  const { state: play, dispatch } = usePlay();
   const glasgowTheme = resolveTheme({ choice: null, now });
-  const theme = choice ?? glasgowTheme;
+  // While playing, the visitor's own sky sets the theme (night is dark), and
+  // the stored choice is left alone for when they go back to live.
+  const toyTheme = playTheme(play, now);
+  const theme = toyTheme ?? choice ?? glasgowTheme;
 
-  // Glasgow's dusk or dawn arrived with the page open: changes the theme by
-  // itself when the visitor hasn't chosen one.
-  const [previousGlasgowTheme, setPreviousGlasgowTheme] = useState(glasgowTheme);
-  if (previousGlasgowTheme !== glasgowTheme) {
-    setPreviousGlasgowTheme(glasgowTheme);
-    if (choice === null) setChange({ kind: "auto" });
+  // The theme changed without a press of the toggle: Glasgow's dusk or dawn
+  // arrived while it follows Glasgow, or the panel moved the sky (or the
+  // visitor left it). The toggle marks its own change.
+  const [previous, setPrevious] = useState({ theme, toy: toyTheme !== null });
+  const [toggled, setToggled] = useState(false);
+  if (previous.theme !== theme) {
+    setPrevious({ theme, toy: toyTheme !== null });
+    if (toggled) setToggled(false);
+    else setChange({ kind: toyTheme !== null || previous.toy ? "panel" : "auto" });
   }
 
   useEffect(() => {
@@ -62,13 +75,21 @@ export function ThemeDocument({ initialChoice, lang, children }: Props) {
 
   const toggle = () => {
     const next = theme === "dark" ? "light" : "dark";
-    rememberChoice(THEME_COOKIE, next);
-    setChoice(next);
+    // While playing, the toggle moves the visitor's time instead of storing a
+    // choice (13:00 for light, the night for dark).
+    if (play.status === "playing") dispatch({ type: "themeToggled", to: next, now });
+    else {
+      rememberChoice(THEME_COOKIE, next);
+      setChoice(next);
+    }
     setChange({ kind: "toggle" });
+    setToggled(true);
   };
 
   return (
-    <ThemeContext value={{ theme, choice, glasgowTheme, change, toggle }}>
+    <ThemeContext
+      value={{ theme, choice, glasgowTheme, change, fromToy: toyTheme !== null, toggle }}
+    >
       <html lang={lang} data-theme={theme} data-theme-change={change?.kind}>
         {children}
       </html>

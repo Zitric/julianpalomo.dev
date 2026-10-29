@@ -22,6 +22,16 @@
   --glass: rgb(246 248 243 / 86%);
   --danger: #b7191c;
   --live: #e5484d;
+  --track-night: #0e1a24;
+  --track-dawn: #f5c49a;
+  --track-day: #cfe4ec;
+  --track-dusk: #a9b7cf;
+  --track-clear: #cfe4ec;
+  --track-overcast: #8a969c;
+  --track-dry: #e6eef0;
+  --track-wet: #2e4a6b;
+  --track-calm: #e6f0e6;
+  --track-gale: #2b6f4a;
 }
 
 :root[data-theme="dark"] {
@@ -40,6 +50,16 @@
   --glass: rgb(14 21 17 / 80%);
   --danger: #fd7468;
   --live: #e5484d;
+  --track-night: #0e1a24;
+  --track-dawn: #f5c49a;
+  --track-day: #cfe4ec;
+  --track-dusk: #a9b7cf;
+  --track-clear: #cfe4ec;
+  --track-overcast: #8a969c;
+  --track-dry: #e6eef0;
+  --track-wet: #2e4a6b;
+  --track-calm: #e6f0e6;
+  --track-gale: #2b6f4a;
 }
 
 /*
@@ -131,6 +151,57 @@
   initial-value: transparent;
 }
 
+@property --track-night {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --track-dawn {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --track-day {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --track-dusk {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --track-clear {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --track-overcast {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --track-dry {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --track-wet {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --track-calm {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --track-gale {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
 /* Exposes every token as a Tailwind colour: bg-background, text-accent, border-field-border and so on. */
 @theme inline {
   --color-background: var(--background);
@@ -147,4 +218,14 @@
   --color-glass: var(--glass);
   --color-danger: var(--danger);
   --color-live: var(--live);
+  --color-track-night: var(--track-night);
+  --color-track-dawn: var(--track-dawn);
+  --color-track-day: var(--track-day);
+  --color-track-dusk: var(--track-dusk);
+  --color-track-clear: var(--track-clear);
+  --color-track-overcast: var(--track-overcast);
+  --color-track-dry: var(--track-dry);
+  --color-track-wet: var(--track-wet);
+  --color-track-calm: var(--track-calm);
+  --color-track-gale: var(--track-gale);
 }
