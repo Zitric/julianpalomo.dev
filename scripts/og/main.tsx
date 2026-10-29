@@ -22,9 +22,9 @@ import type { SkyState } from "../../src/lib/scene/sky-state";
 
 // A fixed day in the middle of autumn, so the image is the same every run.
 const DAY = Date.UTC(2026, 9, 15);
-// Golden hour: the first afternoon minute the sun is 1° or lower over Glasgow,
-// where the sky is at its most golden (the table in DESIGN.md section 7).
-const AT = goldenMinute();
+// A warm autumn afternoon: the first minute the sun sinks to 8° over Glasgow
+// (17:10), low enough to warm the light, high enough to keep the sky bright.
+const AT = afternoonMinute();
 const SKY: SkyState = {
   season: "autumn",
   at: new Date(AT),
@@ -35,12 +35,12 @@ const SKY: SkyState = {
   haar: false,
 };
 
-function goldenMinute(): number {
+function afternoonMinute(): number {
   for (let minute = 12 * 60; minute < 21 * 60; minute++) {
     const at = DAY + minute * 60_000;
-    if (glasgowElevation(at) <= 1) return at;
+    if (glasgowElevation(at) <= 8) return at;
   }
-  throw new Error("No golden hour found on the card's day");
+  throw new Error("The sun never sinks to 8° on the card's day");
 }
 
 /** A language's preview card: the glen, the portrait, the name and role, and the cow asking. */

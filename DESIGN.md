@@ -667,7 +667,8 @@ centred and the background left exactly as it is: no blur, no fade.
 
 - **The link preview** (`og:image`) is a 1200 × 630 card per language,
   `public/og/en.png` and `public/og/es.png`. It shows the landscape, still, on
-  an autumn evening at golden hour with a clear sky and the herd; the
+  a warm autumn afternoon (the sun low, at 8°, at 17:10 on 15 October) with a
+  clear sky and the herd; the
   portrait with its ring; the name and the role from `src/lib/site.ts`; and
   the assistant cow with a speech bubble: "Ask me about Julian's experience"
   ("Pregúntame por la experiencia de Julián"). Light theme only: previews
