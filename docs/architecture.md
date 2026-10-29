@@ -71,7 +71,7 @@ tool result in the history.
 today's counts from D1 (the tables are in
 [`migrations/`](../migrations/0001_daily_limits.sql)) and
 [`src/lib/bot/limits.ts`](../src/lib/bot/limits.ts) decides: 30 questions per
-visitor a day, and $1.00 of estimated spend a day across everyone. A visitor is
+visitor a day, and $3.00 of estimated spend a day across everyone. A visitor is
 a SHA-256 hash of their IP, the UTC date and a secret salt, so no IP is stored
 and nobody can be followed from one day to the next. For an IPv6 address the
 hash takes its /64 instead, since one person can rotate through all of it. Over a limit, the endpoint
