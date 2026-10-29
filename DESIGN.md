@@ -754,8 +754,8 @@ centred and the background left exactly as it is: no blur, no fade.
   element, including on top of the landscape.
 - Everything works with the keyboard alone; dialogs and the gear's panel trap
   focus while open and give it back when they close.
-- The landscape, the particles, the herd and the earlier cows next to
-  messages are `aria-hidden`; the latest cow is the "Pat the cow" button.
+- The landscape, the particles and the herd are `aria-hidden`; the
+  assistant's one cow, on the chat's edge, is the "Pat the cow" button.
   The weather chip has an accessible name ("Weather in Glasgow:
   9°C, drizzle. Play with the sky", and while playing "Your sky, 15:00. Back
   to live Glasgow").

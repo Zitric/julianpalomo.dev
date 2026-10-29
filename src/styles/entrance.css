@@ -10,7 +10,9 @@
  *
  * Keyframes name only where they start, so each part ends as it is without
  * the entrance: a haar that's off stays off. Only transform and opacity
- * animate, and nothing here applies with reduced motion.
+ * animate, and nothing here applies with reduced motion. The one exception
+ * is entrance-clock, which moves an unused custom property and draws
+ * nothing: Entrance.tsx only reads its time.
  */
 
 @media (prefers-reduced-motion: no-preference) {
