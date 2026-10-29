@@ -21,13 +21,18 @@ import { type ChatErrorCode, chatErrorBody } from "./chat-error";
 import type { ChatUIMessage } from "./chat-message";
 import { parseCitations, type Source } from "./citations";
 import { createDemoModel } from "./demo";
-import { checkLimits, estimateCostMicroUsd, MAX_VISITOR_TEXT, type TokenUsage } from "./limits";
+import {
+  checkLimits,
+  estimateCostMicroUsd,
+  MAX_MESSAGES,
+  MAX_VISITOR_TEXT,
+  type TokenUsage,
+} from "./limits";
 import { anthropicOptions, createBotModel, MAX_OUTPUT_TOKENS, MAX_STEPS } from "./model";
 import { SYSTEM_PROMPT } from "./prompt";
 import { buildTools } from "./tools";
 import { type D1Like, d1UsageStore, isD1, type UsageStore, utcDay, visitorHash } from "./usage";
 
-const MAX_MESSAGES = 20;
 // The most text one earlier answer may hold. Like MAX_VISITOR_TEXT it counts a
 // message's text parts together, so splitting a message can't get around
 // either limit; with 20 messages a request carries at most about 110,000

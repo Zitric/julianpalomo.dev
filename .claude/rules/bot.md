@@ -53,6 +53,7 @@ must keep doing; the ADRs say why.
 ## The chat UI
 
 - `src/components/chat/` renders the answer with `parseCitations` and shows a chip only for an id that is both cited in the text and in the answer's `data-sources` part. The pure logic lives in `chat-view.ts`, with unit tests.
+- **The chat sends only the latest `MAX_MESSAGES` messages**, trimmed by `latestMessages` in `chat-view.ts` so they start with a question, through `DefaultChatTransport`'s `prepareSendMessagesRequest` in `Chat.tsx`. The screen keeps the whole conversation. `MAX_MESSAGES` lives in `limits.ts`, the one constant the transport and `chat.ts`'s validation share; the endpoint still rejects longer requests, which only a forged one can be.
 - Code the browser imports must not pull in server code or `claims.json`: share values through client-safe modules (`limits.ts`, `chat-error.ts`, `chat-message.ts`, `../claim-id.ts`), never through `chat.ts` or `claims.ts`.
 
 ## Where things live
