@@ -16,11 +16,11 @@ import {
   outOfQuestions,
   remainingSuggestions,
   shouldFollow,
-  toolStatus,
 } from "./chat-view";
 import { Greeting } from "./Greeting";
 import { MessageList } from "./MessageList";
 import { Suggestions } from "./Suggestions";
+import { useReveal } from "./use-reveal";
 
 // Posts to /api/chat, the default endpoint, with the body the transport sends
 // by default except that only the latest MAX_MESSAGES messages go, so a long
@@ -41,16 +41,27 @@ export function Chat({ onStarted }: { onStarted?: () => void }) {
   const [composerFocused, setComposerFocused] = useState(false);
   const [stopped, setStopped] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const busy = status === "submitted" || status === "streaming";
+  const requesting = status === "submitted" || status === "streaming";
   const last = messages.at(-1);
-  const streamingId = status === "streaming" && last?.role === "assistant" ? last.id : undefined;
-  const streamingParts = streamingId === undefined ? [] : (last?.parts ?? []);
+  const latestAnswer = messages.filter((message) => message.role === "assistant").at(-1);
+  const latestText = latestAnswer ? messageText(latestAnswer.parts) : "";
+
+  // The latest answer types itself out from what has arrived; with reduced
+  // motion, after Stop or after an error, all of it shows at once.
+  const reveal = useReveal({
+    id: latestAnswer?.id,
+    text: latestText,
+    streaming: status === "streaming" && last?.role === "assistant",
+    instant: stopped || status === "error" || (latestAnswer !== undefined && reducedMotion()),
+  });
+  // Stop stays until the answer has finished typing, so it can show the rest at once.
+  const busy = requesting || reveal.revealing;
 
   const cowSlot = liveCowSlot(status, messages);
   const cowState = useCowState({
     status,
-    answerHasText: messageText(streamingParts).length > 0,
-    toolRunning: toolStatus(streamingParts, locale) !== undefined,
+    answerHasText: reveal.revealing && reveal.shown > 0,
+    revealing: reveal.revealing,
     stopped,
     composer: { hasText: input.length > 0, focused: composerFocused },
   });
@@ -72,27 +83,31 @@ export function Chat({ onStarted }: { onStarted?: () => void }) {
   }
 
   // For screen readers: "Answering…" when an answer starts, then the whole
-  // answer once, as plain text, when it ends; never piece by piece.
+  // answer once, as plain text, when it has finished typing; never piece by
+  // piece.
   const [announcement, setAnnouncement] = useState("");
   const [seenStatus, setSeenStatus] = useState(status);
   if (status !== seenStatus) {
     setSeenStatus(status);
     if (status === "submitted") setAnnouncement(t(locale, "answering"));
-    if (status === "ready" && last?.role === "assistant") {
-      setAnnouncement(answerAsText(messageText(last.parts), [], t(locale, "sourceNames"), ""));
+  }
+  const [wasRevealing, setWasRevealing] = useState(false);
+  if (reveal.revealing !== wasRevealing) {
+    setWasRevealing(reveal.revealing);
+    if (!reveal.revealing) {
+      setAnnouncement(answerAsText(latestText, [], t(locale, "sourceNames"), ""));
     }
   }
 
-  // Follow a streaming answer only from the bottom of the page; a visitor who
+  // Follow the typing only from the bottom of the page; a visitor who
   // scrolled up to read gets a "New answer ↓" pill instead.
   const atBottom = useAtBottom();
-  const streamingLength = messageText(streamingParts).length;
   useEffect(() => {
-    if (streamingLength > 0 && shouldFollow({ atBottom, streaming: streamingId !== undefined })) {
+    if (reveal.shown > 0 && shouldFollow({ atBottom, streaming: reveal.revealing })) {
       scrollToBottom();
     }
-  }, [streamingLength, atBottom, streamingId]);
-  const showNewAnswer = streamingId !== undefined && !atBottom;
+  }, [reveal.shown, atBottom, reveal.revealing]);
+  const showNewAnswer = reveal.revealing && !atBottom;
 
   const asked = messages.filter((m) => m.role === "user").map((m) => messageText(m.parts));
   const keepAsking =
@@ -102,7 +117,7 @@ export function Chat({ onStarted }: { onStarted?: () => void }) {
 
   function stopAnswer() {
     setStopped(true);
-    void stop();
+    if (requesting) void stop();
     inputRef.current?.focus();
   }
 
@@ -123,7 +138,7 @@ export function Chat({ onStarted }: { onStarted?: () => void }) {
         <MessageList
           messages={messages}
           flight={flight}
-          streamingId={streamingId}
+          typing={reveal.revealing ? { id: latestAnswer?.id, shown: reveal.shown } : undefined}
           cowSlot={cowSlot}
           cowState={cowState}
         />
@@ -162,6 +177,8 @@ export function Chat({ onStarted }: { onStarted?: () => void }) {
     </section>
   );
 }
+
+const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function scrollToBottom() {
   window.scrollTo({ top: document.documentElement.scrollHeight });

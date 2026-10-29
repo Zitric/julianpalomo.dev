@@ -35,6 +35,37 @@ test("a citation opens its claim with when Julian confirmed it", async ({ page }
   await expect(answer).not.toContainText("Confirmed by Julian");
 });
 
+test("the answer types itself out, and its chips rise only after the last word", async ({
+  page,
+}) => {
+  await ask(page, "What has Julian worked on?");
+  // Each animation frame: how long the answer's text is, and whether its chips are there.
+  const frames = await page.evaluate(
+    () =>
+      new Promise<{ length: number; chips: boolean }[]>((resolve) => {
+        const seen: { length: number; chips: boolean }[] = [];
+        const sample = () => {
+          const answer = document.querySelector('article[aria-label="Answer"]');
+          const length =
+            answer?.querySelector('[data-testid="answer-text"]')?.textContent?.length ?? 0;
+          const chips = answer?.querySelector('ol[aria-label="Sources"]') != null;
+          seen.push({ length, chips });
+          if (chips || seen.length > 1200) resolve(seen);
+          else requestAnimationFrame(sample);
+        };
+        sample();
+      }),
+  );
+  const lengths = frames.filter((frame) => !frame.chips).map((frame) => frame.length);
+  expect(new Set(lengths).size).toBeGreaterThan(5);
+  const final = frames.at(-1);
+  expect(final?.chips).toBe(true);
+  // The chips came with or after the last word, never while text was still typing.
+  expect(Math.max(...lengths)).toBeLessThanOrEqual(final?.length ?? 0);
+  const text = await page.getByTestId("answer-text").textContent();
+  expect(final?.length).toBe(text?.length);
+});
+
 test("Copy puts the answer and its sources on the clipboard", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await ask(page, "What has Julian worked on?");

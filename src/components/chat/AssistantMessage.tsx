@@ -13,27 +13,37 @@ import {
   toolStatus,
 } from "./chat-view";
 
-type Props = { message: ChatUIMessage; streaming: boolean };
+type Props = {
+  message: ChatUIMessage;
+  /** While the answer types itself out, how much of its text is on screen; undefined once it's done. */
+  typed: number | undefined;
+};
 
 /**
- * One answer (DESIGN.md section 10): its text, fading in piece by piece while
- * it streams; citations as numbered buttons; when it ends, the numbered
- * source chips rising in and a Copy button. A number or a chip opens its
- * claim, exactly as Julian confirmed it, under the answer.
+ * One answer (DESIGN.md section 10): its text, typing itself out word by
+ * word, each word fading in; citations as numbered buttons; once the last
+ * word is on screen, the numbered source chips rising in and a Copy button.
+ * A number or a chip opens its claim, exactly as Julian confirmed it, under
+ * the answer.
  */
-export function AssistantMessage({ message, streaming }: Props) {
+export function AssistantMessage({ message, typed }: Props) {
   const locale = useLocale();
   const claimId = useId();
   const names = t(locale, "sourceNames");
+  const streaming = typed !== undefined;
   const text = messageText(message.parts);
   const sources = message.parts.find((part) => part.type === "data-sources")?.data.sources ?? [];
-  const { parts, chips, length } = renderAnswer(text, sources, streaming);
+  const { parts, chips, length } = renderAnswer(
+    streaming ? text.slice(0, typed) : text,
+    sources,
+    streaming,
+  );
   const status = streaming ? toolStatus(message.parts, locale) : undefined;
   const isDemo = message.metadata?.demo === true;
 
-  // Where the text had got to on each render while it streamed. Each new
-  // stretch mounts as its own span and fades in; spans already on screen keep
-  // their keys and never animate again.
+  // Where the text had got to on each render while it typed itself out. Each
+  // new word mounts as its own span and fades in; spans already on screen
+  // keep their keys and never animate again.
   const [boundaries, setBoundaries] = useState<number[]>([]);
   if (streaming && length > (boundaries.at(-1) ?? 0)) setBoundaries([...boundaries, length]);
   const chunks = splitIntoChunks(parts, boundaries);
@@ -58,7 +68,7 @@ export function AssistantMessage({ message, streaming }: Props) {
         </p>
       )}
       {status && <StatusPill text={status} />}
-      <p className="whitespace-pre-wrap break-words">
+      <p className="whitespace-pre-wrap break-words" data-testid="answer-text">
         {chunks.map((chunk) =>
           chunk.type === "text" ? (
             <span key={chunk.key} className={fades ? "answer-chunk" : undefined}>

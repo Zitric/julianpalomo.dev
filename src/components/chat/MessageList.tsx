@@ -9,7 +9,8 @@ import { messageText } from "./chat-view";
 
 type Props = {
   messages: ChatUIMessage[];
-  streamingId: string | undefined;
+  /** The answer still typing itself out, and how much of its text is on screen. */
+  typing: { id: string | undefined; shown: number } | undefined;
   /** Where the one animated cow is, and what it's doing. */
   cowSlot: CowSlot;
   cowState: CowState;
@@ -20,14 +21,7 @@ type Props = {
 };
 
 /** The conversation in order. */
-export function MessageList({
-  messages,
-  streamingId,
-  cowSlot,
-  cowState,
-  flight,
-  onBubbleShown,
-}: Props) {
+export function MessageList({ messages, typing, cowSlot, cowState, flight, onBubbleShown }: Props) {
   const locale = useLocale();
   const newestQuestion = messages.filter((message) => message.role === "user").at(-1)?.id;
   return (
@@ -50,7 +44,10 @@ export function MessageList({
         return (
           <li key={message.id} className="flex items-end gap-2">
             <AssistantCow state={live ? cowState : "idle"} size={58} animated={live} />
-            <AssistantMessage message={message} streaming={message.id === streamingId} />
+            <AssistantMessage
+              message={message}
+              typed={typing?.id === message.id ? typing.shown : undefined}
+            />
           </li>
         );
       })}

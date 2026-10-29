@@ -9,10 +9,10 @@ export type CowState = "idle" | "listening" | "thinking" | "talking" | "satisfie
 /** Everything in the chat the cow reacts to. */
 export type CowSituation = {
   status: ChatStatus;
-  /** The streaming answer has visible text. */
+  /** The latest answer has typed at least one word onto the screen. */
   answerHasText: boolean;
-  /** One of the streaming answer's tools hasn't returned yet. */
-  toolRunning: boolean;
+  /** The latest answer is still typing itself out, even if its stream has ended. */
+  revealing: boolean;
   /** The visitor pressed Stop on the last answer. */
   stopped: boolean;
   composer: { hasText: boolean; focused: boolean };
@@ -22,20 +22,23 @@ export type CowSituation = {
 export const LICK_MS = 1600;
 
 /**
- * The cow's next state. `previous` is what it showed last, so an answer that
- * just finished plays `satisfied` once; the caller ends `satisfied` after
+ * The cow's next state. It follows the typing, not the stream: it talks from
+ * the first word on screen until the last, through a tool call or a pause in
+ * the stream, and an answer that just finished typing plays `satisfied` once.
+ * `previous` is what it showed last; the caller ends `satisfied` after
  * LICK_MS. Applying it twice to the same situation gives the same state.
  */
 export function nextCowState(previous: CowState, situation: CowSituation): CowState {
-  const { status, answerHasText, toolRunning, stopped, composer } = situation;
+  const { status, answerHasText, revealing, stopped, composer } = situation;
   switch (status) {
     case "error":
       return "sorry";
     case "submitted":
       return "thinking";
     case "streaming":
-      return toolRunning || !answerHasText ? "thinking" : "talking";
+      return answerHasText ? "talking" : "thinking";
     case "ready": {
+      if (revealing && !stopped) return answerHasText ? "talking" : "thinking";
       const listening = composer.hasText && composer.focused;
       const justAnswered = previous === "thinking" || previous === "talking";
       if (!stopped && !listening && (justAnswered || previous === "satisfied")) {
