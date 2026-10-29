@@ -6,9 +6,9 @@ import { useLocale } from "../i18n/useLocale";
 
 type Props = {
   state: CowState;
-  /** Width in px: 66 next to the greeting, 58 next to answers. */
-  size: 66 | 58;
-  /** Only the latest cow animates; the others are still and hidden from screen readers. */
+  /** Width in px: 132 on the chat's edge, 66 on the link preview card and the icons. */
+  size: 132 | 66;
+  /** The chat's cow animates; the link preview card's and the icons' are still and hidden. */
   animated: boolean;
   /** Called on every pat; the caller decides whether to moo. */
   onMoo?: () => void;

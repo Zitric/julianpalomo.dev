@@ -13,22 +13,25 @@ test.beforeEach(async ({ page, context, baseURL }) => {
   );
 });
 
+// The gear spins in 2s after the entrance; these tests get the short one, about 2s.
+const GEAR_WAIT = 6000;
+
 // Exact: the chip's own name ends with "Play with the sky" too.
 const gear = (page: Page) => page.getByRole("button", { name: "Play with the sky", exact: true });
 const panel = (page: Page) => page.getByRole("dialog", { name: "Play with the sky" });
 
-test("the gear isn't there at first and spins in after 2s", async ({ page }) => {
+test("the gear isn't there at first and spins in 2s after the entrance", async ({ page }) => {
   await page.goto("/");
   await expect(gear(page)).toHaveCount(0);
-  await expect(gear(page)).toBeVisible({ timeout: 4000 });
+  await expect(gear(page)).toBeVisible({ timeout: GEAR_WAIT });
 });
 
 test("the bubble shows on a first visit only", async ({ page }) => {
   await page.goto("/");
   const bubble = page.getByText("Psst… you can change the weather");
-  await expect(bubble).toBeVisible({ timeout: 4000 });
+  await expect(bubble).toBeVisible({ timeout: GEAR_WAIT });
   await page.reload();
-  await expect(gear(page)).toBeVisible({ timeout: 4000 });
+  await expect(gear(page)).toBeVisible({ timeout: GEAR_WAIT });
   await expect(bubble).toHaveCount(0);
 });
 
@@ -85,7 +88,7 @@ test("Escape closes the panel and gives focus back to the gear", async ({ page }
 
 test("the whole panel works with the keyboard alone", async ({ page }) => {
   await page.goto("/");
-  await expect(gear(page)).toBeVisible({ timeout: 4000 });
+  await expect(gear(page)).toBeVisible({ timeout: GEAR_WAIT });
   await gear(page).focus();
   await page.keyboard.press("Enter");
   await expect(panel(page)).toBeVisible();

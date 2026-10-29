@@ -10,11 +10,6 @@ function liveCow(page: Page) {
   return page.getByRole("button", { name: "Pat the cow" });
 }
 
-/** Every cow except the live one: they render as plain, hidden drawings. */
-function stillCows(page: Page) {
-  return page.locator("[data-state]:not(button)");
-}
-
 function runningAnimations(cow: Locator) {
   return cow.evaluate((element) => element.getAnimations({ subtree: true }).length);
 }
@@ -60,7 +55,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/");
 });
 
-test("the greeting shows the cow, idle and moving", async ({ page }) => {
+test("the cow rests on the chat's edge, idle and moving", async ({ page }) => {
   await expect(page.getByText("Hi! Ask me about Julian's experience.")).toBeVisible();
   await expect(liveCow(page)).toBeVisible();
   await expect(liveCow(page)).toHaveAttribute("data-state", "idle");
@@ -86,7 +81,9 @@ test("the cow thinks, talks while the answer streams, licks once, then idles", a
   ]);
 });
 
-test("only the latest cow moves; earlier ones are still and hidden", async ({ page }) => {
+test("the cow on the chat's edge is the only one, through the whole conversation", async ({
+  page,
+}) => {
   const answers = page.getByRole("article", { name: "Answer" });
   await ask(page, "First question");
   await expect(answers.nth(0)).toContainText(DEMO_ANSWER_INTRO);
@@ -94,14 +91,7 @@ test("only the latest cow moves; earlier ones are still and hidden", async ({ pa
   await expect(answers.nth(1)).toContainText(DEMO_ANSWER_INTRO);
 
   await expect(liveCow(page)).toHaveCount(1);
-  const still = stillCows(page);
-  // The greeting's cow and the first answer's.
-  await expect(still).toHaveCount(2);
-  for (const cow of await still.all()) {
-    await expect(cow).toHaveAttribute("aria-hidden", "true");
-    await expect(cow).toHaveAttribute("data-state", "idle");
-    expect(await runningAnimations(cow)).toBe(0);
-  }
+  await expect(page.locator(".cow")).toHaveCount(1);
 });
 
 test("hovering the cow tilts it and says Moo!", async ({ page }) => {

@@ -1,0 +1,131 @@
+import { expect, type Locator, type Page, test } from "@playwright/test";
+import { en } from "../../src/lib/i18n/en";
+
+// The page's entrance (DESIGN.md section 11). Every other spec is a later
+// visit (playwright.config.ts sets the cookie); these start without it.
+test.use({ storageState: { cookies: [], origins: [] } });
+
+const chat = (page: Page) => page.getByRole("region", { name: "Chat" });
+const greeting = (page: Page) => chat(page).locator("p").filter({ hasText: en.greeting }).first();
+const suggestions = (page: Page) => page.getByRole("list", { name: "Suggested questions" });
+const cow = (page: Page) => page.getByRole("button", { name: "Pat the cow" });
+const hero = (page: Page) => page.locator("svg.landscape");
+const playing = (page: Page) => page.locator("[data-entrance]");
+
+/** The opacity that shows on screen: an element's own, times its ancestors'. */
+function shownOpacity(locator: Locator): Promise<number> {
+  return locator.evaluate((element) => {
+    let opacity = 1;
+    for (let at: Element | null = element; at; at = at.parentElement) {
+      opacity *= Number(getComputedStyle(at).opacity);
+    }
+    return opacity;
+  });
+}
+
+async function centre(locator: Locator) {
+  const box = await locator.boundingBox();
+  if (!box) throw new Error("not on screen");
+  return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+}
+
+/** Whether the cow's middle is inside the hero, rather than on the chat's edge below it. */
+async function cowInHero(page: Page): Promise<boolean> {
+  const { y } = await centre(cow(page));
+  const box = await hero(page).boundingBox();
+  return box !== null && y < box.y + box.height;
+}
+
+test("a first visit introduces the page in order, the chat last", async ({ page }) => {
+  await page.goto("/");
+  await expect(playing(page)).toHaveAttribute("data-entrance", "full");
+  expect(await shownOpacity(greeting(page))).toBe(0);
+  expect(await shownOpacity(suggestions(page))).toBe(0);
+
+  // The cow comes in big, in the hero, and says hello there.
+  const hello = page.getByText(en.heroCowHello);
+  await expect(hello).toBeVisible({ timeout: 5000 });
+  await expect(hello).toHaveAttribute("aria-hidden", "true");
+  expect(await cowInHero(page)).toBe(true);
+  expect(await shownOpacity(greeting(page))).toBe(0);
+
+  // Then it flies to the chat's edge, the greeting types itself out, the
+  // suggestions rise, and the entrance is over.
+  await expect(playing(page)).toHaveCount(0, { timeout: 10_000 });
+  expect(await cowInHero(page)).toBe(false);
+  await expect(chat(page).getByText(en.greeting, { exact: true })).toBeVisible();
+  expect(await shownOpacity(greeting(page))).toBe(1);
+  expect(await shownOpacity(suggestions(page))).toBe(1);
+  await expect(hello).toHaveCount(0);
+});
+
+test("a tap shows everything at once", async ({ page }) => {
+  await page.goto("/");
+  // Retried, because a tap before hydration doesn't end it yet.
+  await expect(async () => {
+    await page.getByRole("heading", { level: 1 }).click();
+    await expect(playing(page)).toHaveCount(0, { timeout: 300 });
+  }).toPass({ timeout: 2000 });
+
+  expect(await shownOpacity(greeting(page))).toBe(1);
+  expect(await shownOpacity(suggestions(page))).toBe(1);
+  expect(await shownOpacity(page.getByLabel("Your question"))).toBe(1);
+  expect(await shownOpacity(cow(page))).toBe(1);
+  expect(await cowInHero(page)).toBe(false);
+});
+
+test("a later visit plays the short entrance, with the cow already on the edge", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.reload();
+  await expect(playing(page)).toHaveAttribute("data-entrance", "short");
+  expect(await cowInHero(page)).toBe(false);
+  // About 1s from the first paint, with room for a busy runner to paint late.
+  await expect.poll(() => shownOpacity(greeting(page)), { timeout: 2000 }).toBe(1);
+  expect(await cowInHero(page)).toBe(false);
+  await expect(page.getByText(en.heroCowHello)).toHaveCount(0);
+  await expect(playing(page)).toHaveCount(0, { timeout: 3000 });
+});
+
+test("the composer can be reached with the keyboard during the entrance, and shows", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.waitForLoadState("networkidle");
+  const box = page.getByLabel("Your question");
+  // The hero's buttons, the cow and the suggestions come first.
+  for (let presses = 0; presses < 15; presses++) {
+    await page.keyboard.press("Tab");
+    if (await box.evaluate((element) => element === document.activeElement)) break;
+  }
+  await expect(box).toBeFocused();
+  await expect(playing(page)).toHaveCount(0);
+  expect(await shownOpacity(box)).toBe(1);
+});
+
+test.describe("with reduced motion", () => {
+  test.use({ reducedMotion: "reduce" });
+
+  test("everything shows at once", async ({ page }) => {
+    await page.goto("/");
+    expect(await shownOpacity(greeting(page))).toBe(1);
+    expect(await shownOpacity(suggestions(page))).toBe(1);
+    expect(await shownOpacity(cow(page))).toBe(1);
+    expect(await cowInHero(page)).toBe(false);
+  });
+});
+
+test.describe("without JavaScript", () => {
+  test.use({ javaScriptEnabled: false });
+
+  test("everything ends visible within about 6s, the cow on the chat's edge", async ({ page }) => {
+    await page.goto("/");
+    expect(await shownOpacity(greeting(page))).toBe(0);
+    await expect.poll(() => shownOpacity(cow(page)), { timeout: 7000 }).toBe(1);
+    await expect.poll(() => shownOpacity(suggestions(page)), { timeout: 1000 }).toBe(1);
+    expect(await shownOpacity(greeting(page))).toBe(1);
+    expect(await shownOpacity(page.getByLabel("Your question"))).toBe(1);
+    expect(await cowInHero(page)).toBe(false);
+  });
+});

@@ -29,6 +29,11 @@ export const en = {
   themeToLight: "Switch to light theme",
 
   chatLabel: "Chat",
+  // The heading beside the cow on the chat's edge, and its line.
+  chatHeading: "Ask me about Julian",
+  chatReady: "Ready when you are",
+  // The cow's hello in the hero, during a first visit's entrance.
+  heroCowHello: "Hi! I'm the Highland cow.",
   greeting:
     "Hi! Ask me about Julian's experience. I only answer with facts he has confirmed, and I show where each one comes from.",
   suggestionsLabel: "Suggested questions",

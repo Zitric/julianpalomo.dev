@@ -36,7 +36,11 @@ closed, the live site shows only the parts already built.
 
 - **Warm and playful, never in the way.** The landscape, the cow and the
   sounds are there to make people smile. The content (who Julian is, the chat,
-  the CV) always comes first, loads first and never waits for decoration.
+  the CV) always comes first and loads first. On a first visit an entrance
+  introduces the page in order (who Julian is, the glen, the cow, then the
+  chat), and any tap, key or scroll ends it at once; later visits that week
+  get a short version, about 2s, with the chat fading in at once. With
+  reduced motion the content shows at once (section 11).
 - **Alive, and true.** The landscape is Glasgow's real season, time and
   weather. When a visitor plays with it, the page says so ("Your sky"), so
   nobody thinks it's snowing in Glasgow in August.
@@ -156,11 +160,16 @@ From top to bottom:
 3. **Name, role and one line** ("Ask about my experience. Answers come only
    from facts I've confirmed, with their sources."), then **"Download CV"**
    and **"Contact"**.
-4. **The chat** (section 10): the cow's greeting, three suggested questions
-   and the composer.
+4. **The chat** (section 10). At its top, the cow (132 × 104px) rests its
+   chin on the chat's edge, like a fence, with its two front hooves over it:
+   on a phone the edge is a 3px line in `border` with rounded ends, across
+   the top of the chat. Beside the cow, bottom-aligned, "Ask me about Julian"
+   (Bricolage, 16px, `foreground`) over "Ready when you are" (13px, `muted`).
+   Under the edge, the greeting, three suggested questions and the composer.
+   The answers have no cow of their own, so their bubbles get the full width.
 
 Once the visitor sends a first question, the page scrolls so the chat fills
-the screen, with the greeting just under the bar (the chat is at least a
+the screen, with the cow on its edge just under the bar (the chat is at least a
 screen tall from then on, so there's always room to scroll it up), and a
 **compact bar** sticks to the top: the square portrait at
 34px, the name, and the sound and theme toggles, 58px tall, with a thin strip
@@ -176,7 +185,9 @@ the on-screen keyboard.
 - **Two columns** under the hero: on the left (about 300px) the portrait at
   120 × 150px overlapping the hero, the name, the role, the line and the two
   buttons; on the right, the chat in a card with a 2px `border` and a 20px
-  radius.
+  radius. The card's top border is the cow's edge: the cow sits on it, 28px
+  from its left edge, overlapping it from above, with the heading beside it,
+  so the card starts about 7.5rem lower to make room.
 - The gear's panel opens as a popover under the gear (section 8).
 
 ### Between the two
@@ -431,7 +442,8 @@ feet on `y = 0`).
 A gear lets visitors play with the landscape, like the rainbow on Josh
 Comeau's blog. It's a toy, and it's honest about being one.
 
-- **The gear isn't there at first.** It spins in after 2s and pulses three
+- **The gear isn't there at first.** It spins in 2s after the page's
+  entrance ends (section 11; 2s after the page is ready with reduced motion) and pulses three
   times so it's noticed. On a first visit, a small bubble next to it says
   "Psst… you can change the weather" and goes away after 5s or on any tap;
   the site remembers it was shown.
@@ -497,15 +509,17 @@ through.
 | Sorry                | An error or the daily limit                                      | Lowers its head and stays still                                                                                           |
 | Hover (pointer only) | The pointer is over it                                           | Tilts and says "Moo!" in a small speech bubble                                                                            |
 | Tap                  | It's tapped                                                      | Licks and, if sound is on, moos softly (at most once every 3s). While it talks it only moos: a lick would cover the mouth |
-- Only the cow next to the **latest** assistant message is animated. Earlier
-  ones stay still, so a long conversation doesn't become a field of moving
-  heads. Before the first answer that's the greeting's cow; while a question
-  waits for its answer, a cow alone where the answer will appear; after an
-  error, the cow beside the message.
-- **Sizes:** 66px wide next to the greeting, 58px next to answers.
-- The earlier, still cows are decorative (`aria-hidden`). The latest cow is a
-  button labelled "Pat the cow", for the tap. The tap and hover are extras;
-  nothing depends on them.
+- **There is one cow**, 132px wide, on the chat's edge (section 5). It's the
+  greeting's cow and every answer's: no cow sits beside the greeting, an
+  answer, a question waiting for its answer or an error. It goes through
+  every state above, and rises 8px over the edge while it thinks and on
+  hover. When the edge has scrolled out of view nothing is lost: the status
+  pill and the screen-reader announcements say what is happening in words.
+- Its two front hooves are part of its drawing on the edge: two rounded
+  shapes, 17 × 11px, in its darkest brown (`strand`), 26px in from each side
+  and 17px up from its bottom.
+- It's a button labelled "Pat the cow", for the tap. The tap and hover are
+  extras; nothing depends on them.
 - With reduced motion it's a still drawing in every state.
 
 ## 10. The chat
@@ -583,14 +597,68 @@ text, in both languages, in the pull request that adds it.
 | A claim opens                           | 0.35s                                                                                                          | `ease`                                             |
 | Each word as an answer types itself out | 0.2s fade; about 60 characters a second, faster when more than about 1.5s behind                               | `ease`                                             |
 | Button press                            | 80ms                                                                                                           | `ease`                                             |
-| The gear spins in                       | 0.6s, after 2s                                                                                                 | Spring-like overshoot, then 3 pulses               |
+| The gear spins in                       | 0.6s, 2s after the entrance                                                                                    | Spring-like overshoot, then 3 pulses               |
 | Clouds cross the sky                    | 1700 units in 120–190s, over a 2900-unit loop (205–324s)                                                       | `linear`                                           |
 | Particles, before the wind              | Leaves 7–11s, petals 8–12s, rain 0.6–0.9s and snow 6–10s a fall; midges buzz in 1.2–2s, glints twinkle in 2–4s | `linear` falls; sways and twinkles `ease-in-out`   |
 | The herd's loops                        | 11s, 16s, 19s                                                                                                  | `ease-in-out`                                      |
 
+### Entrance
+
+The first look builds attention in order: who Julian is, then the glen, then
+the cow, and only then the chat. The times are from the page's first paint;
+"rise" is a small move up with a fade. Only `transform` and `opacity`
+animate.
+
+On a first visit, or the first in a week:
+
+| When                   | What                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0.08s to 0.32s         | The name, the role, the line, and "Download CV" and "Contact" rise, 80ms apart, 0.45s each. The portrait drops in at 0.1s (0.6s). The hero's buttons pop in from 0.3s, 70ms apart. They work from the start.                                                                                                                                                                                              |
+| 0.6s to about 3.9s     | The glen wakes, slowly. The sky fades in (1.05s from 0.6s). The land rises back to front: far hills from 0.68s, middle from 0.87s, near land from 1.05s, 1.5s each. The loch fades in at 1.2s, the trees grow one after another from 1.43s to 1.85s, the cottage pops at 1.73s, the haar fades in at 1.5s, the two herd groups walk in at 1.88s and 2.03s (1.8s each), and the particles fade in at 2.4s. |
+| 2.5s                   | The cow appears big in the middle of the hero, about 200px wide (at most 62% of the hero's height), scaling up from nothing with a small overshoot (0.6s). It talks.                                                                                                                                                                                                                                      |
+| 3.15s                  | A speech bubble above it says "Hi! I'm the Highland cow." for 1.7s. It's decoration, hidden from screen readers.                                                                                                                                                                                                                                                                                          |
+| 4.25s                  | It stops talking and licks once.                                                                                                                                                                                                                                                                                                                                                                          |
+| 4.3s                   | The chat's edge draws itself: the card's border fades in over 0.6s on desktop, and the phone's line grows from left to right over 0.7s.                                                                                                                                                                                                                                                                   |
+| 4.6s                   | The cow flies from the hero to its place on the edge, scaling down to 132px (0.55s, `cubic-bezier(.5, 0, .2, 1)`, `transform` only).                                                                                                                                                                                                                                                                      |
+| 5.15s, when it lands   | The chat appears: "Ask me about Julian", the greeting bubble and its row rise (0.5s). The suggestions and the composer follow 0.15s later. Until then they take their space but are invisible, so nothing shifts.                                                                                                                                                                                         |
+| 0.4s after landing     | The greeting types itself out at the answers' pace (section 10), and the cow talks until the last word.                                                                                                                                                                                                                                                                                                   |
+| When the greeting ends | The cow licks once and the three suggestions rise, 80ms apart, like source chips. The entrance is over about 1.2s later, at roughly 9s.                                                                                                                                                                                                                                                                   |
+
+On every other visit, the glen wakes quickly and the chat fades in, with no
+cow presentation. All of it is over in about 2s:
+
+| When           | What                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0s to 0.32s    | The name, the role, the line and the buttons rise as in the full entrance. The portrait drops in at 0.25s (0.6s), and the hero's buttons pop in.                                                                                                                                                                                                                                                                                                                       |
+| 0s to about 2s | The glen wakes at its quick pace. The sky fades in (0.7s), and the sun rises from 0.15s (1.1s). The land rises back to front, 1s each: far hills from 0.05s, middle from 0.18s, near land from 0.3s. The loch fades in at 0.4s (0.8s) and the clouds at 0.25s (1.2s). The trees grow from 0.55s to 0.83s (0.7s each), the cottage pops at 0.75s, the haar fades in at 0.6s, the herd groups walk in at 0.85s and 0.95s (1.2s each), and the particles fade in at 1.2s. |
+| 0.2s           | The chat fades in over 0.4s, all of it at once: the cow already on the edge, the heading, the greeting complete, the suggestions and the composer. Nothing types itself out.                                                                                                                                                                                                                                                                                           |
+
+Around both:
+
+- **Any tap, key, wheel or touch ends it at once.** Everything jumps to the
+  end state: the chat visible, the greeting complete, the suggestions shown
+  and the cow on the edge. A key that moves focus into the composer
+  therefore finds it visible.
+- **The server knows which one to play.** A cookie, set for 7 days and
+  refreshed on every visit, says a visitor has been here that week, so the
+  first HTML already has the right entrance and nothing flashes.
+- **It never leaves the page stuck.** Without JavaScript, or if it fails,
+  everything ends visible within about 6s, the cow on the edge. When
+  JavaScript starts late, the entrance carries on from the beat it has
+  reached: a cow that should already be in the hero appears there, a flight
+  that has begun is skipped, and a greeting already on screen stays whole. A
+  page opened in a background tab starts the entrance when it's first shown.
+- **The gear waits** until 2s after it ends (section 8).
+- **Screen readers** have the chat from the start: it's hidden with
+  `opacity`, never `display` or `visibility`, and the greeting's full text is
+  readable at once; only its typed words are decorative.
+- **Sound:** none here.
+
 ### Reduced motion
 
 With `prefers-reduced-motion: reduce`:
+
+- no entrance: the page appears at once;
 
 - no particles, no drifting clouds or haar, no swaying pines, no herd or cow
   animation, no bounces, no FLIP;

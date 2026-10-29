@@ -24,7 +24,11 @@ the sky on their own screen (season, time of day, clouds, rain or snow, wind
 and haar) until they go back to live Glasgow. The assistant is a
 Highland cow that greets you and follows the chat: it listens while you type,
 chews while it looks things up, talks while the answer types itself out, licks
-its lips when it's done and lowers its head when something goes wrong. The site is in
+its lips when it's done and lowers its head when something goes wrong. It rests
+on the chat's edge. On a first visit the page introduces itself in order: who I
+am, the glen waking up, then the cow, which says hello big in the hero and flies
+down to the chat; later visits that week get a 2s version, and any tap ends
+it. The site is in
 English at `/` and Spanish at `/es`: visitors in Spain get Spanish by default,
 everyone else English, and the language toggle always wins.
 

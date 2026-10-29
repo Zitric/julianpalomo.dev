@@ -126,12 +126,12 @@ test("a phone gets the compact bar after the first question", async ({ page }) =
   await expect(bar.getByRole("button", { name: /^Switch to (dark|light) theme$/ })).toBeVisible();
   expect((await bar.boundingBox())?.height).toBe(58);
   // The chat fills the screen under it: the hero, the name and the role have
-  // scrolled away, and the greeting sits just under the bar.
+  // scrolled away, and the cow on the chat's edge sits just under the bar.
   await expect(page.locator("svg.landscape")).not.toBeInViewport();
   await expect(page.getByRole("heading", { level: 1 })).not.toBeInViewport();
-  const greeting = await page.getByText(/^Hi! Ask me about Julian/).boundingBox();
-  expect(greeting?.y).toBeGreaterThanOrEqual(58);
-  expect(greeting?.y).toBeLessThanOrEqual(58 + 48);
+  const cow = await page.getByRole("button", { name: "Pat the cow" }).boundingBox();
+  expect(cow?.y).toBeGreaterThanOrEqual(58);
+  expect(cow?.y).toBeLessThanOrEqual(58 + 48);
   // The answer types itself out in view, so it's followed: no "New answer ↓"
   // at any point while it types (checked once, not retried until it's gone).
   await expect(page.getByTestId("answer-text")).not.toHaveText("");

@@ -1,11 +1,9 @@
-import type { CowState } from "../../lib/cow-state";
 import { t } from "../../lib/i18n/t";
 import { site } from "../../lib/site";
-import { AssistantCow } from "../cow/AssistantCow";
 import { useLocale } from "../i18n/useLocale";
 import { chatErrorMessage, revealOnMount } from "./chat-view";
 
-type Props = { error: Error; cowState: CowState | undefined };
+type Props = { error: Error };
 
 // The other ways to reach Julian, in the order the notice lists them.
 const WAYS = [
@@ -16,15 +14,13 @@ const WAYS = [
 /**
  * Why the last request failed, warmly, and the other ways to reach Julian
  * (DESIGN.md section 10). It's an alert, so screen readers announce it once
- * when it appears. The cow sits beside the alert, not inside it, so its
- * button isn't read out with the alert; it lowers its head.
+ * when it appears. The cow on the chat's edge lowers its head.
  */
-export function ChatErrorNotice({ error, cowState }: Props) {
+export function ChatErrorNotice({ error }: Props) {
   const locale = useLocale();
   const contact = t(locale, "contact");
   return (
-    <div ref={revealOnMount} className="flex items-end gap-2 max-lg:scroll-mb-44">
-      <AssistantCow state={cowState ?? "idle"} size={58} animated={cowState !== undefined} />
+    <div ref={revealOnMount} className="max-lg:scroll-mb-44">
       <div role="alert" className="flex min-w-0 flex-col gap-1 rounded-[20px] bg-tint px-4 py-3">
         <p>{chatErrorMessage(error, locale)}</p>
         <p className="text-[12.5px] text-muted">
