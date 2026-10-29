@@ -60,22 +60,26 @@ All UI colours are tokens in `src/styles/tokens.css`, defined for light and
 dark as `.claude/rules/styling.md` says. The existing token names stay; these
 are their values and the new ones.
 
-| Token          | Light                    | Dark                  | Used for                                                     |
-| -------------- | ------------------------ | --------------------- | ------------------------------------------------------------ |
-| `background`   | `#F6F8F3`                | `#0E1511`             | Page                                                         |
-| `foreground`   | `#13201A`                | `#E8EFE9`             | Text                                                         |
-| `muted`        | `#4F5E55`                | `#9EB0A4`             | Secondary text, hints, labels                                |
-| `border`       | `#DCE5DA`                | `#24332A`             | Chip borders, dividers                                       |
-| `accent`       | `#2B6F4A`                | `#7FCB98`             | Buttons, links, citation numbers, focus ring                 |
-| `on-accent`    | `#FFFFFF`                | `#0E1511`             | Text and icons on `accent`                                   |
-| `tint`         | `#E6F0E6`                | `#18241D`             | Assistant bubbles, status pill, icon buttons in the bar      |
-| `field`        | `#FFFFFF`                | `#121B16`             | The composer and form fields                                 |
-| `field-border` | `#7F9184`                | `#587060`             | The border of the composer and form fields (3:1 on the page) |
-| `user`         | `#2B6F4A`                | `#2B6F4A`             | The visitor's bubbles (the same green in both themes)        |
-| `on-user`      | `#FFFFFF`                | `#FFFFFF`             | Text on `user`                                               |
-| `glass`        | `rgb(246 248 243 / 86%)` | `rgb(14 21 17 / 80%)` | Chips and buttons that sit on the landscape, with a 6px blur |
-| `danger`       | `#B7191C`                | `#FD7468`             | Only for a broken field in the contact form                  |
-| `live`         | `#E5484D`                | `#E5484D`             | The small "live" dot in "Back to live Glasgow"               |
+| Token                                                  | Light                                      | Dark                  | Used for                                                     |
+| ------------------------------------------------------ | ------------------------------------------ | --------------------- | ------------------------------------------------------------ |
+| `background`                                           | `#F6F8F3`                                  | `#0E1511`             | Page                                                         |
+| `foreground`                                           | `#13201A`                                  | `#E8EFE9`             | Text                                                         |
+| `muted`                                                | `#4F5E55`                                  | `#9EB0A4`             | Secondary text, hints, labels                                |
+| `border`                                               | `#DCE5DA`                                  | `#24332A`             | Chip borders, dividers                                       |
+| `accent`                                               | `#2B6F4A`                                  | `#7FCB98`             | Buttons, links, citation numbers, focus ring                 |
+| `on-accent`                                            | `#FFFFFF`                                  | `#0E1511`             | Text and icons on `accent`                                   |
+| `tint`                                                 | `#E6F0E6`                                  | `#18241D`             | Assistant bubbles, status pill, icon buttons in the bar      |
+| `field`                                                | `#FFFFFF`                                  | `#121B16`             | The composer and form fields                                 |
+| `field-border`                                         | `#7F9184`                                  | `#587060`             | The border of the composer and form fields (3:1 on the page) |
+| `user`                                                 | `#2B6F4A`                                  | `#2B6F4A`             | The visitor's bubbles (the same green in both themes)        |
+| `on-user`                                              | `#FFFFFF`                                  | `#FFFFFF`             | Text on `user`                                               |
+| `glass`                                                | `rgb(246 248 243 / 86%)`                   | `rgb(14 21 17 / 80%)` | Chips and buttons that sit on the landscape, with a 6px blur |
+| `danger`                                               | `#B7191C`                                  | `#FD7468`             | Only for a broken field in the contact form                  |
+| `live`                                                 | `#E5484D`                                  | `#E5484D`             | The small "live" dot in "Back to live Glasgow"               |
+| `track-night`, `track-dawn`, `track-day`, `track-dusk` | `#0E1A24`, `#F5C49A`, `#CFE4EC`, `#A9B7CF` | The same              | The time-of-day slider's track, night to night (section 8)   |
+| `track-clear`, `track-overcast`                        | `#CFE4EC`, `#8A969C`                       | The same              | The clouds slider's track                                    |
+| `track-dry`, `track-wet`                               | `#E6EEF0`, `#2E4A6B`                       | The same              | The rain slider's track                                      |
+| `track-calm`, `track-gale`                             | `#E6F0E6`, `#2B6F4A`                       | The same              | The wind slider's track                                      |
 
 The values were picked by eye on the canvas, then measured:
 `tests/unit/tokens.test.ts` reads `tokens.css` and checks every text pair
@@ -430,8 +434,10 @@ Comeau's blog. It's a toy, and it's honest about being one.
   "Psst… you can change the weather" and goes away after 5s or on any tap;
   the site remembers it was shown.
 - **The panel** is a bottom sheet on mobile and a popover under the gear on
-  desktop (about 380px wide). Title "Play with the sky", subtitle "Only on
-  your screen, for as long as you like."
+  desktop (about 380px wide), with a "Close" button in its header. Title
+  "Play with the sky", subtitle "Only on your screen, for as long as you
+  like." Its backdrop stays clear and the sheet stops short of the hero, so
+  the sky can be watched while it changes.
   - **Season:** four segmented buttons.
   - **Time of day:** a slider from 00:00 to 23:00 whose track is a gradient
     from night through dawn, day and dusk back to night. Label: "15:00 · day",
@@ -448,9 +454,12 @@ Comeau's blog. It's a toy, and it's honest about being one.
   - **Switches:** "Snow instead of rain" and "Haar".
   - **"Back to live Glasgow"**: a wide flat button with the live dot.
 - **While playing**, the slider's time also drives the theme (night is dark),
-  the chip turns `accent` and reads "Your sky · 15:00 · tap to reset", and
-  tapping it goes back to live. Pressing the theme toggle while playing moves
-  the time to 13:00 (light) or 22:00 (dark).
+  the chip turns `accent` and reads "Your sky · 15:00 · tap to reset" ("Your
+  sky · 15:00" on a phone), and tapping it goes back to live. A season other
+  than today's moves the date to the 15th of its middle month, as `?sky=`
+  does, so summer's evenings stay light. Pressing the theme toggle while
+  playing moves the time to 13:00 (light) or 22:00 (dark); on a summer day
+  when 22:00 isn't night, to the hour nearest that night's solar midnight.
 - **Nothing is stored.** A reload, or "Back to live Glasgow", returns to the
   real sky and the theme rule from section 6.
 - The sliders are native range inputs with `aria-valuetext` set to the words,
@@ -649,7 +658,8 @@ centred and the background left exactly as it is: no blur, no fade.
 - The landscape, the particles, the herd and the earlier cows next to
   messages are `aria-hidden`; the latest cow is the "Pat the cow" button.
   The weather chip has an accessible name ("Weather in Glasgow:
-  9°C, drizzle. Play with the sky").
+  9°C, drizzle. Play with the sky", and while playing "Your sky, 15:00. Back
+  to live Glasgow").
 - `lang` on `<html>` matches the page's language, and each page links its
   other language with `hreflang`.
 - Reduced motion (section 11) and muted sound (section 12) lose nothing.

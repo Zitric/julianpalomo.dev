@@ -19,7 +19,9 @@ live Highland glen: its season follows the date and its sky the sun's real
 height over Glasgow, a small herd grazes, and the sun sets when the visitor
 switches to the dark theme. Glasgow's live weather rolls into it: clouds,
 rain, snow, wind and haar, with leaves, petals, midges or frost by season, and
-a chip with the time and the temperature. The assistant is a
+a chip with the time and the temperature. A gear lets visitors play with
+the sky on their own screen (season, time of day, clouds, rain or snow, wind
+and haar) until they go back to live Glasgow. The assistant is a
 Highland cow that greets you and follows the chat: it listens while you type,
 chews while it looks things up, talks while the answer streams, licks its lips
 when it's done and lowers its head when something goes wrong. The site is in
