@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { t } from "../../lib/i18n/t";
 import { useEntrance } from "../entrance/Entrance";
 import { useLocale } from "../i18n/useLocale";
+import { BubbleTail } from "../ui/BubbleTail";
 import { IconButton } from "../ui/IconButton";
 
 // The gear isn't there at first: it spins in this long after the entrance ends.
@@ -74,9 +75,17 @@ export function Gear({ onOpen }: { onOpen: (trigger: HTMLElement) => void }) {
       {bubble && (
         <p
           role="status"
-          className="absolute top-full left-0 mt-2 w-max max-w-[220px] rounded-[14px] rounded-tl-[6px] border-[1.5px] border-border bg-field px-3 py-2 text-[13px] font-semibold text-foreground"
+          className="absolute top-full left-0 mt-3 w-max max-w-[220px] rounded-[14px] border-[1.5px] border-border bg-field px-3 py-2 text-[13px] font-semibold text-foreground"
         >
           {t(locale, "playBubble")}
+          {/* Pointing up at the gear, whose centre is 22px in. */}
+          <BubbleTail
+            edge="top"
+            width={14}
+            height={9}
+            base={9}
+            className="bottom-[calc(100%-1.5px)] left-[13.5px]"
+          />
         </p>
       )}
     </div>

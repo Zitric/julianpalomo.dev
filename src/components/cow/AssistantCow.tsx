@@ -3,6 +3,7 @@ import { type CowState, LICK_MS } from "../../lib/cow-state";
 import { t } from "../../lib/i18n/t";
 import { assistantCow as cow } from "../../lib/scene/palette";
 import { useLocale } from "../i18n/useLocale";
+import { BubbleTail } from "../ui/BubbleTail";
 
 type Props = {
   state: CowState;
@@ -17,7 +18,7 @@ type Props = {
 };
 
 const mooBubble =
-  "pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 rounded-full border-[1.5px] border-border bg-field px-2.5 py-0.5 font-display text-[13px] font-bold whitespace-nowrap text-foreground opacity-0 group-hover:opacity-100 motion-safe:translate-y-1 motion-safe:transition motion-safe:duration-200 motion-safe:group-hover:translate-y-0";
+  "pointer-events-none absolute bottom-full left-1/2 mb-2.5 -translate-x-1/2 rounded-full border-[1.5px] border-border bg-field px-2.5 py-0.5 font-display text-[13px] font-bold whitespace-nowrap text-foreground opacity-0 group-hover:opacity-100 motion-safe:translate-y-1 motion-safe:transition motion-safe:duration-200 motion-safe:group-hover:translate-y-0";
 
 /**
  * The assistant, a Highland cow (DESIGN.md section 9). Its animations live in
@@ -59,6 +60,14 @@ export function AssistantCow({ state, size, animated, onMoo, drawingClassName }:
     >
       <span aria-hidden="true" className={mooBubble}>
         {t(locale, "moo")}
+        {/* Pointing down at the cow that speaks. */}
+        <BubbleTail
+          edge="bottom"
+          width={12}
+          height={8}
+          base={8}
+          className="top-[calc(100%-1.5px)] left-1/2 -translate-x-1/2"
+        />
       </span>
       <CowDrawing size={size} className={drawingClassName} />
     </button>

@@ -10,6 +10,26 @@ function liveCow(page: Page) {
   return page.getByRole("button", { name: "Pat the cow" });
 }
 
+/**
+ * Whether the bubble's tail shows at a point inside it, near its tip: nothing
+ * paints over it. The bubble ignores the pointer, which elementFromPoint
+ * honours, so it's turned on to look.
+ */
+function tailShows(bubble: Locator, x: number, y: number): Promise<boolean> {
+  return bubble.evaluate(
+    (element, at) => {
+      const tail = element.querySelector("svg");
+      if (!(element instanceof HTMLElement) || !tail) return false;
+      const box = tail.getBoundingClientRect();
+      element.style.pointerEvents = "auto";
+      tail.style.pointerEvents = "auto";
+      const hit = document.elementFromPoint(box.left + at.x, box.top + at.y);
+      return hit !== null && element.contains(hit);
+    },
+    { x, y },
+  );
+}
+
 function runningAnimations(cow: Locator) {
   return cow.evaluate((element) => element.getAnimations({ subtree: true }).length);
 }
@@ -97,6 +117,8 @@ test("the cow on the chat's edge is the only one, through the whole conversation
 test("hovering the cow tilts it and says Moo!", async ({ page }) => {
   await liveCow(page).hover();
   await expect(liveCow(page).getByText("Moo!")).toHaveCSS("opacity", "1");
+  // Its tail, 12 × 8, points down at the cow from (6, 7.25).
+  expect(await tailShows(liveCow(page).getByText("Moo!"), 6, 5)).toBe(true);
   const tiltAnimations = await liveCow(page).evaluate((cow) =>
     cow
       .querySelector(".tilt")

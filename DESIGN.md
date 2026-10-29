@@ -131,6 +131,10 @@ in `.claude/rules/styling.md`. UI components still never use a colour literal.
 - **Radii:** buttons, chips and pills are fully round (`999px`); the composer
   `24px`; chat bubbles `20px` with the corner nearest the speaker at `6px`;
   cards and panels `20px`; the portrait `26px` on mobile and `32px` on desktop.
+- **Speech bubbles** outside the chat (the cow's "Moo!", the gear's hint and
+  the hero's hello on a phone) have a comic-style tail pointing at whoever
+  speaks, in the bubble's `field` fill and 1.5px `border`, with no seam where
+  it joins. Chat bubbles keep their 6px corner instead, with no tail.
 - **Spacing:** a 4px scale (Tailwind's default). The page gutter is 16px on
   mobile and 24px from `sm` up.
 - **Touch targets:** at least 44 × 44px on mobile, including icon buttons.
@@ -444,9 +448,9 @@ Comeau's blog. It's a toy, and it's honest about being one.
 
 - **The gear isn't there at first.** It spins in 2s after the page's
   entrance ends (section 11; 2s after the page is ready with reduced motion) and pulses three
-  times so it's noticed. On a first visit, a small bubble next to it says
-  "Psst… you can change the weather" and goes away after 5s or on any tap;
-  the site remembers it was shown.
+  times so it's noticed. On a first visit, a small bubble under it, its tail
+  pointing up at the gear, says "Psst… you can change the weather" and goes
+  away after 5s or on any tap; the site remembers it was shown.
 - **The panel** is a bottom sheet on mobile and a popover under the gear on
   desktop (about 380px wide), with a "Close" button in its header. Title
   "Play with the sky", subtitle "Only on your screen, for as long as you
@@ -507,7 +511,7 @@ through.
 | Talking              | The answer is typing itself out, from its first word to its last | The mouth opens and closes, irregularly, every 1.8s                                                                       |
 | Satisfied            | The answer just finished typing                                  | Licks once (1.6s), then goes back to idle                                                                                 |
 | Sorry                | An error or the daily limit                                      | Lowers its head and stays still                                                                                           |
-| Hover (pointer only) | The pointer is over it                                           | Tilts and says "Moo!" in a small speech bubble                                                                            |
+| Hover (pointer only) | The pointer is over it                                           | Tilts and says "Moo!" in a small speech bubble above it, its tail pointing down at the cow                                |
 | Tap                  | It's tapped                                                      | Licks and, if sound is on, moos softly (at most once every 3s). While it talks it only moos: a lick would cover the mouth |
 - **There is one cow**, 100px wide on a phone and 132px from `lg`, on the
   chat's edge (section 5). It's the greeting's cow and every answer's: no cow

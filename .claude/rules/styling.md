@@ -66,6 +66,7 @@ Tailwind, `tokens.css`, `fonts.css`, `landscape.css`, `play.css`, `chat.css`, `c
 ## Shared pieces live in `src/components/ui/`
 
 - Small, typed and feature-free. `IconButton` is a round, flat, 44px icon-only button with a required `label` (its accessible name) and a `look`: `accent`, `glass` (`bg-glass` with a 6px blur) for buttons on the landscape, or `tint` for buttons on a panel. Its press scale (0.92 over 80ms) runs only under `motion-safe`.
+- `BubbleTail` is a speech bubble's comic-style tail (`DESIGN.md` section 4), on the bubble's `left`, `top` or `bottom` edge, in `field` and `border`. Its callers place it so its joining edge covers the bubble's 1.5px border: the hero's hello, the cow's "Moo!" and the gear's hint.
 - `Button` is the wide, flat, fully round button (`DESIGN.md` section 4), with a `look` (`primary` today) and a 0.97 press scale under `motion-safe`. "Back to live Glasgow" is its first caller.
 - A piece, or a new look of one, is added with its first caller, not ahead of it.
 

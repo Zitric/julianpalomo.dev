@@ -1,5 +1,6 @@
 import { t } from "../../lib/i18n/t";
 import { useLocale } from "../i18n/useLocale";
+import { BubbleTail } from "../ui/BubbleTail";
 import { useEntrance } from "./Entrance";
 
 // On a phone, where the hero is 230px tall and the big cow 181 × 143: beside
@@ -23,34 +24,16 @@ export function HeroBubble() {
   return (
     <p aria-hidden="true" className={bubble}>
       {t(locale, "heroCowHello")}
-      <Tail />
-    </p>
-  );
-}
-
-/**
- * The phone's comic-style tail on the bubble's left edge, pointing down and
- * left. It overlaps the bubble's 1.5px border, so its fill covers that stretch
- * of border and the outline runs on around the tail with no seam. It hangs
- * from the bubble's top, so its tip lands beside the cow's mouth, about 140px
- * down and above the hooves, however many lines the text takes.
- */
-function Tail() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 22 16"
-      width={22}
-      height={16}
-      className="absolute top-[29px] -left-[20.5px] overflow-visible lg:hidden"
-    >
-      <path d="M22 0 L0.75 15.25 L22 9.5 Z" className="fill-field" />
-      <path
-        d="M22 0 L0.75 15.25 L22 9.5"
-        className="fill-none stroke-border"
-        strokeWidth={1.5}
-        strokeLinejoin="round"
+      {/* On a phone only: it hangs from the bubble's top, so its tip lands
+          beside the cow's mouth, about 140px down and above the hooves,
+          however many lines the text takes. */}
+      <BubbleTail
+        edge="left"
+        width={22}
+        height={16}
+        base={9.5}
+        className="top-[29px] -left-[20.5px] lg:hidden"
       />
-    </svg>
+    </p>
   );
 }
