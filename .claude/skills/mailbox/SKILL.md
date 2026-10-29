@@ -82,7 +82,7 @@ clean working tree.
    git switch -c docs/mailbox-<name> origin/main
    ```
 
-   Add the row ``| `<name>` | #<pr> | <cloud thread> | #<epic>, … |`` to the table in `AGENTS.md` section 2 (Julián names the thread; the first row also removes "No mailbox exists yet."), then run `/handoff` and `/ship-pr`. Until it is merged, `post.sh` finds no row and posts nothing.
+   Add the row ``| `<name>` | #<pr> | <cloud thread> | #<epic>, … |`` to the table in `AGENTS.md` section 2 (Julián names the thread), then run `/handoff` and `/ship-pr`. Until it is merged, `post.sh` finds no row and posts nothing.
 
 6. Tell Julián the PR number, so the cloud thread subscribes to it.
 
