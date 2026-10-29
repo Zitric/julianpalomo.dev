@@ -220,9 +220,10 @@ night in Glasgow**, wherever the visitor is.
   dependency.
 - **The toggle wins until Glasgow's next dusk or dawn.** Pressing it sets
   the other theme until Glasgow's next civil dusk or civil dawn, when the sun
-  next crosses 6° below the horizon. Then the choice ends and the site
-  follows Glasgow again. Pressing it back to Glasgow's current theme ends the
-  choice at once, so two presses in a row return to following Glasgow. At
+  next crosses 6° below the horizon. Two minutes later, so Glasgow has
+  surely turned, the choice ends and the site follows Glasgow again.
+  Pressing it back to Glasgow's current theme ends the choice at once, so
+  two presses in a row return to following Glasgow. At
   23:00, pressing light lasts until dawn, when Glasgow is light anyway; at
   14:00, pressing dark lasts until dusk. Either way, the next evening or
   morning follows Glasgow.

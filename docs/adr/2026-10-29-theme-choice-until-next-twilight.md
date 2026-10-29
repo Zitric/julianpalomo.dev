@@ -14,8 +14,8 @@ laptop and his phone.
 ## Decision
 
 A press sets the other theme until Glasgow's next civil dusk or civil dawn,
-the moment its sun next crosses 6° below the horizon, and then the site
-follows Glasgow again. Pressing back to Glasgow's current theme ends the
+the moment its sun next crosses 6° below the horizon. Two minutes after it,
+so Glasgow has surely turned, the site follows Glasgow again. Pressing back to Glasgow's current theme ends the
 choice at once. The cookie carries its own end (`theme=dark.<epoch ms>`) and
 a `Max-Age` up to that moment, so the server and the browser both drop it
 then. The old one-year cookies, which have no end, count as no choice, and

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { resolveTheme } from "../../src/lib/theme";
+import { resolveTheme, TWILIGHT_MARGIN_MS } from "../../src/lib/theme";
 import { nextTwilight } from "../../src/lib/twilight";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -52,7 +52,7 @@ test.describe("the server's HTML", () => {
   });
 });
 
-test("the toggle chooses the other theme until Glasgow's next dusk or dawn", async ({
+test("the toggle chooses the other theme until just after Glasgow's next dusk or dawn", async ({
   page,
   context,
 }) => {
@@ -69,11 +69,11 @@ test("the toggle chooses the other theme until Glasgow's next dusk or dawn", asy
   await expect(html).toHaveAttribute("data-theme", other);
   await expect(page.getByRole("button", { name: `Switch to ${glasgow} theme` })).toBeVisible();
   const cookie = (await context.cookies()).find(({ name }) => name === "theme");
-  const until = nextTwilight(pressedAt);
+  const until = (nextTwilight(pressedAt) ?? 0) + TWILIGHT_MARGIN_MS;
   expect(cookie?.value).toBe(`${other}.${until}`);
   expect(cookie?.path).toBe("/");
   // The browser drops it at the same moment, give or take the second it rounds to.
-  expect(Math.abs((cookie?.expires ?? 0) * 1000 - (until ?? 0))).toBeLessThan(2000);
+  expect(Math.abs((cookie?.expires ?? 0) * 1000 - until)).toBeLessThan(2000);
 
   await page.reload();
   await expect(html).toHaveAttribute("data-theme", other);

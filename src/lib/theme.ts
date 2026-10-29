@@ -47,17 +47,49 @@ export function parseThemeCookie(value: unknown, now: number): ThemeChoice | nul
 const FALLBACK_MS = 12 * 60 * 60 * 1000;
 
 /**
+ * How long after the twilight a choice ends. nextTwilight finds it with
+ * sunTimes, but the theme follows isGlasgowNight, whose elevation crosses −6°
+ * up to about 0.5s away from that instant. Ending exactly at the twilight
+ * could leave a moment where the choice is over and Glasgow hasn't turned
+ * yet, so a minute tick or a request shows the old theme. Two minutes clear it.
+ */
+export const TWILIGHT_MARGIN_MS = 2 * 60 * 1000;
+
+// The same mismatch the other way: sunTimes can put a twilight a fraction of
+// a second before `now` while isGlasgowNight hasn't turned yet. Looking from
+// a second earlier keeps that twilight in view.
+const TWILIGHT_TOLERANCE_MS = 1000;
+
+/**
+ * When a choice of `theme` made at `now` ends: just after the next twilight
+ * that turns Glasgow to `theme`, checked with the same isGlasgowNight the
+ * theme follows, so its end never changes the theme on screen.
+ */
+function choiceEnd(theme: Theme, now: number): number {
+  let from = now - TWILIGHT_TOLERANCE_MS;
+  for (let tries = 0; tries < 3; tries++) {
+    const twilight = nextTwilight(from);
+    if (twilight === null) break;
+    const end = twilight + TWILIGHT_MARGIN_MS;
+    if (resolveTheme({ choice: null, now: end }) === theme) return end;
+    from = twilight;
+  }
+  return now + FALLBACK_MS;
+}
+
+/**
  * What pressing the toggle for `theme` at `now` stores. Back to Glasgow's own
  * theme ends the choice: the cookie is deleted. Otherwise the choice lasts
- * until Glasgow's next dusk or dawn, and so does the cookie: its `maxAge`, in
- * whole seconds rounded up and never under 1, ends it then, never before.
+ * until Glasgow's next dusk or dawn, and TWILIGHT_MARGIN_MS more, and so does
+ * the cookie: its `maxAge`, in whole seconds rounded up and never under 1,
+ * ends it then, never before.
  */
 export function themeChoiceCookie(
   theme: Theme,
   now: number,
 ): { action: "delete" } | { action: "set"; value: string; maxAge: number; choice: ThemeChoice } {
   if (theme === resolveTheme({ choice: null, now })) return { action: "delete" };
-  const until = nextTwilight(now) ?? now + FALLBACK_MS;
+  const until = choiceEnd(theme, now);
   return {
     action: "set",
     value: `${theme}.${until}`,

@@ -5,6 +5,7 @@ import {
   isGlasgowNight,
   parseThemeCookie,
   resolveTheme,
+  TWILIGHT_MARGIN_MS,
   themeChoiceCookie,
 } from "../../src/lib/theme";
 
@@ -83,14 +84,41 @@ describe("parseThemeCookie", () => {
   });
 });
 
+/**
+ * Glasgow keeps the other theme from `now` until just before `until`'s
+ * twilight: the choice ends at the first one that turns it, not a later one.
+ */
+function expectNoEarlierTurn(theme: "light" | "dark", now: number, until: number) {
+  const lastBefore = until - TWILIGHT_MARGIN_MS - 2000;
+  for (let at = now + 2000; at < lastBefore; at += 30 * MINUTE) {
+    expect(resolveTheme({ choice: null, now: at })).not.toBe(theme);
+  }
+  if (lastBefore > now) expect(resolveTheme({ choice: null, now: lastBefore })).not.toBe(theme);
+}
+
 describe("themeChoiceCookie", () => {
-  it("stores the other theme until Glasgow's next dusk or dawn", () => {
+  it("stores the other theme until just after Glasgow's next dusk or dawn", () => {
+    const until = civilDusk + TWILIGHT_MARGIN_MS;
     expect(themeChoiceCookie("dark", solarNoon)).toEqual({
       action: "set",
-      value: `dark.${civilDusk}`,
-      maxAge: Math.ceil((civilDusk - solarNoon) / 1000),
-      choice: { theme: "dark", until: civilDusk },
+      value: `dark.${until}`,
+      maxAge: Math.ceil((until - solarNoon) / 1000),
+      choice: { theme: "dark", until },
     });
+  });
+
+  it("ends only once Glasgow has turned to the chosen theme, all year round", () => {
+    // Every week of 2026, at four hours of the day, pressing for the other theme.
+    for (let week = 0; week < 53; week++) {
+      for (const hour of [1, 9, 15, 21]) {
+        const now = Date.UTC(2026, 0, 1 + week * 7, hour);
+        const theme = resolveTheme({ choice: null, now }) === "dark" ? "light" : "dark";
+        const cookie = themeChoiceCookie(theme, now);
+        if (cookie.action !== "set") throw new Error("A press for the other theme must set");
+        expect(resolveTheme({ choice: null, now: cookie.choice.until })).toBe(theme);
+        expectNoEarlierTurn(theme, now, cookie.choice.until);
+      }
+    }
   });
 
   it("deletes the cookie when the press comes back to Glasgow's own theme", () => {
@@ -98,9 +126,33 @@ describe("themeChoiceCookie", () => {
     expect(themeChoiceCookie("dark", civilDusk + MINUTE)).toEqual({ action: "delete" });
   });
 
-  it("rounds Max-Age up, so a press seconds before the twilight still stores a live cookie", () => {
+  it("ends just after Glasgow turns, even a fraction of a second either side of a twilight", () => {
+    // sunTimes and isGlasgowNight cross −6° up to about 0.5s apart, so a press
+    // right at a twilight must still end at the one that turns Glasgow to the
+    // chosen theme, not skip it or stop at the one that just passed.
+    for (const month of [2, 5, 8, 11]) {
+      const { civilDawn: dawn, civilDusk: dusk } = sunTimes({ year: 2026, month, day: 6 }, glasgow);
+      if (dawn === null || dusk === null) throw new Error("No civil twilight in Glasgow");
+      for (const twilight of [dawn, dusk]) {
+        for (const offset of [-900, -400, -50, 0, 50, 400, 900]) {
+          const now = twilight + offset;
+          const theme = resolveTheme({ choice: null, now }) === "dark" ? "light" : "dark";
+          const cookie = themeChoiceCookie(theme, now);
+          if (cookie.action !== "set") throw new Error("A press for the other theme must set");
+          expect(resolveTheme({ choice: null, now: cookie.choice.until })).toBe(theme);
+          expect(cookie.choice.until).toBeGreaterThan(now);
+          expectNoEarlierTurn(theme, now, cookie.choice.until);
+        }
+      }
+    }
+  });
+
+  it("rounds Max-Age up to whole seconds, never ending the cookie early", () => {
     // Twilights are found to the second, so 1.5s before dusk is still day.
     const cookie = themeChoiceCookie("dark", civilDusk - 1500);
-    expect(cookie).toMatchObject({ action: "set", maxAge: 2 });
+    expect(cookie).toMatchObject({
+      action: "set",
+      maxAge: Math.ceil((1500 + TWILIGHT_MARGIN_MS) / 1000),
+    });
   });
 });
