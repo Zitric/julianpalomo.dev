@@ -15,10 +15,11 @@ answer is worse than "I don't know".
    One wrong item stops the run: a judge that misses overclaims gives false
    confidence.
 2. **Asks every case.** [`evals/cases.ts`](../evals/cases.ts) holds about 40
-   questions in seven categories: answered from the claims, traps that tempt
+   questions in eight categories: answered from the claims, traps that tempt
    the model to overclaim, questions the claims don't cover, private data,
-   injection and scope, Spanish, and several turns. Each one goes through
-   `handleChat`, the same code as `/api/chat` in production.
+   injection and scope, Spanish, the page's language, and several turns. Each
+   one goes through `handleChat`, the same code as `/api/chat` in production,
+   sent from the case's page (`/` or `/es`).
 3. **Grades every answer twice.** Code checks
    ([`evals/checks.ts`](../evals/checks.ts)) look at what text can show:
    citations, links, contact details, Markdown, forbidden patterns. Then the

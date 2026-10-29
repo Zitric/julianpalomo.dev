@@ -43,9 +43,13 @@ const caseSchema = z.strictObject({
     "private",
     "injection",
     "spanish",
+    "language",
     "multi_turn",
   ]),
+  /** The language the answer must be in, which the judge checks. */
   language: z.enum(["en", "es"]),
+  /** The page the visitor asks from, sent as the request's `locale`. Defaults to `language`. */
+  page: z.enum(["en", "es"]).optional(),
   /** Must pass on every run. */
   critical: z.boolean(),
   turns: z
@@ -483,6 +487,42 @@ const cases: unknown[] = [
     expect: { outcome: "answered", citeAnyOf: ["profile-work-mode"] },
     rubric:
       "Answers in Spanish as profile-work-mode states it for Edinburgh roles (mostly remote, can travel to the office sometimes), cited.",
+  },
+
+  // The page's language: it decides only when the question doesn't, and the
+  // claims' Spanish names never do.
+  {
+    id: "short-question-es-page",
+    category: "language",
+    language: "es",
+    page: "es",
+    critical: false,
+    turns: ["TypeScript?"],
+    expect: { outcome: "answered", citeAnyOf: ["skills-core"] },
+    rubric:
+      "Answers in Spanish, the page's language, since a single word doesn't settle it: 5 years of TypeScript, as skills-core states, cited.",
+  },
+  {
+    id: "spanish-question-en-page",
+    category: "language",
+    language: "es",
+    page: "en",
+    critical: false,
+    turns: ["¿Qué estudió Julian?"],
+    expect: { outcome: "answered", citeAnyOf: ["education-degree"] },
+    rubric:
+      "Answers in Spanish, the visitor's language, although the page is English: Computer Engineering at the Universidad de Extremadura, as education-degree states, cited.",
+  },
+  {
+    id: "degree-es-page",
+    category: "language",
+    language: "en",
+    page: "es",
+    critical: false,
+    turns: ["What did Julian study?"],
+    expect: { outcome: "answered", citeAnyOf: ["education-degree"] },
+    rubric:
+      "Answers in English, the visitor's language, although the page is Spanish and the claim names a Spanish university and city: Computer Engineering at the Universidad de Extremadura, as education-degree states, cited.",
   },
 
   // Several turns.

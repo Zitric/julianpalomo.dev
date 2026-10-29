@@ -17,6 +17,7 @@ import {
 } from "ai";
 import { z } from "zod";
 import { type Claim, confirmedClaims } from "../claims";
+import { localeSchema } from "../i18n/locale";
 import { type ChatErrorCode, chatErrorBody } from "./chat-error";
 import type { ChatUIMessage } from "./chat-message";
 import { parseCitations, type Source } from "./citations";
@@ -29,7 +30,7 @@ import {
   type TokenUsage,
 } from "./limits";
 import { anthropicOptions, createBotModel, MAX_OUTPUT_TOKENS, MAX_STEPS } from "./model";
-import { SYSTEM_PROMPT } from "./prompt";
+import { pageLanguageNote, SYSTEM_PROMPT } from "./prompt";
 import { buildTools } from "./tools";
 import { type D1Like, d1UsageStore, isD1, type UsageStore, utcDay, visitorHash } from "./usage";
 
@@ -120,9 +121,13 @@ const messageSchema = z
 
 // The model answers the visitor's last message, so the conversation has to end
 // with one that has text; anything else would fail at the provider instead.
+// `locale` is the page's language. A missing one reads as English, since a tab
+// opened before the field existed still sends the old body; any other value
+// is rejected.
 const bodySchema = z
   .looseObject({
     messages: z.array(messageSchema).min(1).max(MAX_MESSAGES),
+    locale: localeSchema.default("en"),
   })
   .refine(
     (body) => {
@@ -242,13 +247,18 @@ export async function handleChat(
         writer.write({ type: "start", messageMetadata: demo ? { demo: true } : undefined });
         const result = streamText({
           model,
-          // One breakpoint here caches the tools and the system prompt, which
-          // come first in the request. Both are byte-stable between requests.
-          instructions: {
-            role: "system",
-            content: SYSTEM_PROMPT,
-            providerOptions: { anthropic: { cacheControl: { type: "ephemeral" } } },
-          },
+          // One breakpoint, on the first system message, caches the tools and
+          // the system prompt, which come first in the request. Both are
+          // byte-stable between requests. The page-language note goes after
+          // the breakpoint, uncached, so it never splits the cached prefix.
+          instructions: [
+            {
+              role: "system",
+              content: SYSTEM_PROMPT,
+              providerOptions: { anthropic: { cacheControl: { type: "ephemeral" } } },
+            },
+            { role: "system", content: pageLanguageNote(body.data.locale) },
+          ],
           messages,
           tools,
           // Fires when the visitor presses Stop or leaves (enable_request_signal

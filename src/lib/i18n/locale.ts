@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const localeSchema = z.enum(["en", "es"]);
+export const localeSchema = z.enum(["en", "es"]);
 export type Locale = z.infer<typeof localeSchema>;
 
 /** `/` is English and `/es` is Spanish: the route's optional `locale` parameter. */

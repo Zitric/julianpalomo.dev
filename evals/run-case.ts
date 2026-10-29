@@ -74,12 +74,12 @@ function runStore() {
   return { store, usage, cost: () => costMicroUsd };
 }
 
-/** A POST shaped like the one `useChat` sends. */
-function chatRequest(messages: ChatUIMessage[]): Request {
+/** A POST shaped like the one `useChat` sends from the page in `locale`. */
+function chatRequest(messages: ChatUIMessage[], locale: "en" | "es"): Request {
   return new Request("http://localhost/api/chat", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ id: "eval", messages, trigger: "submit-message" }),
+    body: JSON.stringify({ id: "eval", messages, trigger: "submit-message", locale }),
   });
 }
 
@@ -169,14 +169,18 @@ export async function runCase(
     history.push({ id, role: "user", parts: [{ type: "text", text: turn }] });
 
     const pending: Promise<unknown>[] = [];
-    const response = await handleChat(chatRequest(history), env, {
-      createModel: (key) =>
-        wrapLanguageModel({ model: createModel(key), middleware: recorder.middleware }),
-      createStore: () => store,
-      waitUntil: (promise) => {
-        pending.push(promise);
+    const response = await handleChat(
+      chatRequest(history, evalCase.page ?? evalCase.language),
+      env,
+      {
+        createModel: (key) =>
+          wrapLanguageModel({ model: createModel(key), middleware: recorder.middleware }),
+        createStore: () => store,
+        waitUntil: (promise) => {
+          pending.push(promise);
+        },
       },
-    });
+    );
     if (response.status !== 200 || response.body === null) {
       last = { status: response.status, text: "", sourceIds: [], streamError: undefined };
       toolCalls = [];

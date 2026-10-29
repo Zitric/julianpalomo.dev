@@ -29,7 +29,7 @@ claim changes the answers, so this rule loads for those files too.
 
 ## How a run works
 
-- `evals/run-case.ts` calls `handleChat`, the production endpoint, with a request shaped like `useChat`'s, so the validation, tools, prompt, citation check and limits all run as in production. It uses only `handleChat`'s existing overrides: an in-memory store per run of each case, so the daily limits never cut an eval run, and a `waitUntil` that it awaits. **Never add a code path for evals in `src/`.**
+- `evals/run-case.ts` calls `handleChat`, the production endpoint, with a request shaped like `useChat`'s, so the validation, tools, prompt, citation check and limits all run as in production. It uses only `handleChat`'s existing overrides: an in-memory store per run of each case, so the daily limits never cut an eval run, and a `waitUntil` that it awaits. It sends the case's `page` as the request's `locale`, or its `language` when it has no `page`; `language` is always the language the answer must be in, which the judge checks. **Never add a code path for evals in `src/`.**
 - The response is read with the SDK's own readers: `parseJsonEventStream` with `uiMessageChunkSchema`, then `readUIMessageStream`.
 - `evals/checks.ts` holds the code checks as pure functions. A response that isn't 200 fails on its status alone, never as an empty answer. Every check has a passing and a failing unit test in `tests/unit/eval-checks.test.ts`.
 - A run passes when every critical case passes every time and at least `PASS_RATE` of all runs pass; in CI the rate is only reported ("In CI" below). It stops starting runs past `COST_CAP_MICRO_USD` of estimated cost, and then fails. The per-case tests never fail on their own; `afterAll` fails the command.
