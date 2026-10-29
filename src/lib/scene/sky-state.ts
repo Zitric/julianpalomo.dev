@@ -1,5 +1,5 @@
 import { glasgowClock, glasgowInstant } from "../glasgow";
-import { SEASON_MIDDLE_MONTH, type Season, seasonOf } from "./season";
+import { type Season, seasonDay, seasonOf } from "./season";
 
 /** Everything the landscape shows: the season, the moment, and the weather. */
 export type SkyState = {
@@ -36,9 +36,9 @@ const isLevel = (key: string | undefined): key is "clouds" | "rain" | "wind" =>
 /**
  * The sky asked for by `?sky=`, such as `winter,22:00,clouds=1,snow`, for
  * previews and tests. Null unless `enabled` (the `SCENE_OVERRIDE` variable)
- * and the value names at least one thing. A season moves the date to the 15th
- * of that season's middle month, so the sun matches it; a time is Glasgow's,
- * on that day. Levels are clamped to 0–10; unknown words are ignored.
+ * and the value names at least one thing. A season other than today's moves
+ * the date to the 15th of its middle month (`seasonDay`), so the sun matches
+ * it; a time is Glasgow's, on that day. Levels are clamped to 0–10; unknown words are ignored.
  */
 export function skyFromOverride({
   param,
@@ -63,7 +63,7 @@ export function skyFromOverride({
     const clock = /^(\d{1,2}):(\d{2})$/.exec(token);
     if (isSeason(token)) {
       sky.season = token;
-      day = { year: today.year, month: SEASON_MIDDLE_MONTH[token], day: 15 };
+      day = seasonDay(token, now);
     } else if (clock) {
       const hour = Number(clock[1]);
       const minute = Number(clock[2]);
