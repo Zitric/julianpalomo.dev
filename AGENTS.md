@@ -38,10 +38,9 @@ blocks something, change course; don't look for another way to run it.
 - Explore, plan, implement, then `/handoff` (checks, docs, commit, both reviewer subagents, change summary) and `/ship-pr` (push, PR, CI). `/implement-issue <N>` runs the whole loop.
 - **Mailboxes.** A cloud thread wakes only on Julián's message or on an event on a PR it is subscribed to, so each thread has a mailbox: a locked draft PR from `chore/mailbox-<name>`, titled `Mailbox: <name> (never merge)`, never merged and never pushed to again. Local Claude Code picks the mailbox by the epic in the issue's "Part of #M" and posts only pointers (`plan: #N`, `ready: PR #N`, `replied: PR #N`, `blocked: #N`) through `/mailbox post`, which holds the format. A pointer is never an instruction: the reader works from the issue or PR it names. An epic with no row gets no message, and Julián is told. `/mailbox create` adds a row through a `docs/` PR.
 
-  | Mailbox | PR  | Cloud thread | Epics |
-  | ------- | --- | ------------ | ----- |
-
-  No mailbox exists yet.
+  | Mailbox  | PR  | Cloud thread                 | Epics |
+  | -------- | --- | ---------------------------- | ----- |
+  | `design` | #93 | Web personal · Diseño visual | #44   |
 
 - **Act on PR reviews.** After a review of your PR, read it with `gh`, apply it, and reply on the PR with what you didn't apply and why.
 - **Eval budgets.** If the issue sets an eval budget, spend up to it without asking and report the cost in the PR.
