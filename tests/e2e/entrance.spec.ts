@@ -121,6 +121,31 @@ for (const [path, messages] of [
   });
 }
 
+for (const width of [320, 390]) {
+  test(`at ${width}px the hero's bubble sits beside the cow, clear of the hero's buttons`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto("/");
+    const hello = page.getByText(en.heroCowHello);
+    await expect(hello).toBeVisible({ timeout: 5000 });
+    const bubble = await hello.boundingBox();
+    const scene = await hero(page).boundingBox();
+    if (!bubble || !scene) throw new Error("not on screen");
+    expect(bubble.x + bubble.width).toBeLessThanOrEqual(scene.x + scene.width);
+    expect(bubble.x).toBeGreaterThan(scene.x + scene.width / 2);
+    for (const button of await page.locator("header button").all()) {
+      const box = await button.boundingBox();
+      if (!box || box.y > bubble.y) continue;
+      const apart =
+        box.x + box.width <= bubble.x ||
+        box.x >= bubble.x + bubble.width ||
+        box.y + box.height <= bubble.y;
+      expect(apart).toBe(true);
+    }
+  });
+}
+
 test("a tap shows everything at once", async ({ page }) => {
   await page.goto("/");
   // Retried, because a tap before hydration doesn't end it yet.
