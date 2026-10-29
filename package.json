@@ -14,6 +14,7 @@
     "test:hooks": "bash .claude/hooks/tests/run.sh",
     "eval": "vitest run --config vitest.evals.config.ts",
     "knip": "knip",
+    "og": "node scripts/og/generate.ts",
     "db:migrate:local": "wrangler d1 migrations apply julianpalomo-dev --local"
   },
   "dependencies": {

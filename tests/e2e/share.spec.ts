@@ -31,3 +31,34 @@ test.describe("the head of each page", () => {
     });
   }
 });
+
+test("the icons, the preview images, the sitemap and robots.txt are served", async ({
+  request,
+}) => {
+  for (const [path, type] of [
+    ["/favicon.ico", /^image\/(x-icon|vnd\.microsoft\.icon)/],
+    ["/favicon.svg", /^image\/svg\+xml/],
+    ["/apple-touch-icon.png", /^image\/png/],
+    ["/og/en.png", /^image\/png/],
+    ["/og/es.png", /^image\/png/],
+    ["/sitemap.xml", /^(application|text)\/xml/],
+    ["/robots.txt", /^text\/plain/],
+  ] as const) {
+    const response = await request.get(path);
+    expect(response.status(), path).toBe(200);
+    expect(response.headers()["content-type"], path).toMatch(type);
+  }
+  expect(await (await request.get("/robots.txt")).text()).toContain(
+    "Sitemap: https://julianpalomo.dev/sitemap.xml",
+  );
+  const sitemap = await (await request.get("/sitemap.xml")).text();
+  expect(sitemap).toContain("<loc>https://julianpalomo.dev/</loc>");
+  expect(sitemap).toContain("<loc>https://julianpalomo.dev/es</loc>");
+});
+
+test("the page links its icons", async ({ request }) => {
+  const html = await (await request.get("/")).text();
+  expect(html).toMatch(/<link[^>]+rel="icon"[^>]+type="image\/svg\+xml"[^>]+href="\/favicon.svg"/);
+  expect(html).toMatch(/<link[^>]+rel="icon"[^>]+href="\/favicon.ico"/);
+  expect(html).toMatch(/<link[^>]+rel="apple-touch-icon"[^>]+href="\/apple-touch-icon.png"/);
+});

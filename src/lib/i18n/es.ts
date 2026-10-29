@@ -11,6 +11,7 @@ export const es: Messages = {
   intro:
     "Pregúntame por mi experiencia. Las respuestas salen solo de datos que he confirmado, con sus fuentes.",
   portraitAlt: "Retrato en pixel art de Julián Palomo",
+  ogBubble: "Pregúntame por la experiencia de Julián",
   ogImageAlt:
     "Retrato en pixel art de Julián Palomo sobre un valle de las Highlands a la hora dorada, con una vaca de las Highlands que te invita a preguntar por su experiencia",
   metaDescription:

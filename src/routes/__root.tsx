@@ -38,6 +38,10 @@ export const Route = createRootRoute({
       },
       { rel: "preload", href: interUrl, as: "font", type: "font/woff2", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: appCss },
+      // The cow's head, written by `pnpm og` (scripts/og/).
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+      { rel: "icon", href: "/favicon.ico", sizes: "32x32" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
     ],
   }),
   shellComponent: RootDocument,
