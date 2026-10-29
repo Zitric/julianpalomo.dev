@@ -83,6 +83,30 @@ test("the daily limit says so warmly, once, and closes the composer for today", 
   await expect(box).toHaveAttribute("placeholder", "Questions are back tomorrow");
 });
 
+test("a phone gets the compact bar after the first question", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.reload();
+  const bar = page
+    .locator("div.fixed")
+    .filter({ has: page.getByText("Julian Palomo", { exact: true }) });
+  await expect(bar).toHaveCount(0);
+  await ask(page, "What has Julian worked on?");
+  await expect(bar).toBeVisible();
+  await expect(bar.getByRole("button", { name: /^Switch to (dark|light) theme$/ })).toBeVisible();
+  expect((await bar.boundingBox())?.height).toBe(58);
+  // The chat fills the screen under it: the hero has scrolled away.
+  await expect(page.locator("svg.landscape")).not.toBeInViewport();
+});
+
+test("a laptop never gets the compact bar", async ({ page }) => {
+  await ask(page, "What has Julian worked on?");
+  await expect(page.getByRole("article", { name: "Answer" })).toContainText(DEMO_ANSWER_INTRO);
+  const bar = page
+    .locator("div.fixed")
+    .filter({ has: page.getByText("Julian Palomo", { exact: true }) });
+  await expect(bar).toBeHidden();
+});
+
 test.describe("with reduced motion", () => {
   test.use({ reducedMotion: "reduce" });
 

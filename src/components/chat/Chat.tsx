@@ -32,7 +32,8 @@ const transport = new DefaultChatTransport<ChatUIMessage>({
 });
 
 /** The chat with the assistant. */
-export function Chat() {
+/** `onStarted` runs when the visitor sends their first question. */
+export function Chat({ onStarted }: { onStarted?: () => void }) {
   const locale = useLocale();
   const { messages, sendMessage, status, stop, error } = useChat<ChatUIMessage>({ transport });
   const [input, setInput] = useState("");
@@ -61,6 +62,7 @@ export function Chat() {
   const [flight, setFlight] = useState<{ text: string; from: DOMRect } | null>(null);
 
   function send(text: string, from?: DOMRect) {
+    if (messages.length === 0) onStarted?.();
     setFlight(from ? { text, from } : null);
     setStopped(false);
     void sendMessage({ text });

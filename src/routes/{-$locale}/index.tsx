@@ -1,6 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { z } from "zod";
+import { CompactBar } from "../../components/bar/CompactBar";
 import { Chat } from "../../components/chat/Chat";
 import { useNow } from "../../components/clock/Clock";
 import { LanguageToggle } from "../../components/i18n/LanguageToggle";
@@ -70,7 +71,7 @@ const header =
 const portrait =
   "ml-1 -mt-[60px] h-[120px] w-24 -scale-x-100 rounded-[26px] ring-4 ring-background [image-rendering:pixelated] sm:ml-0 lg:-mt-[75px] lg:h-[150px] lg:w-[120px] lg:rounded-[32px] lg:ring-[6px]";
 const chatCard =
-  "px-4 pt-8 sm:px-6 lg:col-start-3 lg:row-start-2 lg:mt-8 lg:self-start lg:rounded-[20px] lg:border-2 lg:border-border lg:p-6";
+  "scroll-mt-[58px] px-4 pt-8 sm:px-6 lg:col-start-3 lg:row-start-2 lg:mt-8 lg:self-start lg:rounded-[20px] lg:border-2 lg:border-border lg:p-6";
 
 type PanelState = { open: boolean; position: { top: number; left: number } | null };
 
@@ -83,6 +84,17 @@ function Home() {
   const now = useNow();
   const { state: play, dispatch } = usePlay();
   const [panel, setPanel] = useState<PanelState>({ open: false, position: null });
+
+  // After the first question a phone gets the compact bar, and the page
+  // scrolls so the chat fills the screen under it.
+  const [started, setStarted] = useState(false);
+  const chatRef = useRef<HTMLElement>(null);
+  function start() {
+    setStarted(true);
+    if (window.matchMedia("(max-width: 1023px)").matches) {
+      requestAnimationFrame(() => chatRef.current?.scrollIntoView({ block: "start" }));
+    }
+  }
 
   // The gear and the chip open the panel; playing starts from the sky on
   // screen, and the popover sits under whichever was pressed.
@@ -130,8 +142,9 @@ function Home() {
           <p className="mt-3 text-muted">{t(locale, "intro")}</p>
         </div>
       </header>
-      <main className={chatCard}>
-        <Chat />
+      {started && <CompactBar />}
+      <main ref={chatRef} className={chatCard}>
+        <Chat onStarted={start} />
       </main>
       <SiteFooter className="lg:col-start-2 lg:col-end-4 lg:px-0" />
       <SkyPanel
