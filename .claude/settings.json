@@ -71,7 +71,8 @@
       "Bash(pnpm test:e2e)",
       "Bash(pnpm test:e2e *)",
       "Bash(pnpm exec biome check *)",
-      "Bash(bash .claude/hooks/tests/run.sh)"
+      "Bash(bash .claude/hooks/tests/run.sh)",
+      "Bash(pnpm test:hooks)"
     ]
   },
   "hooks": {

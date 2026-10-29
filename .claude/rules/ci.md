@@ -15,6 +15,7 @@ spending more.
 - `check`: `pnpm check` (Biome, then `tsc`).
 - `unit`: `pnpm test`.
 - `knip`: `pnpm knip`.
+- `hooks`: `pnpm test:hooks`, the Claude Code hook tests. GitHub sets `CI=true`, which makes a missing jq or Biome a failure instead of a skipped pass.
 - `e2e`: installs Chromium, runs `pnpm test:e2e`, uploads the Playwright report on failure.
 - `changes`: `git diff` between the merge commit and its first parent, over the paths the evals measure. Outputs `bot`.
 - `evals`: runs only when `changes` says `bot`; otherwise it shows as skipped, which counts as Success for a required check. `pnpm eval` once, on the `EVALS_ANTHROPIC_API_KEY` secret, with the pass rate reported, not enforced. Uploads `evals/results/` and writes the summary to the job's page. `.claude/rules/evals.md` has the rest.
@@ -22,8 +23,6 @@ spending more.
 **The paths list lives in three places**: the `changes` job, the skill `.claude/skills/run-evals/SKILL.md` and `.claude/rules/evals.md`. Keep them in step.
 
 **Never use `pull_request_target`**: it gives a fork's code the repo's secrets. Under `pull_request` a fork gets none, and the `evals` job says so and passes.
-
-The hook tests in `.claude/hooks/tests/` don't run in CI (`docs/tech-debt.md`).
 
 ## No deploy job
 

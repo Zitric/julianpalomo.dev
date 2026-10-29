@@ -17,7 +17,7 @@ pnpm test
 
 - Add `pnpm knip` when the change touches exports, `package.json` or `pnpm-lock.yaml`.
 - Run `/run-evals` for one full `pnpm eval` run when the change touches the files its step 1 lists (the bot, the claims, `evals/` or the dependencies), and put its cost (bot, judge, calibration) in the summary. After changing the judge's prompt, model or effort, also run the calibration alone three times (`EVAL_CALIBRATION_ONLY=1 pnpm eval`) and say whether any item's verdict changed. Both call the real models.
-- Add `bash .claude/hooks/tests/run.sh` when anything in `.claude/hooks/` or `biome.json` changed.
+- Add `pnpm test:hooks` when anything in `.claude/hooks/` or `biome.json` changed. CI runs it too, but a local run catches a break before the push.
 - `pnpm build` and `pnpm test:e2e` when the change touches routes, components, styles, the landscape, the build or CI: run them without asking, and say so in one line before starting. Otherwise rely on CI's e2e job and say so.
 
 A failure stops the handoff: report it with its output.
