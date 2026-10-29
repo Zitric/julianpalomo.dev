@@ -9,7 +9,7 @@ export const es: Messages = {
   // Deliberately the English role from site.ts: a Spanish one needs Julian's approval.
   role: site.role,
   intro:
-    "Pregúntame por mi experiencia. Las respuestas salen solo de datos que he confirmado, con sus fuentes.",
+    "Pregúntame por mi experiencia. Respondo solo con datos que he confirmado, con sus fuentes.",
   portraitAlt: "Retrato en pixel art de Julián Palomo",
   ogBubble: "Pregúntame por la experiencia de Julián",
   ogImageAlt:
@@ -26,7 +26,7 @@ export const es: Messages = {
   chatReady: "Cuando quieras",
   heroCowHello: "¡Hola! Soy la vaca de las Highlands.",
   greeting:
-    "¡Hola! Pregúntame por la experiencia de Julián. Solo respondo con datos que él ha confirmado y te enseño de dónde sale cada uno.",
+    "¡Hola! Pregúntame por la experiencia de Julián. Solo respondo con datos que él ha confirmado, y te enseño de dónde salen.",
   suggestionsLabel: "Preguntas sugeridas",
   suggestions: [
     "¿Qué hizo Julián en Cazoo?",

@@ -1,5 +1,6 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
 import { en } from "../../src/lib/i18n/en";
+import { es } from "../../src/lib/i18n/es";
 
 // The page's entrance (DESIGN.md section 11). Every other spec is a later
 // visit (playwright.config.ts sets the cookie); these start without it.
@@ -7,7 +8,8 @@ test.use({ storageState: { cookies: [], origins: [] } });
 
 const chat = (page: Page) => page.getByRole("region", { name: "Chat" });
 const greeting = (page: Page) => chat(page).locator("p").filter({ hasText: en.greeting }).first();
-const suggestions = (page: Page) => page.getByRole("list", { name: "Suggested questions" });
+const suggestions = (page: Page, label: string = en.suggestionsLabel) =>
+  page.getByRole("list", { name: label });
 const cow = (page: Page) => page.getByRole("button", { name: "Pat the cow" });
 const hero = (page: Page) => page.locator("svg.landscape");
 const playing = (page: Page) => page.locator("[data-entrance]");
@@ -93,21 +95,31 @@ test("the greeting shows no word until it starts typing itself out", async ({ pa
   expect(shown.slice(0, firstWord).every((frame) => !frame.whole && frame.words === 0)).toBe(true);
 });
 
-test("on a 390 × 844 phone the first suggestions show above the composer", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
-  await expect(async () => {
-    await page.getByRole("heading", { level: 1 }).click();
-    await expect(playing(page)).toHaveCount(0, { timeout: 300 });
-  }).toPass({ timeout: 2000 });
-  const first = await suggestions(page).getByRole("listitem").first().boundingBox();
-  const composer = await page
-    .locator("form")
-    .filter({ has: page.getByLabel("Your question") })
-    .boundingBox();
-  if (!first || !composer) throw new Error("not on screen");
-  expect(first.y + first.height).toBeLessThanOrEqual(composer.y);
-});
+for (const [path, messages] of [
+  ["/", en],
+  ["/es", es],
+] as const) {
+  test(`on a 390 × 844 phone the first suggestions show above the composer, at ${path}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(path);
+    await expect(async () => {
+      await page.getByRole("heading", { level: 1 }).click();
+      await expect(playing(page)).toHaveCount(0, { timeout: 300 });
+    }).toPass({ timeout: 2000 });
+    const first = await suggestions(page, messages.suggestionsLabel)
+      .getByRole("listitem")
+      .first()
+      .boundingBox();
+    const composer = await page
+      .locator("form")
+      .filter({ has: page.getByLabel(messages.questionLabel) })
+      .boundingBox();
+    if (!first || !composer) throw new Error("not on screen");
+    expect(first.y + first.height).toBeLessThanOrEqual(composer.y);
+  });
+}
 
 test("a tap shows everything at once", async ({ page }) => {
   await page.goto("/");
