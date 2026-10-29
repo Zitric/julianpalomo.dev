@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Request, test } from "@playwright/test";
 import { DEMO_ANSWER_INTRO } from "../../src/lib/bot/demo";
 
 // These open `/` without a cookie and expect English, so they assume the
@@ -99,4 +99,37 @@ test("a conversation survives a language switch both ways", async ({ page }) => 
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByText("What has Julian worked on?")).toBeVisible();
   await expect(answer).toContainText(DEMO_ANSWER_INTRO);
+});
+
+const isChatPost = (request: Request) =>
+  request.url().endsWith("/api/chat") && request.method() === "POST";
+
+for (const { path, locale, label, send } of [
+  { path: "/", locale: "en", label: "Your question", send: "Send" },
+  { path: "/es", locale: "es", label: "Tu pregunta", send: "Enviar" },
+] as const) {
+  test(`a question on ${path} tells the server the page is "${locale}"`, async ({ page }) => {
+    await page.goto(path);
+    const sent = page.waitForRequest(isChatPost);
+    await page.getByLabel(label).fill("TypeScript?");
+    await page.getByRole("button", { name: send }).click();
+    expect((await sent).postDataJSON()).toMatchObject({ locale });
+  });
+}
+
+test("after a language switch, the next question carries the new page's language", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByLabel("Your question").fill("What has Julian worked on?");
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.getByRole("article", { name: "Answer" })).toContainText(DEMO_ANSWER_INTRO);
+  await expect(page.getByRole("button", { name: "Send" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Ver en español" }).click();
+  await expect(page).toHaveURL(/\/es$/);
+  const sent = page.waitForRequest(isChatPost);
+  await page.getByLabel("Tu pregunta").fill("¿Qué estudió Julian?");
+  await page.getByRole("button", { name: "Enviar" }).click();
+  expect((await sent).postDataJSON()).toMatchObject({ locale: "es" });
 });

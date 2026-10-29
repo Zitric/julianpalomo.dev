@@ -6,7 +6,7 @@ streamed answer with its sources. Every step links to the file that does it.
 ```mermaid
 flowchart TD
   visitor([Visitor types a question]) --> chat[Chat on the home page<br/>useChat]
-  chat -->|POST /api/chat| route[Server route]
+  chat -->|POST /api/chat<br/>with the page's locale| route[Server route]
   route --> key{API key?}
   key -->|no, BOT_DEMO=1| validateDemo{Valid request?}
   key -->|no, no demo| r503[503 unavailable]
@@ -40,7 +40,10 @@ against a visitor's limit.
 uses the AI SDK's `useChat`, which posts the conversation to `/api/chat` and
 reads the streamed answer. It sends only the latest 20 messages, starting with
 a question, so a long conversation never hits the endpoint's cap; the screen
-keeps the whole conversation, and the bot forgets the oldest turns. A counter in
+keeps the whole conversation, and the bot forgets the oldest turns. Each
+question also carries the page's language as `locale`: `en` on `/`, `es` on
+`/es`, read when it is sent, so a question asked after switching language
+carries the new one. A counter in
 [`Composer.tsx`](../src/components/chat/Composer.tsx) keeps a question under
 1,000 characters, so the visitor never hits the endpoint's own limit.
 
@@ -59,8 +62,10 @@ limits in front of it.
 **Validation.** The request body is parsed with Zod: at most 20 messages
 (the chat never sends more, so this only stops forged requests), at
 most 1,000 characters per visitor message, and the conversation must end with
-the visitor's question. Only the text of earlier messages reaches the model,
-so a visitor can't forge a tool result in the history.
+the visitor's question. `locale` must be `en` or `es`; a request without it
+counts as English, since a tab opened before the field existed doesn't send it.
+Only the text of earlier messages reaches the model, so a visitor can't forge a
+tool result in the history.
 
 **The limits.** [`src/lib/bot/usage.ts`](../src/lib/bot/usage.ts) reads
 today's counts from D1 (the tables are in
@@ -74,7 +79,13 @@ answers `429` without calling the model.
 
 **The model and its tools.** Claude Sonnet 5.5, set in
 [`src/lib/bot/model.ts`](../src/lib/bot/model.ts), answers with the system
-prompt in [`src/lib/bot/prompt.ts`](../src/lib/bot/prompt.ts). It can only
+prompt in [`src/lib/bot/prompt.ts`](../src/lib/bot/prompt.ts), cached with
+the tools, and a one-line note after it saying which page the visitor is
+reading. The note sits after the cache breakpoint, so the cached prefix is the
+same on both pages
+([ADR](adr/2026-10-29-page-language-outside-the-cached-prompt.md)). The
+prompt tells the model to answer in the visitor's language and to fall back to
+the page's only when the question doesn't settle it. It can only
 look things up through three read-only tools in
 [`src/lib/bot/tools.ts`](../src/lib/bot/tools.ts), built from the claims Julian
 has confirmed ([`src/lib/claims.ts`](../src/lib/claims.ts)). Demo mode,

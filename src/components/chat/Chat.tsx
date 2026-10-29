@@ -24,7 +24,8 @@ import { useReveal } from "./use-reveal";
 
 // Posts to /api/chat, the default endpoint, with the body the transport sends
 // by default except that only the latest MAX_MESSAGES messages go, so a long
-// conversation never reaches the endpoint's cap. Module-level so the
+// conversation never reaches the endpoint's cap. `body` carries the page's
+// locale, which send() passes with each message. Module-level so the
 // transport isn't rebuilt on every render.
 const transport = new DefaultChatTransport<ChatUIMessage>({
   prepareSendMessagesRequest: ({ body, id, messages, trigger, messageId }) => ({
@@ -77,7 +78,7 @@ export function Chat({ onStarted }: { onStarted?: () => void }) {
     if (messages.length === 0) onStarted?.();
     setFlight(from ? { text, from } : null);
     setStopped(false);
-    void sendMessage({ text });
+    void sendMessage({ text }, { body: { locale } });
     setInput("");
     inputRef.current?.focus();
   }

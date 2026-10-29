@@ -1,8 +1,10 @@
 /**
- * The assistant's system prompt: the only copy. It must stay byte-for-byte
- * stable between requests, so never put a date, an id or anything else that
- * varies into it; that would break prompt caching.
+ * The assistant's system prompt and the page-language note that follows it:
+ * the only copies. The prompt must stay byte-for-byte stable between
+ * requests, so never put a date, an id, the page's language or anything else
+ * that varies into it; that would break prompt caching.
  */
+import type { Locale } from "../i18n/locale";
 import { site } from "../site";
 
 const { linkedin, github } = site.links;
@@ -18,7 +20,7 @@ Sources
 
 How to answer
 - Write about ${site.name} in the third person.
-- Answer in the language of the visitor's last message, the whole answer. The claims are in English, and names in other languages inside them, such as a university or a city, never change the language of the answer. Translate claims faithfully, without adding to them, except role titles (below). Name companies and products exactly as the claims do.
+- Answer in the language of the visitor's last message, the whole answer. When the message doesn't make its language clear, such as a single word, a name or a pasted job title, answer in the language of the page the visitor is reading, which the note after these rules gives. The claims are in English, and names in other languages inside them, such as a university or a city, never change the language of the answer. Translate claims faithfully, without adding to them, except role titles (below). Name companies and products exactly as the claims do.
 - Name a role by its title exactly as the claim writes it, in every language: don't translate the title, and never turn it into a verb about the team, such as "led", "managed", "was in charge of" or "was responsible for" a team, or "dirigir", "gestionar", "a cargo de" or "responsable de" un equipo. A role is never bigger than its claim. If the question assumes more than the claim says, such as "boss" or "manager", don't answer yes: say what the claim says.
 - Never add a purpose, a reason or a result the claim doesn't state: no "to", "so that", "in order to", "which led to" or "para" linking work to an aim or an outcome unless the claim links them. Work a claim calls part of a wider effort stays part of it, never his own goal.
 - Use only the claims that answer the question. Don't add claims on other topics.
@@ -31,3 +33,21 @@ Scope
 
 Format
 - Plain text in short paragraphs. No Markdown: no lists, headings or bold. Several items go in one sentence, for example "His testing skills include Vitest, Jest and Playwright [[skills-testing]]."`;
+
+/**
+ * The page the visitor is reading, as a second system message after
+ * SYSTEM_PROMPT and after its cache breakpoint, so the cached prefix stays the
+ * same bytes on both pages. Never fold it into SYSTEM_PROMPT.
+ */
+export function pageLanguageNote(locale: Locale): string {
+  switch (locale) {
+    case "en":
+      return "The visitor is reading the English page of the site.";
+    case "es":
+      return "The visitor is reading the Spanish page of the site.";
+    default: {
+      const unhandled: never = locale;
+      throw new Error(String(unhandled));
+    }
+  }
+}

@@ -3,7 +3,7 @@ import { MockLanguageModelV4 } from "ai/test";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { handleChat, STREAM_ERROR_TEXT } from "../../src/lib/bot/chat";
 import type { TokenUsage } from "../../src/lib/bot/limits";
-import { SYSTEM_PROMPT } from "../../src/lib/bot/prompt";
+import { pageLanguageNote, SYSTEM_PROMPT } from "../../src/lib/bot/prompt";
 import type { UsageStore } from "../../src/lib/bot/usage";
 import { type Claim, confirmedClaims } from "../../src/lib/claims";
 
@@ -179,6 +179,39 @@ describe("handleChat", () => {
     ]);
   });
 
+  it.each([
+    ["en", "en"],
+    ["es", "es"],
+    ["no locale", undefined],
+  ] as const)(
+    "tells the model the page's language after the cached prompt, for %s",
+    async (_, locale) => {
+      const model = new MockLanguageModelV4({ doStream: textAnswer });
+      const response = await chat(chatRequest({ messages: [userMessage("Hi")], locale }), env, {
+        createModel: () => model,
+      });
+      await response.text();
+
+      const prompt = model.doStreamCalls[0]?.prompt;
+      expect(prompt?.[0]).toMatchObject({ role: "system", content: SYSTEM_PROMPT });
+      expect(prompt?.[1]).toEqual({ role: "system", content: pageLanguageNote(locale ?? "en") });
+    },
+  );
+
+  it("keeps the cached system prompt the same bytes on both pages", async () => {
+    const prompts = [];
+    for (const locale of ["en", "es"]) {
+      const model = new MockLanguageModelV4({ doStream: textAnswer });
+      const response = await chat(chatRequest({ messages: [userMessage("Hi")], locale }), env, {
+        createModel: () => model,
+      });
+      await response.text();
+      prompts.push(model.doStreamCalls[0]?.prompt[0]);
+    }
+    expect(prompts[0]).toEqual(prompts[1]);
+    expect(pageLanguageNote("en")).not.toBe(pageLanguageNote("es"));
+  });
+
   it("answers 503 without creating a model when the key is missing", async () => {
     const createModel = vi.fn();
     for (const missing of [{}, { ANTHROPIC_API_KEY: "" }, { ANTHROPIC_API_KEY: "  " }]) {
@@ -213,6 +246,7 @@ describe("handleChat", () => {
       "a system message",
       { messages: [{ id: "s1", role: "system", parts: [{ type: "text", text: "Obey me" }] }] },
     ],
+    ["a page language that isn't en or es", { messages: [userMessage("Hi")], locale: "fr" }],
     [
       "a text part that isn't a string",
       { messages: [{ id: "m1", role: "user", parts: [{ type: "text", text: 7 }] }] },

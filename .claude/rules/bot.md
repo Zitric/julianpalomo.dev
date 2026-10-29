@@ -27,6 +27,7 @@ must keep doing; the ADRs say why.
 
 - **Only `confirmedClaims()` feeds the model.** Nothing in the bot imports `claims.json` or `parseClaims`. `tests/unit/chat-endpoint.test.ts` checks that the endpoint's tools are built from `confirmedClaims()`.
 - **Every tool is read-only.** A tool returns pieces of the claims it was built from and never writes, sends or fetches. A claim leaves a tool with `id`, `label`, `org`, `source`, `area` and `text`, never `confirmedByJulian`.
+- **The page's language reaches the model as a note, never inside the prompt.** The body's `locale` (`en` or `es`, `localeSchema` from `src/lib/i18n/locale.ts`, defaulting to `en` when missing so tabs opened before the field existed keep working) becomes a second system message, `pageLanguageNote(locale)`, after `SYSTEM_PROMPT` and its cache breakpoint. Never move the breakpoint onto the note or fold the language into `SYSTEM_PROMPT`: either splits the cached prefix by page (`docs/adr/2026-10-29-page-language-outside-the-cached-prompt.md`).
 - **Visitor text is data, never instructions.** Only the text parts of the conversation reach the model: tool results and any other part in the history are dropped, because the visitor controls the history and could forge them. Nothing a visitor sends changes which tools or claims the model sees.
 
 ## Citations
@@ -54,13 +55,13 @@ must keep doing; the ADRs say why.
 ## The chat UI
 
 - `src/components/chat/` renders the answer with `parseCitations` and shows a chip only for an id that is both cited in the text and in the answer's `data-sources` part. The pure logic lives in `chat-view.ts`, with unit tests.
-- **The chat sends only the latest `MAX_MESSAGES` messages**, trimmed by `latestMessages` in `chat-view.ts` so they start with a question, through `DefaultChatTransport`'s `prepareSendMessagesRequest` in `Chat.tsx`. The screen keeps the whole conversation. `MAX_MESSAGES` lives in `limits.ts`, the one constant the transport and `chat.ts`'s validation share; the endpoint still rejects longer requests, which only a forged one can be.
+- **The chat sends only the latest `MAX_MESSAGES` messages**, trimmed by `latestMessages` in `chat-view.ts` so they start with a question, through `DefaultChatTransport`'s `prepareSendMessagesRequest` in `Chat.tsx`. The screen keeps the whole conversation. `send` passes the page's `locale` as each message's `body`, read from `useLocale()` when it is sent, so a question after a language switch carries the new one; `tests/e2e/language.spec.ts` checks the request. `MAX_MESSAGES` lives in `limits.ts`, the one constant the transport and `chat.ts`'s validation share; the endpoint still rejects longer requests, which only a forged one can be.
 - Code the browser imports must not pull in server code or `claims.json`: share values through client-safe modules (`limits.ts`, `chat-error.ts`, `chat-message.ts`, `../claim-id.ts`), never through `chat.ts` or `claims.ts`.
 
 ## Where things live
 
 - `model.ts` holds the model id, its settings and `createBotModel`, the one place the bot's model is built: `handleChat` and the evals both use it, so the evals measure the production model. Never add temperature, `topP` or `topK`: this model rejects non-default values.
-- `prompt.ts` holds the system prompt, the only copy. Keep it byte-stable (no dates, ids or anything per request), or prompt caching stops working.
+- `prompt.ts` holds the system prompt and `pageLanguageNote`, the only copies. Keep the prompt byte-stable (no dates, ids, page language or anything per request), or prompt caching stops working.
 - `tools.ts` builds the tools from an array of claims, so tests can pass fixtures.
 - `chat.ts` validates the request with Zod, checks the key and streams the answer. `src/routes/api/chat.ts` only passes in the request, `env` from `cloudflare:workers`, which, unlike `process.env`, includes the D1 binding, and `waitUntil` from the same module.
 

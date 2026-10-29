@@ -20,21 +20,22 @@ files are the answer, written down at the time instead of remembered later.
 
 ## Decisions so far
 
-| Date       | Decision                                                                                             |
-| ---------- | ---------------------------------------------------------------------------------------------------- |
-| 2026-10-26 | [A new repository, not a fork](2026-10-26-new-repo-not-fork.md)                                      |
-| 2026-10-26 | [TanStack Start on Cloudflare](2026-10-26-tanstack-start-on-cloudflare.md)                           |
-| 2026-10-26 | [The Vercel AI SDK with Claude and read-only tools](2026-10-26-ai-sdk-claude-read-only-tools.md)     |
-| 2026-10-26 | [The assistant answers only from confirmed claims](2026-10-26-answers-only-from-confirmed-claims.md) |
-| 2026-10-26 | [The AI-first setup](2026-10-26-ai-first-setup.md)                                                   |
-| 2026-10-26 | [The site in English and Spanish](2026-10-26-english-and-spanish.md)                                 |
-| 2026-10-26 | [The licence split](2026-10-26-licence-split.md)                                                     |
-| 2026-10-26 | [Git rules and the issue workflow](2026-10-26-git-rules-and-issue-workflow.md)                       |
-| 2026-10-27 | [Deploys with Cloudflare Workers Builds](2026-10-27-deploy-with-workers-builds.md)                   |
-| 2026-10-27 | [Claims in English only](2026-10-27-claims-in-english-only.md)                                       |
-| 2026-10-27 | [Claude Haiku 5.5 at low effort, on AI SDK 7](2026-10-27-claude-model-and-ai-sdk-7.md)               |
-| 2026-10-28 | [The visual direction: a live Highland landscape and a cow](2026-10-28-visual-direction.md)          |
-| 2026-10-28 | [Claude Sonnet 5.5 for the bot, at low effort](2026-10-28-claude-sonnet-for-the-bot.md)              |
-| 2026-10-28 | [One URL per language: / in English, /es in Spanish](2026-10-28-language-urls.md)                    |
-| 2026-10-28 | [Evals in CI, with the pass rate reported, not enforced](2026-10-28-evals-in-ci.md)                  |
-| 2026-10-29 | [The CI evals run on a label, not on every push](2026-10-29-evals-on-a-label.md)                     |
+| Date       | Decision                                                                                                  |
+| ---------- | --------------------------------------------------------------------------------------------------------- |
+| 2026-10-26 | [A new repository, not a fork](2026-10-26-new-repo-not-fork.md)                                           |
+| 2026-10-26 | [TanStack Start on Cloudflare](2026-10-26-tanstack-start-on-cloudflare.md)                                |
+| 2026-10-26 | [The Vercel AI SDK with Claude and read-only tools](2026-10-26-ai-sdk-claude-read-only-tools.md)          |
+| 2026-10-26 | [The assistant answers only from confirmed claims](2026-10-26-answers-only-from-confirmed-claims.md)      |
+| 2026-10-26 | [The AI-first setup](2026-10-26-ai-first-setup.md)                                                        |
+| 2026-10-26 | [The site in English and Spanish](2026-10-26-english-and-spanish.md)                                      |
+| 2026-10-26 | [The licence split](2026-10-26-licence-split.md)                                                          |
+| 2026-10-26 | [Git rules and the issue workflow](2026-10-26-git-rules-and-issue-workflow.md)                            |
+| 2026-10-27 | [Deploys with Cloudflare Workers Builds](2026-10-27-deploy-with-workers-builds.md)                        |
+| 2026-10-27 | [Claims in English only](2026-10-27-claims-in-english-only.md)                                            |
+| 2026-10-27 | [Claude Haiku 5.5 at low effort, on AI SDK 7](2026-10-27-claude-model-and-ai-sdk-7.md)                    |
+| 2026-10-28 | [The visual direction: a live Highland landscape and a cow](2026-10-28-visual-direction.md)               |
+| 2026-10-28 | [Claude Sonnet 5.5 for the bot, at low effort](2026-10-28-claude-sonnet-for-the-bot.md)                   |
+| 2026-10-28 | [One URL per language: / in English, /es in Spanish](2026-10-28-language-urls.md)                         |
+| 2026-10-28 | [Evals in CI, with the pass rate reported, not enforced](2026-10-28-evals-in-ci.md)                       |
+| 2026-10-29 | [The CI evals run on a label, not on every push](2026-10-29-evals-on-a-label.md)                          |
+| 2026-10-29 | [The page's language goes after the cached prompt](2026-10-29-page-language-outside-the-cached-prompt.md) |
