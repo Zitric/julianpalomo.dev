@@ -38,6 +38,7 @@ blocks something, change course; don't look for another way to run it.
 - Explore, plan, implement, then `/handoff` (checks, docs, commit, both reviewer subagents, change summary) and `/ship-pr` (push, PR, CI). `/implement-issue <N>` runs the whole loop.
 - **Act on PR reviews.** After a review of your PR, read it with `gh`, apply it, and reply on the PR with what you didn't apply and why.
 - **Eval budgets.** If the issue sets an eval budget, spend up to it without asking and report the cost in the PR.
+- **The `run-evals` label.** CI runs the evals, about $0.70, only when that label is added to a pull request that touches the bot, never on a push. Julián or the cloud reviewer adds it; local Claude Code never does, and suggests it in the PR body when the bot paths changed.
 - Each commit typechecks and builds on its own. Subjects are short, lowercase and imperative ("add …", "fix …").
 
 ## 3. Commands
@@ -76,7 +77,7 @@ wrangler commands that change Cloudflare.
 - `src/styles/tokens.css`: the only place colours are defined.
 - `evals/`: the evals: cases, code checks, the judge and its calibration, the runner and its report, run by `pnpm eval` with `vitest.evals.config.ts` (`.claude/rules/evals.md`).
 - `tests/unit/`: Vitest. `tests/e2e/`: Playwright, against a production build of the `e2e` environment, in demo mode (`.claude/rules/tests.md`).
-- `.github/workflows/ci.yml`: CI on every pull request to `main`. Deploys aren't here: Cloudflare Workers Builds deploys `main` and comments a preview URL on every PR.
+- `.github/workflows/ci.yml`: CI on every pull request to `main`; the evals only on the `run-evals` label. Deploys aren't here: Cloudflare Workers Builds deploys `main` and comments a preview URL on every PR.
 - `docs/adr/`: one file per decision. `docs/tech-debt.md`: shortcuts taken on purpose.
 - `.claude/`: rules, hooks, skills and subagents for Claude Code; `.claude/README.md` explains them.
 

@@ -7,7 +7,7 @@ sections.
 - **First line:** `Closes #N.` plus `Part of #M.` when the issue belongs to an epic.
 - **`## What`:** one paragraph saying what the PR delivers, then one bullet per area with the lead word in bold (`**Hooks**: …`).
 - **`## Decisions worth a look`:** anything a reviewer could reasonably have chosen differently, and why it went this way. This is where the complex parts go.
-- **`## Checks`:** every command run locally and its result, then what was not run or not verified and why, then CI's result.
+- **`## Checks`:** every command run locally and its result, then what was not run or not verified and why, then CI's result. When the diff touches the paths the evals measure (`.claude/rules/evals.md`, "In CI"), end it with a line suggesting the `run-evals` label, which only Julian or the cloud reviewer adds.
 - **`## Review`:** what `constraint-reviewer` and `docs-truth-checker` reported at handoff, what was fixed, and why any finding stays. Always present.
 
 Other sections the change doesn't need are left out; don't pad.

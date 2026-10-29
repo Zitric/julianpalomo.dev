@@ -51,15 +51,22 @@ which is gitignored.
 ## In CI
 
 The `evals` job in [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)
-runs `pnpm eval` once on every pull request that changes the assistant's
-code or anything it reads (the site's name and links, how claim ids look),
-the claims, the evals, or the dependencies, since an upgrade such as the AI
-SDK's can change the answers. The exact list is in
-[`.claude/rules/evals.md`](../.claude/rules/evals.md). On any other pull
-request the job shows as skipped.
+runs `pnpm eval` once when the `run-evals` label is added to a pull request
+that changes the assistant's code or anything it reads (the site's name and
+links, how claim ids look), the claims, the evals, or the dependencies, since
+an upgrade such as the AI SDK's can change the answers. The exact list is in
+[`.claude/rules/evals.md`](../.claude/rules/evals.md). A push never starts
+it, so a doc fix or a merge of `main` doesn't pay for another run
+([evals on a label](adr/2026-10-29-evals-on-a-label.md)). Julian adds the
+label, or the cloud reviewer does once the other checks are green; Claude Code
+never does.
 
+- On a pull request that changes those paths, every run that doesn't measure
+  it shows a notice: "This pull request changes what the bot sees. To measure
+  this commit, add the `run-evals` label (or remove it and add it again)."
 - It runs on a separate Anthropic key, Julian's `EVALS_ANTHROPIC_API_KEY`
-  secret, at about $0.70 a push. A new push cancels the run in progress.
+  secret, at about $0.70 a run. A new push cancels the run in progress, which
+  would measure a stale commit.
 - The job's summary page has the result, the score, the critical failures and
   the cost, and the `eval-results` artifact has the full JSON. The repo is
   public, so the artifact is too: it holds the answers and the claims they
