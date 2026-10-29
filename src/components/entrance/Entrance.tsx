@@ -36,7 +36,7 @@ type EntranceView = {
   cow: CowState | null;
   /** Where the full entrance is, for the cow's flight; null outside it. */
   flight: { beat: Beat; join: Join } | null;
-  /** Whether the hero's "Hi! I'm the Highland cow." is up. */
+  /** Whether the hero's "Hi! I'm the Highland cow" is up. */
   bubble: boolean;
   /** How much of the greeting is on screen while it types itself out; undefined when it's whole. */
   greetingTyped: number | undefined;

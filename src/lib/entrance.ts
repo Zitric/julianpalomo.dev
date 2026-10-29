@@ -45,7 +45,7 @@ export function entranceCookie({ secure }: { secure: boolean }) {
 export const BEATS = {
   /** The cow pops up, big, in the middle of the hero, and talks. */
   heroCow: 2500,
-  /** "Hi! I'm the Highland cow." appears above it… */
+  /** "Hi! I'm the Highland cow" appears beside or above it… */
   bubble: 3150,
   /** …it stops talking and licks once… */
   heroLick: 4250,

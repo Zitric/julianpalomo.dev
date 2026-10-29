@@ -10,10 +10,10 @@ import { useEntrance } from "./Entrance";
 // its height (79px, from heroCowWidth) and 8px more. z-20 paints it over the
 // cow, whose z-10 comes later in the page.
 const bubble =
-  "bubble-pop pointer-events-none absolute top-[96px] left-[calc(50%+62px)] z-20 w-[92px] rounded-[14px] border-[1.5px] border-border bg-field px-2.5 py-1.5 font-display text-sm leading-tight font-bold text-foreground lg:top-auto lg:bottom-[calc(50%+87px)] lg:left-1/2 lg:w-auto lg:-translate-x-1/2 lg:rounded-full lg:px-3 lg:py-1 lg:whitespace-nowrap";
+  "bubble-pop pointer-events-none absolute top-[96px] left-[calc(50%+62px)] z-20 w-[92px] rounded-[14px] border-[1.5px] border-border bg-field px-2.5 py-1.5 text-center font-display text-sm leading-tight font-bold text-foreground lg:top-auto lg:bottom-[calc(50%+87px)] lg:left-1/2 lg:w-auto lg:-translate-x-1/2 lg:rounded-full lg:px-3 lg:py-1 lg:whitespace-nowrap";
 
 /**
- * "Hi! I'm the Highland cow." beside or over the big cow in the hero, for
+ * "Hi! I'm the Highland cow" beside or over the big cow in the hero, centred, for
  * 1.7s of the full entrance. It's decoration, hidden from screen readers:
  * they read the whole greeting in the chat from the start.
  */

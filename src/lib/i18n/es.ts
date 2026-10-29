@@ -24,7 +24,7 @@ export const es: Messages = {
   chatLabel: "Chat",
   chatHeading: "Pregúntame por Julián",
   chatReady: "Cuando quieras",
-  heroCowHello: "¡Hola! Soy la vaca de las Highlands.",
+  heroCowHello: "¡Hola! Soy la vaca de las Highlands",
   greeting:
     "¡Hola! Pregúntame por la experiencia de Julián. Solo respondo con datos que él ha confirmado, y te enseño de dónde salen.",
   suggestionsLabel: "Preguntas sugeridas",
