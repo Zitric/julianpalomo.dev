@@ -1,8 +1,14 @@
 import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
-import { rememberChoice } from "../../lib/cookie";
+import { forgetChoice, rememberChoice } from "../../lib/cookie";
 import type { Locale } from "../../lib/i18n/locale";
 import { playTheme } from "../../lib/scene/play";
-import { resolveTheme, THEME_COOKIE, type Theme } from "../../lib/theme";
+import {
+  resolveTheme,
+  THEME_COOKIE,
+  type Theme,
+  type ThemeChoice,
+  themeChoiceCookie,
+} from "../../lib/theme";
 import { useNow } from "../clock/Clock";
 import { usePlay } from "../play/Play";
 
@@ -22,7 +28,7 @@ const CHANGE_MS: Record<ThemeChange["kind"], number> = { toggle: 600, auto: 6000
 type ThemeState = {
   /** The theme on screen. */
   theme: Theme;
-  /** The visitor's stored choice, or null while the theme follows Glasgow. */
+  /** The visitor's choice while it lasts, or null while the theme follows Glasgow. */
   choice: Theme | null;
   /** What Glasgow's sun says right now, whatever the visitor chose. */
   glasgowTheme: Theme;
@@ -36,8 +42,8 @@ type ThemeState = {
 const ThemeContext = createContext<ThemeState | null>(null);
 
 type Props = {
-  /** The `theme` cookie as the server read it. */
-  initialChoice: Theme | null;
+  /** The choice in the `theme` cookie as the server read it. */
+  initialChoice: ThemeChoice | null;
   /** The page's language, for <html lang>. */
   lang: Locale;
   /** The document's <head> and <body>. */
@@ -51,10 +57,14 @@ export function ThemeDocument({ initialChoice, lang, children }: Props) {
   const [change, setChange] = useState<ThemeChange | null>(null);
   const { state: play, dispatch } = usePlay();
   const glasgowTheme = resolveTheme({ choice: null, now });
+  // A choice lasts until Glasgow's next dusk or dawn: the minute clock ends it,
+  // as the cookie's Max-Age does. It ends when Glasgow comes round to the same
+  // theme, so its end never changes the theme on screen.
+  const chosen = choice !== null && now < choice.until ? choice.theme : null;
   // While playing, the visitor's own sky sets the theme (night is dark), and
-  // the stored choice is left alone for when they go back to live.
+  // the choice is left alone for when they go back to live.
   const toyTheme = playTheme(play, now);
-  const theme = toyTheme ?? choice ?? glasgowTheme;
+  const theme = toyTheme ?? chosen ?? glasgowTheme;
 
   // The theme changed without a press of the toggle: Glasgow's dusk or dawn
   // arrived while it follows Glasgow, or the panel moved the sky (or the
@@ -79,8 +89,17 @@ export function ThemeDocument({ initialChoice, lang, children }: Props) {
     // choice (13:00 for light, the night for dark).
     if (play.status === "playing") dispatch({ type: "themeToggled", to: next, now });
     else {
-      rememberChoice(THEME_COOKIE, next);
-      setChoice(next);
+      // Back to Glasgow's own theme ends the choice; any other lasts until
+      // its next dusk or dawn. Date.now, not the minute clock, so the end is
+      // exact.
+      const cookie = themeChoiceCookie(next, Date.now());
+      if (cookie.action === "delete") {
+        forgetChoice(THEME_COOKIE);
+        setChoice(null);
+      } else {
+        rememberChoice(THEME_COOKIE, cookie.value, cookie.maxAge);
+        setChoice(cookie.choice);
+      }
     }
     setChange({ kind: "toggle" });
     setToggled(true);
@@ -88,7 +107,7 @@ export function ThemeDocument({ initialChoice, lang, children }: Props) {
 
   return (
     <ThemeContext
-      value={{ theme, choice, glasgowTheme, change, fromToy: toyTheme !== null, toggle }}
+      value={{ theme, choice: chosen, glasgowTheme, change, fromToy: toyTheme !== null, toggle }}
     >
       <html lang={lang} data-theme={theme} data-theme-change={change?.kind}>
         {children}

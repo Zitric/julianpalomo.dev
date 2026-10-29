@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
 
+// A light theme choice that lasts a day: the cookie holds its end (src/lib/theme.ts).
+const LIGHT_FOR_A_DAY = `light.${Date.now() + 24 * 60 * 60 * 1000}`;
+
 // The e2e build sets SCENE_OVERRIDE (wrangler.jsonc's env.e2e), so `?sky=`
 // fixes the scene. That `?sky=` is ignored without the variable is unit-tested
 // in tests/unit/scene.test.ts, since this build always has it.
@@ -54,7 +57,7 @@ test("the hero keeps its height and stays behind the controls", async ({
   context,
   baseURL,
 }) => {
-  await context.addCookies([{ name: "theme", value: "light", url: baseURL ?? "" }]);
+  await context.addCookies([{ name: "theme", value: LIGHT_FOR_A_DAY, url: baseURL ?? "" }]);
   await page.setViewportSize({ width: 390, height: 800 });
   await page.goto("/?sky=summer,15:00");
   const hero = page.locator("svg.landscape");
@@ -65,7 +68,7 @@ test("the hero keeps its height and stays behind the controls", async ({
 });
 
 test("toggling the theme runs the landscape's sunset", async ({ page, context, baseURL }) => {
-  await context.addCookies([{ name: "theme", value: "light", url: baseURL ?? "" }]);
+  await context.addCookies([{ name: "theme", value: LIGHT_FOR_A_DAY, url: baseURL ?? "" }]);
   await page.goto("/");
   const scene = page.locator("svg.landscape");
   await page.getByRole("button", { name: "Switch to dark theme" }).click();

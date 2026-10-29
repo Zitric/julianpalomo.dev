@@ -1,5 +1,7 @@
 # The visual direction: a live Highland landscape and a cow
 
+Partly superseded by [`2026-10-29-theme-choice-until-next-twilight.md`](2026-10-29-theme-choice-until-next-twilight.md): a theme choice lasts until Glasgow's next dusk or dawn, not a year.
+
 - **Status:** Accepted
 - **Date:** 2026-10-28
 

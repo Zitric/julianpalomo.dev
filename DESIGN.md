@@ -218,18 +218,27 @@ night in Glasgow**, wherever the visitor is.
   it's 6° below in the morning. Sunrise, sunset and the sun's elevation are
   computed in code with the NOAA solar equations. There is no API call and no
   dependency.
-- **The toggle always wins and is remembered.** Pressing it sets the other
-  theme and stores the choice. From then on the site keeps that theme until
-  the visitor presses it again.
+- **The toggle wins until Glasgow's next dusk or dawn.** Pressing it sets
+  the other theme until Glasgow's next civil dusk or civil dawn, when the sun
+  next crosses 6° below the horizon. Then the choice ends and the site
+  follows Glasgow again. Pressing it back to Glasgow's current theme ends the
+  choice at once, so two presses in a row return to following Glasgow. At
+  23:00, pressing light lasts until dawn, when Glasgow is light anyway; at
+  14:00, pressing dark lasts until dusk. Either way, the next evening or
+  morning follows Glasgow.
 - **No flash, without a head script.** The choice is stored in a cookie
-  (`theme=light|dark`, one year). The server renders `<html data-theme>` from
-  the cookie, or from Glasgow's sun at the time of the request, so the first
-  paint is already right and there's no inline script to keep in step with the
-  TypeScript.
-- **While the page is open**, the client re-checks every minute. If the
-  visitor hasn't chosen and Glasgow's dusk or dawn arrives, the theme changes
-  by itself with the same choreography as the toggle, but slower (about 6s),
-  so it doesn't startle.
+  that carries its end, `theme=dark.<epoch ms>`, with a `Max-Age` up to that
+  moment. The server renders `<html data-theme>` from a choice that hasn't
+  ended, or from Glasgow's sun at the time of the request, so the first paint
+  is already right and there's no inline script to keep in step with the
+  TypeScript. A cookie whose end has passed, or an old one-year `theme=dark`
+  without an end, is no choice, and the server deletes it.
+- **While the page is open**, the client re-checks every minute and ends a
+  choice whose end has passed. When the theme follows Glasgow and its dusk
+  or dawn arrives, the theme changes by itself with the same choreography as
+  the toggle, but slower (about 6s), so it doesn't startle. A choice ends
+  just as Glasgow comes round to the same theme, so its end changes nothing
+  on screen.
 - **The landscape matches the theme.** Normally it shows Glasgow's real time.
   If the chosen theme disagrees with it (dark during Glasgow's day, or light
   at night), the landscape shows a representative moment instead: today's
@@ -473,6 +482,13 @@ Comeau's blog. It's a toy, and it's honest about being one.
       Gale, Gale.
   - **Switches:** "Snow instead of rain" and "Haar".
   - **"Back to live Glasgow"**: a wide flat button with the live dot.
+- **Playing starts on the first change.** Opening the panel shows the
+  controls set to the live sky on screen, and changes nothing: the chip stays
+  live, the sky follows the clock and the theme rule is untouched. The first
+  change to any control (a season, the time, a level, a switch) starts
+  playing from the live sky at that moment, with that change. Closing the
+  panel without a change leaves everything live, and pressing the theme
+  toggle then is an ordinary toggle.
 - **While playing**, the slider's time also drives the theme (night is dark),
   the chip turns `accent` and reads "Your sky · 15:00 · tap to reset" ("Your
   sky · 15:00" on a phone), and tapping it goes back to live. A season other

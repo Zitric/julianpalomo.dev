@@ -2,8 +2,11 @@ import { expect, type Locator, type Page, test } from "@playwright/test";
 
 // Play with the sky (DESIGN.md section 8). /api/weather is answered here, so
 // the live sky is fixed: clear and dry, so any rain on screen is the visitor's.
+// A light theme choice that lasts a day: the cookie holds its end (src/lib/theme.ts).
+const LIGHT_FOR_A_DAY = `light.${Date.now() + 24 * 60 * 60 * 1000}`;
+
 test.beforeEach(async ({ page, context, baseURL }) => {
-  await context.addCookies([{ name: "theme", value: "light", url: baseURL ?? "" }]);
+  await context.addCookies([{ name: "theme", value: LIGHT_FOR_A_DAY, url: baseURL ?? "" }]);
   await page.route("**/api/weather", (route) =>
     route.fulfill({
       json: {
@@ -57,6 +60,34 @@ test("the bubble shows on a first visit only", async ({ page }) => {
   await expect(bubble).toHaveCount(0);
 });
 
+test("opening and closing the panel leaves the live sky, the live chip and the theme cookie", async ({
+  page,
+  context,
+}) => {
+  await page.goto("/");
+  await gear(page).click();
+  await expect(panel(page)).toBeVisible();
+  // The controls show the live sky, but nothing plays until one changes.
+  await expect(panel(page).getByLabel("Rain", { exact: true })).toHaveValue("0");
+  await expect(page.getByRole("button", { name: /^Weather in Glasgow:/ })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(panel(page)).toBeHidden();
+  await expect(page.getByRole("button", { name: /^Weather in Glasgow:/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Your sky/ })).toHaveCount(0);
+  const cookie = (await context.cookies()).find(({ name }) => name === "theme");
+  expect(cookie?.value).toBe(LIGHT_FOR_A_DAY);
+});
+
+test("the first change in the panel starts playing", async ({ page }) => {
+  await page.goto("/");
+  await gear(page).click();
+  await expect(page.getByRole("button", { name: /^Your sky/ })).toHaveCount(0);
+  await panel(page).getByLabel("Clouds").fill("4");
+  await expect(
+    page.getByRole("button", { name: /^Your sky, \d{2}:00\. Back to live Glasgow$/ }),
+  ).toBeVisible();
+});
+
 test("rain to 8 rains on the landscape and the chip says it's the visitor's sky", async ({
   page,
 }) => {
@@ -94,7 +125,7 @@ test("22:00 makes the page dark, and a reload brings back the real theme", async
   await panel(page).getByLabel("Time of day").fill("22");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   const cookie = (await context.cookies()).find(({ name }) => name === "theme");
-  expect(cookie?.value).toBe("light");
+  expect(cookie?.value).toBe(LIGHT_FOR_A_DAY);
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 });

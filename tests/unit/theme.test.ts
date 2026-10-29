@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { glasgow } from "../../src/lib/glasgow";
 import { sunTimes } from "../../src/lib/sun";
-import { isGlasgowNight, parseThemeCookie, resolveTheme } from "../../src/lib/theme";
+import {
+  isGlasgowNight,
+  parseThemeCookie,
+  resolveTheme,
+  themeChoiceCookie,
+} from "../../src/lib/theme";
 
 const MINUTE = 60_000;
 
@@ -47,15 +52,55 @@ describe("resolveTheme", () => {
 });
 
 describe("parseThemeCookie", () => {
-  it("reads light and dark", () => {
-    expect(parseThemeCookie("light")).toBe("light");
-    expect(parseThemeCookie("dark")).toBe("dark");
+  it("reads a theme and when it ends", () => {
+    expect(parseThemeCookie(`dark.${civilDusk}`, solarNoon)).toEqual({
+      theme: "dark",
+      until: civilDusk,
+    });
+    expect(parseThemeCookie(`light.${civilDusk}`, solarNoon)).toEqual({
+      theme: "light",
+      until: civilDusk,
+    });
   });
 
-  it("treats a missing or unknown value as no choice", () => {
-    expect(parseThemeCookie(undefined)).toBeNull();
-    expect(parseThemeCookie("")).toBeNull();
-    expect(parseThemeCookie("Dark")).toBeNull();
-    expect(parseThemeCookie("system")).toBeNull();
+  it("treats a choice that has ended as no choice", () => {
+    expect(parseThemeCookie(`dark.${civilDusk}`, civilDusk)).toBeNull();
+    expect(parseThemeCookie(`dark.${civilDusk}`, civilDusk + MINUTE)).toBeNull();
+  });
+
+  it("treats the old one-year format, without an end, as no choice", () => {
+    expect(parseThemeCookie("light", solarNoon)).toBeNull();
+    expect(parseThemeCookie("dark", solarNoon)).toBeNull();
+  });
+
+  it("treats a missing or malformed value as no choice", () => {
+    expect(parseThemeCookie(undefined, solarNoon)).toBeNull();
+    expect(parseThemeCookie("", solarNoon)).toBeNull();
+    expect(parseThemeCookie(`Dark.${civilDusk}`, solarNoon)).toBeNull();
+    expect(parseThemeCookie(`system.${civilDusk}`, solarNoon)).toBeNull();
+    expect(parseThemeCookie("dark.soon", solarNoon)).toBeNull();
+    expect(parseThemeCookie(`dark.${civilDusk}.1`, solarNoon)).toBeNull();
+  });
+});
+
+describe("themeChoiceCookie", () => {
+  it("stores the other theme until Glasgow's next dusk or dawn", () => {
+    expect(themeChoiceCookie("dark", solarNoon)).toEqual({
+      action: "set",
+      value: `dark.${civilDusk}`,
+      maxAge: Math.ceil((civilDusk - solarNoon) / 1000),
+      choice: { theme: "dark", until: civilDusk },
+    });
+  });
+
+  it("deletes the cookie when the press comes back to Glasgow's own theme", () => {
+    expect(themeChoiceCookie("light", solarNoon)).toEqual({ action: "delete" });
+    expect(themeChoiceCookie("dark", civilDusk + MINUTE)).toEqual({ action: "delete" });
+  });
+
+  it("rounds Max-Age up, so a press seconds before the twilight still stores a live cookie", () => {
+    // Twilights are found to the second, so 1.5s before dusk is still day.
+    const cookie = themeChoiceCookie("dark", civilDusk - 1500);
+    expect(cookie).toMatchObject({ action: "set", maxAge: 2 });
   });
 });
