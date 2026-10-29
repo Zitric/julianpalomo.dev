@@ -55,7 +55,12 @@ export function Chat() {
   // Sending swaps Send for Stop, a suggestion removes its own button, and
   // stopping removes Stop. Each would leave keyboard focus on the page, so it
   // goes back to the question box instead.
-  function send(text: string) {
+  // The question a suggestion chip sent, and where the chip was: its bubble
+  // flies in from there.
+  const [flight, setFlight] = useState<{ text: string; from: DOMRect } | null>(null);
+
+  function send(text: string, from?: DOMRect) {
+    setFlight(from ? { text, from } : null);
     setStopped(false);
     void sendMessage({ text });
     setInput("");
@@ -98,6 +103,7 @@ export function Chat() {
       {messages.length > 0 && (
         <MessageList
           messages={messages}
+          flight={flight}
           streamingId={streamingId}
           cowSlot={cowSlot}
           cowState={cowState}
@@ -115,7 +121,7 @@ export function Chat() {
         <button
           type="button"
           onClick={scrollToBottom}
-          className="fixed bottom-6 left-1/2 z-20 min-h-11 -translate-x-1/2 rounded-full bg-accent px-4 text-[13px] font-semibold text-on-accent"
+          className="fixed bottom-44 left-1/2 z-20 lg:bottom-6 min-h-11 -translate-x-1/2 rounded-full bg-accent px-4 text-[13px] font-semibold text-on-accent"
         >
           {t(locale, "newAnswer")}
         </button>

@@ -41,6 +41,7 @@ export const es: Messages = {
   fromCv: "de su CV",
   fromJulian: "de Julián",
   newAnswer: "Nueva respuesta ↓",
+  composerHint: "Intro para enviar · Mayús+Intro para una línea nueva",
   answerLabel: "Respuesta",
   sourcesLabel: "Fuentes",
   sourceNames: { cv: "CV", julian: "Julián" },

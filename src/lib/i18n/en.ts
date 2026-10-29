@@ -49,6 +49,7 @@ export const en = {
   fromCv: "from his CV",
   fromJulian: "from Julian",
   newAnswer: "New answer ↓",
+  composerHint: "Enter to send · Shift+Enter for a new line",
   answerLabel: "Answer",
   sourcesLabel: "Sources",
   sourceNames: { cv: "CV", julian: "Julian" },

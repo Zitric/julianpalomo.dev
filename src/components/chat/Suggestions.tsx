@@ -4,7 +4,8 @@ type Props = {
   /** A visible heading above the questions, such as "Keep asking". */
   heading?: string;
   questions: readonly string[];
-  onPick: (question: string) => void;
+  /** `from` is where the chip was on screen, so the bubble can fly in from it. */
+  onPick: (question: string, from: DOMRect) => void;
 };
 
 /** Questions to start with, or to keep asking, sent as an ordinary message. */
@@ -17,7 +18,7 @@ export function Suggestions({ label, heading, questions, onPick }: Props) {
           <li key={question}>
             <button
               type="button"
-              onClick={() => onPick(question)}
+              onClick={(event) => onPick(question, event.currentTarget.getBoundingClientRect())}
               className="min-h-11 rounded-full border-[1.5px] border-border bg-field px-4 py-2 text-left text-sm font-medium hover:border-accent"
             >
               {question}

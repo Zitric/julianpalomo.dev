@@ -63,7 +63,8 @@ export const Route = createFileRoute("/{-$locale}/")({
 // header spans every column on a subgrid, so the hero runs edge to edge in its
 // first row and the intro sits in the second row's left column, while main
 // takes the second row's right column beside it.
-const page = "pb-12 lg:grid lg:grid-cols-[1fr_300px_minmax(0,772px)_1fr] lg:gap-x-12";
+// Below 1024px the composer is fixed to the bottom, so the page ends with room for it.
+const page = "pb-12 max-lg:pb-44 lg:grid lg:grid-cols-[1fr_300px_minmax(0,772px)_1fr] lg:gap-x-12";
 const header =
   "lg:col-span-full lg:row-span-2 lg:row-start-1 lg:grid lg:grid-cols-subgrid lg:grid-rows-subgrid";
 const portrait =

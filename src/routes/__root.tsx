@@ -18,7 +18,12 @@ export const Route = createRootRoute({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      // resizes-content: Chrome on Android shrinks the page above its keyboard,
+      // so the composer fixed to the bottom stays in view.
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1, interactive-widget=resizes-content",
+      },
       { title: pageTitle() },
     ],
     links: [
