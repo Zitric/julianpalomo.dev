@@ -11,8 +11,9 @@ import { useLocale } from "../i18n/useLocale";
  * The top of the chat (DESIGN.md sections 5 and 9): the assistant's one cow,
  * resting its chin and hooves on the chat's edge, with "Ask me about Julian"
  * beside it. The edge itself is the card's top border on desktop and a line on
- * a phone, both drawn by Chat. The cow hangs 22px below this row, so its
- * hooves sit on the edge.
+ * a phone, both drawn by Chat. The cow is 132 × 104 from lg and 100 × 79 on
+ * a phone, so the first suggestions still show above the fixed composer; it
+ * hangs 22px (17px on a phone) below this row, so its hooves sit on the edge.
  */
 export function ChatEdge({ cowState }: { cowState: CowState }) {
   const locale = useLocale();
@@ -20,10 +21,10 @@ export function ChatEdge({ cowState }: { cowState: CowState }) {
   useCowFlight(cow);
   return (
     <div className="flex items-end gap-3 lg:pl-7">
-      <div ref={cow} className="edge-cow relative z-10 -mb-[22px] shrink-0">
+      <div ref={cow} className="edge-cow relative z-10 -mb-[17px] shrink-0 lg:-mb-[22px]">
         <div className="edge-lift relative" data-state={cowState}>
-          <AssistantCow state={cowState} size={132} animated />
-          <CowHooves />
+          <AssistantCow state={cowState} size={132} animated drawingClassName={phoneSize} />
+          <CowHooves className={phoneSize} />
         </div>
       </div>
       <div className="enter-chat min-w-0 pb-2">
@@ -35,6 +36,8 @@ export function ChatEdge({ cowState }: { cowState: CowState }) {
     </div>
   );
 }
+
+const phoneSize = "max-lg:h-[79px] max-lg:w-[100px]";
 
 type Step = "wait" | "pop" | "place" | "fly" | "landed" | "rest";
 

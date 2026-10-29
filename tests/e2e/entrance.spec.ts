@@ -59,6 +59,56 @@ test("a first visit introduces the page in order, the chat last", async ({ page 
   await expect(hello).toHaveCount(0);
 });
 
+test("the greeting shows no word until it starts typing itself out", async ({ page }) => {
+  await page.goto("/");
+  // Every frame until the entrance is over: how visible the greeting is, and
+  // how many of its words are on screen. A MutationObserver would miss a
+  // fade; a frame-by-frame sample doesn't.
+  const frames = await page.evaluate(
+    () =>
+      new Promise<{ opacity: number; whole: boolean; words: number }[]>((resolve) => {
+        const samples: { opacity: number; whole: boolean; words: number }[] = [];
+        const sample = () => {
+          const bubble = [...document.querySelectorAll("section p")].find((p) =>
+            p.textContent?.includes("Hi! Ask me"),
+          );
+          if (!document.querySelector("[data-entrance]") || !bubble) return resolve(samples);
+          let opacity = 1;
+          for (let at: Element | null = bubble; at; at = at.parentElement) {
+            opacity *= Number(getComputedStyle(at).opacity);
+          }
+          const whole = bubble.querySelector(".sr-only") === null;
+          samples.push({ opacity, whole, words: bubble.querySelectorAll(".answer-chunk").length });
+          requestAnimationFrame(sample);
+        };
+        requestAnimationFrame(sample);
+      }),
+  );
+  // From the moment it appears until its first word, the bubble is the
+  // typing version with nothing typed yet; once it has typed itself out, it's
+  // whole again for the entrance's last moments.
+  const shown = frames.filter((frame) => frame.opacity > 0);
+  const firstWord = shown.findIndex((frame) => frame.words > 0);
+  expect(firstWord).toBeGreaterThan(0);
+  expect(shown.slice(0, firstWord).every((frame) => !frame.whole && frame.words === 0)).toBe(true);
+});
+
+test("on a 390 × 844 phone the first suggestions show above the composer", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await expect(async () => {
+    await page.getByRole("heading", { level: 1 }).click();
+    await expect(playing(page)).toHaveCount(0, { timeout: 300 });
+  }).toPass({ timeout: 2000 });
+  const first = await suggestions(page).getByRole("listitem").first().boundingBox();
+  const composer = await page
+    .locator("form")
+    .filter({ has: page.getByLabel("Your question") })
+    .boundingBox();
+  if (!first || !composer) throw new Error("not on screen");
+  expect(first.y + first.height).toBeLessThanOrEqual(composer.y);
+});
+
 test("a tap shows everything at once", async ({ page }) => {
   await page.goto("/");
   // Retried, because a tap before hydration doesn't end it yet.

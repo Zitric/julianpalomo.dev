@@ -160,8 +160,8 @@ From top to bottom:
 3. **Name, role and one line** ("Ask about my experience. Answers come only
    from facts I've confirmed, with their sources."), then **"Download CV"**
    and **"Contact"**.
-4. **The chat** (section 10). At its top, the cow (132 × 104px) rests its
-   chin on the chat's edge, like a fence, with its two front hooves over it:
+4. **The chat** (section 10). At its top, the cow (100 × 79px on a phone) rests
+   its chin on the chat's edge, like a fence, with its two front hooves over it:
    on a phone the edge is a 3px line in `border` with rounded ends, across
    the top of the chat. Beside the cow, bottom-aligned, "Ask me about Julian"
    (Bricolage, 16px, `foreground`) over "Ready when you are" (13px, `muted`).
@@ -509,15 +509,16 @@ through.
 | Sorry                | An error or the daily limit                                      | Lowers its head and stays still                                                                                           |
 | Hover (pointer only) | The pointer is over it                                           | Tilts and says "Moo!" in a small speech bubble                                                                            |
 | Tap                  | It's tapped                                                      | Licks and, if sound is on, moos softly (at most once every 3s). While it talks it only moos: a lick would cover the mouth |
-- **There is one cow**, 132px wide, on the chat's edge (section 5). It's the
-  greeting's cow and every answer's: no cow sits beside the greeting, an
-  answer, a question waiting for its answer or an error. It goes through
+- **There is one cow**, 100px wide on a phone and 132px from `lg`, on the
+  chat's edge (section 5). It's the greeting's cow and every answer's: no cow
+  sits beside the greeting, an answer, a question waiting for its answer or
+  an error. It goes through
   every state above, and rises 8px over the edge while it thinks and on
   hover. When the edge has scrolled out of view nothing is lost: the status
   pill and the screen-reader announcements say what is happening in words.
 - Its two front hooves are part of its drawing on the edge: two rounded
   shapes, 17 × 11px, in its darkest brown (`strand`), 26px in from each side
-  and 17px up from its bottom.
+  and 17px up from its bottom at 132px, scaled with it on a phone.
 - It's a button labelled "Pat the cow", for the tap. The tap and hover are
   extras; nothing depends on them.
 - With reduced motion it's a still drawing in every state.
@@ -619,7 +620,7 @@ On a first visit, or the first in a week:
 | 3.15s                  | A speech bubble above it says "Hi! I'm the Highland cow." for 1.7s. It's decoration, hidden from screen readers.                                                                                                                                                                                                                                                                                          |
 | 4.25s                  | It stops talking and licks once.                                                                                                                                                                                                                                                                                                                                                                          |
 | 4.3s                   | The chat's edge draws itself: the card's border fades in over 0.6s on desktop, and the phone's line grows from left to right over 0.7s.                                                                                                                                                                                                                                                                   |
-| 4.6s                   | The cow flies from the hero to its place on the edge, scaling down to 132px (0.55s, `cubic-bezier(.5, 0, .2, 1)`, `transform` only).                                                                                                                                                                                                                                                                      |
+| 4.6s                   | The cow flies from the hero to its place on the edge, scaling down to its size there (0.55s, `cubic-bezier(.5, 0, .2, 1)`, `transform` only).                                                                                                                                                                                                                                                             |
 | 5.15s, when it lands   | The chat appears: "Ask me about Julian", the greeting bubble and its row rise (0.5s). The suggestions and the composer follow 0.15s later. Until then they take their space but are invisible, so nothing shifts.                                                                                                                                                                                         |
 | 0.4s after landing     | The greeting types itself out at the answers' pace (section 10), and the cow talks until the last word.                                                                                                                                                                                                                                                                                                   |
 | When the greeting ends | The cow licks once and the three suggestions rise, 80ms apart, like source chips. The entrance is over about 1.2s later, at roughly 9s.                                                                                                                                                                                                                                                                   |

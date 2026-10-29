@@ -62,7 +62,7 @@ const portrait =
 // From lg the chat is a card whose top edge the cow rests on (Chat draws the
 // border), so it starts low enough for the cow and its heading above it.
 const chatCard =
-  "scroll-mt-[58px] px-4 pt-8 sm:px-6 lg:col-start-3 lg:row-start-2 lg:mt-10 lg:self-start lg:px-0 lg:pt-0";
+  "scroll-mt-[58px] px-4 pt-6 sm:px-6 lg:col-start-3 lg:row-start-2 lg:mt-10 lg:self-start lg:px-0 lg:pt-0";
 
 const rootRoute = getRouteApi("__root__");
 

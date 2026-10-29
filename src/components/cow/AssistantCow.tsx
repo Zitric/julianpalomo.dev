@@ -12,6 +12,8 @@ type Props = {
   animated: boolean;
   /** Called on every pat; the caller decides whether to moo. */
   onMoo?: () => void;
+  /** Classes for the drawing, to size it with CSS where `size` doesn't fit, as on a phone. */
+  drawingClassName?: string;
 };
 
 const mooBubble =
@@ -22,7 +24,7 @@ const mooBubble =
  * src/styles/cow.css, keyed by `data-state` and `data-pat`; only an animated
  * cow gets them.
  */
-export function AssistantCow({ state, size, animated, onMoo }: Props) {
+export function AssistantCow({ state, size, animated, onMoo, drawingClassName }: Props) {
   const locale = useLocale();
   const [patting, setPatting] = useState(false);
 
@@ -35,7 +37,7 @@ export function AssistantCow({ state, size, animated, onMoo }: Props) {
   if (!animated) {
     return (
       <span aria-hidden="true" data-state={state} className="cow inline-flex shrink-0">
-        <CowDrawing size={size} />
+        <CowDrawing size={size} className={drawingClassName} />
       </span>
     );
   }
@@ -58,7 +60,7 @@ export function AssistantCow({ state, size, animated, onMoo }: Props) {
       <span aria-hidden="true" className={mooBubble}>
         {t(locale, "moo")}
       </span>
-      <CowDrawing size={size} />
+      <CowDrawing size={size} className={drawingClassName} />
     </button>
   );
 }
@@ -68,9 +70,10 @@ export function AssistantCow({ state, size, animated, onMoo }: Props) {
  * the same order, in the same groups. Never redraw or simplify it;
  * tests/unit/assistant-cow.test.ts checks it against the reference.
  */
-function CowDrawing({ size }: { size: number }) {
+function CowDrawing({ size, className }: { size: number; className: string | undefined }) {
   return (
     <svg
+      className={className}
       aria-hidden="true"
       viewBox="5 26 190 150"
       width={size}

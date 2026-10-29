@@ -141,14 +141,17 @@ export function Entrance({ kind, greeting, hero, className, children }: Props) {
   // The greeting types itself out at the answers' pace, from the greeting's beat.
   const full = stage.status === "full" ? stage : null;
   const typing = full !== null && full.join.greeting === "type" && !full.greetingDone;
+  const typingNow = typing && full.beat === "greeting";
+  // useReveal moves on whenever it's behind its text, even without an id, so
+  // it gets the greeting only from the greeting's beat.
   const reveal = useReveal({
-    id: typing && full.beat === "greeting" ? "greeting" : undefined,
-    text: greeting,
+    id: typingNow ? "greeting" : undefined,
+    text: typingNow ? greeting : "",
     streaming: false,
     instant: false,
   });
   // Adjusting state while rendering: the reveal has reached the greeting's end.
-  if (full && typing && full.beat === "greeting" && !reveal.revealing && reveal.shown > 0) {
+  if (full && typingNow && !reveal.revealing && reveal.shown > 0) {
     setStage({ ...full, greetingDone: true });
   }
 
@@ -159,7 +162,10 @@ export function Entrance({ kind, greeting, hero, className, children }: Props) {
     return () => clearTimeout(timer);
   }, [greetingDone]);
 
-  const view = viewOf(stage, kind, typing ? reveal.shown : undefined, hero);
+  // Until its beat, none of the greeting shows.
+  let typed: number | undefined;
+  if (typing) typed = typingNow ? reveal.shown : 0;
+  const view = viewOf(stage, kind, typed, hero);
   return (
     <EntranceContext value={view}>
       <div ref={root} data-entrance={view.playing} className={className}>

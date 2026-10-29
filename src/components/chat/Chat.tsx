@@ -134,7 +134,7 @@ export function Chat({ onStarted }: { onStarted?: () => void }) {
         {/* The edge the cow rests on: the card's top border from lg, a line on a phone. */}
         <span aria-hidden="true" className={frame} />
         <span aria-hidden="true" className={line} />
-        <section aria-label={t(locale, "chatLabel")} className="flex flex-col gap-6 max-lg:mt-9">
+        <section aria-label={t(locale, "chatLabel")} className="flex flex-col gap-6 max-lg:mt-6">
           <p aria-live="polite" className="sr-only" data-testid="chat-announcer">
             {announcement}
           </p>
