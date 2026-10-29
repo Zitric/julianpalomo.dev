@@ -84,6 +84,7 @@ wrangler commands that change Cloudflare.
 - `tests/unit/`: Vitest. `tests/e2e/`: Playwright, against a production build of the `e2e` environment, in demo mode (`.claude/rules/tests.md`).
 - `.github/workflows/ci.yml`: CI on every pull request to `main`. Deploys aren't here: Cloudflare Workers Builds deploys `main` and comments a preview URL on every PR.
 - `docs/adr/`: one file per decision. `docs/tech-debt.md`: shortcuts taken on purpose.
+- `scripts/og/`: the card and the icon that `pnpm og` draws with the site's own components and screenshots into `public/` (the link preview images and the icons). It never reaches the site's bundle.
 - `.claude/`: rules, hooks, skills and subagents for Claude Code; `.claude/README.md` explains them.
 
 ## 5. Docs map
