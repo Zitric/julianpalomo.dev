@@ -14,7 +14,8 @@ Tailwind CSS) that runs on Cloudflare Workers at
 [julianpalomo.dev](https://julianpalomo.dev). [`DESIGN.md`](DESIGN.md)
 describes the visual design, which is being built in steps: the colours, the
 fonts, the layout and the assistant are in, and the theme follows day and
-night in Glasgow unless the visitor picks one with the toggle. The hero is a
+night in Glasgow; a visitor who picks one with the toggle keeps it until
+Glasgow's next dusk or dawn. The hero is a
 live Highland glen: its season follows the date and its sky the sun's real
 height over Glasgow, a small herd grazes, and the sun sets when the visitor
 switches to the dark theme. Glasgow's live weather rolls into it: clouds,

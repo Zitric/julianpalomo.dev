@@ -2,7 +2,9 @@
  * Play with the sky (DESIGN.md section 8): the visitor's own sky, which
  * replaces the live one until they go back to live or reload. One reducer
  * holds it, so the gear, the panel, the chip, the landscape and the theme all
- * read the same state. Nothing is stored.
+ * read the same state. Nothing is stored. Opening the panel changes nothing:
+ * playing starts with the first change to a control, from the live sky at
+ * that moment.
  */
 
 import { type Day, glasgow, glasgowClock, glasgowInstant } from "../glasgow";
@@ -38,42 +40,50 @@ export type PlayState =
       cause: "panel" | "toggle";
     } & PlaySky);
 
-export type PlayAction =
-  /** Starts playing from the sky on screen. */
-  | { type: "play"; from: SkyState }
+/** A change to one of the panel's controls. */
+export type PanelControl =
   | { type: "season"; season: Season }
   | { type: "hour"; hour: number }
   | { type: "level"; level: "clouds" | "rain" | "wind"; value: number }
-  | { type: "switch"; name: "snow" | "haar"; on: boolean }
+  | { type: "switch"; name: "snow" | "haar"; on: boolean };
+
+/** `from` is the live sky on screen when the change happens: the first one starts playing from it. */
+type PanelChange = PanelControl & { from: SkyState };
+
+export type PlayAction =
+  | PanelChange
   /** The theme toggle while playing: it moves the time instead of storing a choice. */
   | { type: "themeToggled"; to: Theme; now: number }
   | { type: "backToLive" };
 
 const clamp = (value: number, max: number) => Math.min(max, Math.max(0, Math.round(value)));
 
-export function playReducer(state: PlayState, action: PlayAction): PlayState {
-  if (action.type === "play") {
-    if (state.status === "playing") return state;
-    const { season, clouds, rain, wind, snow, haar, at } = action.from;
-    const { hour } = glasgowClock(at.getTime());
-    return { status: "playing", cause: "panel", season, hour, clouds, rain, wind, snow, haar };
-  }
-  if (action.type === "backToLive") return { status: "live" };
-  if (state.status === "live") return state;
+/** The panel's controls set to a sky: the live one, before the first change. */
+export function panelSky(sky: SkyState): PlaySky {
+  const { season, clouds, rain, wind, snow, haar, at } = sky;
+  return { season, hour: glasgowClock(at.getTime()).hour, clouds, rain, wind, snow, haar };
+}
 
+export function playReducer(state: PlayState, action: PlayAction): PlayState {
+  if (action.type === "backToLive") return { status: "live" };
+  if (action.type === "themeToggled") {
+    // The toggle only moves the visitor's time while playing; live, it's an ordinary toggle.
+    if (state.status === "live") return state;
+    const day = seasonDay(state.season, action.now);
+    return { ...state, cause: "toggle", hour: action.to === "light" ? 13 : darkHour(day) };
+  }
+
+  const sky = state.status === "playing" ? state : panelSky(action.from);
+  const playing = { ...sky, status: "playing", cause: "panel" } as const;
   switch (action.type) {
     case "season":
-      return { ...state, cause: "panel", season: action.season };
+      return { ...playing, season: action.season };
     case "hour":
-      return { ...state, cause: "panel", hour: clamp(action.hour, 23) };
+      return { ...playing, hour: clamp(action.hour, 23) };
     case "level":
-      return { ...state, cause: "panel", [action.level]: clamp(action.value, 10) };
+      return { ...playing, [action.level]: clamp(action.value, 10) };
     case "switch":
-      return { ...state, cause: "panel", [action.name]: action.on };
-    case "themeToggled": {
-      const day = seasonDay(state.season, action.now);
-      return { ...state, cause: "toggle", hour: action.to === "light" ? 13 : darkHour(day) };
-    }
+      return { ...playing, [action.name]: action.on };
     default: {
       const unhandled: never = action;
       throw new Error(String(unhandled));

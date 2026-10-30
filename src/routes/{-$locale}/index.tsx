@@ -94,10 +94,10 @@ function Home() {
     }
   }
 
-  // The gear and the chip open the panel; playing starts from the sky on
-  // screen, and the popover sits under whichever was pressed.
+  // The gear and the chip open the panel, and the popover sits under
+  // whichever was pressed. Opening changes nothing: the first change in the
+  // panel starts playing, from the live sky on screen.
   function openPanel(trigger: HTMLElement) {
-    dispatch({ type: "play", from: override ?? withWeather(defaultSky(now), weather) });
     const { bottom, left } = trigger.getBoundingClientRect();
     setPanel({ open: true, position: { top: bottom + 8, left } });
   }
@@ -161,6 +161,7 @@ function Home() {
       <SkyPanel
         open={panel.open}
         position={panel.position}
+        live={override ?? withWeather(defaultSky(now), weather)}
         onClose={() => setPanel((current) => ({ ...current, open: false }))}
       />
     </Entrance>

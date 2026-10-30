@@ -1,7 +1,8 @@
 import { type CSSProperties, useEffect, useId, useRef } from "react";
 import { t } from "../../lib/i18n/t";
-import { momentAt } from "../../lib/scene/play";
+import { momentAt, type PanelControl, panelSky } from "../../lib/scene/play";
 import type { Season } from "../../lib/scene/season";
+import type { SkyState } from "../../lib/scene/sky-state";
 import { useNow } from "../clock/Clock";
 import { useLocale } from "../i18n/useLocale";
 import { Button } from "../ui/Button";
@@ -14,6 +15,8 @@ type Props = {
   open: boolean;
   /** Where the popover sits from 1024px, under the gear; the sheet below that ignores it. */
   position: { top: number; left: number } | null;
+  /** The live sky on screen: the controls show it until the first change starts playing from it. */
+  live: SkyState;
   onClose: () => void;
 };
 
@@ -23,12 +26,16 @@ type Props = {
  * gear or the chip that opened it. The backdrop is clear, so the visitor
  * watches the sky change as they play.
  */
-export function SkyPanel({ open, position, onClose }: Props) {
+export function SkyPanel({ open, position, live, onClose }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const locale = useLocale();
   const now = useNow();
   const { state, dispatch } = usePlay();
+  // Opening the panel changes nothing: it shows the live sky, read afresh on
+  // every render, and the first change starts playing from it.
+  const controls = state.status === "playing" ? state : panelSky(live);
+  const change = (control: PanelControl) => dispatch({ ...control, from: live });
 
   // The dialog is outside React's model: opening and closing it is syncing
   // with the DOM.
@@ -61,7 +68,7 @@ export function SkyPanel({ open, position, onClose }: Props) {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      {state.status === "playing" && (
+      {open && (
         <div className="flex flex-col gap-5 p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -76,8 +83,8 @@ export function SkyPanel({ open, position, onClose }: Props) {
           </div>
 
           <SeasonPicker
-            value={state.season}
-            onChange={(season) => dispatch({ type: "season", season })}
+            value={controls.season}
+            onChange={(season) => change({ type: "season", season })}
           />
 
           <Slider
@@ -85,42 +92,42 @@ export function SkyPanel({ open, position, onClose }: Props) {
             track="track-time"
             min={0}
             max={23}
-            value={state.hour}
-            word={timeLabel(state.hour, t(locale, "moments")[momentAt(state, now)])}
-            onChange={(hour) => dispatch({ type: "hour", hour })}
+            value={controls.hour}
+            word={timeLabel(controls.hour, t(locale, "moments")[momentAt(controls, now)])}
+            onChange={(hour) => change({ type: "hour", hour })}
           />
           <LevelSlider
             label={t(locale, "cloudsLabel")}
             track="track-clouds"
             words={t(locale, "weatherClouds")}
-            value={state.clouds}
-            onChange={(value) => dispatch({ type: "level", level: "clouds", value })}
+            value={controls.clouds}
+            onChange={(value) => change({ type: "level", level: "clouds", value })}
           />
           <LevelSlider
-            label={t(locale, state.snow ? "snowLabel" : "rainLabel")}
+            label={t(locale, controls.snow ? "snowLabel" : "rainLabel")}
             track="track-rain"
-            words={t(locale, state.snow ? "weatherSnowLevels" : "weatherRain")}
-            value={state.rain}
-            onChange={(value) => dispatch({ type: "level", level: "rain", value })}
+            words={t(locale, controls.snow ? "weatherSnowLevels" : "weatherRain")}
+            value={controls.rain}
+            onChange={(value) => change({ type: "level", level: "rain", value })}
           />
           <LevelSlider
             label={t(locale, "windLabel")}
             track="track-wind"
             words={t(locale, "weatherWind")}
-            value={state.wind}
-            onChange={(value) => dispatch({ type: "level", level: "wind", value })}
+            value={controls.wind}
+            onChange={(value) => change({ type: "level", level: "wind", value })}
           />
 
           <div className="flex flex-col gap-2">
             <Switch
               label={t(locale, "snowInsteadOfRain")}
-              on={state.snow}
-              onChange={(on) => dispatch({ type: "switch", name: "snow", on })}
+              on={controls.snow}
+              onChange={(on) => change({ type: "switch", name: "snow", on })}
             />
             <Switch
               label={t(locale, "weatherHaar")}
-              on={state.haar}
-              onChange={(on) => dispatch({ type: "switch", name: "haar", on })}
+              on={controls.haar}
+              onChange={(on) => change({ type: "switch", name: "haar", on })}
             />
           </div>
 
