@@ -48,7 +48,7 @@ const standInDb = {
 
 /**
  * Today's counts for one run only, so a long eval run never hits the
- * 30-questions or $1-a-day limits. It also collects the usage the endpoint
+ * 30-questions or daily-spend limits. It also collects the usage the endpoint
  * records, which is how the runner learns each answer's tokens and cost.
  */
 function runStore() {

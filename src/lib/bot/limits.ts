@@ -18,8 +18,8 @@ export const MAX_VISITOR_TEXT = 1_000;
 /** Questions one visitor may ask per UTC day. */
 export const MAX_VISITOR_MESSAGES_PER_DAY = 30;
 
-/** Estimated spend across all visitors per UTC day, in micro-dollars ($1.00). */
-export const DAILY_BUDGET_MICRO_USD = 1_000_000;
+/** Estimated spend across all visitors per UTC day, in micro-dollars ($3.00). */
+export const DAILY_BUDGET_MICRO_USD = 3_000_000;
 
 /**
  * Micro-dollars per million tokens for Claude Sonnet 5.5: input $2, output

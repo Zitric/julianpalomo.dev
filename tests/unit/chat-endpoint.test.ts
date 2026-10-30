@@ -2,7 +2,7 @@ import { simulateReadableStream } from "ai";
 import { MockLanguageModelV4 } from "ai/test";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { handleChat, STREAM_ERROR_TEXT } from "../../src/lib/bot/chat";
-import type { TokenUsage } from "../../src/lib/bot/limits";
+import { DAILY_BUDGET_MICRO_USD, type TokenUsage } from "../../src/lib/bot/limits";
 import { pageLanguageNote, SYSTEM_PROMPT } from "../../src/lib/bot/prompt";
 import type { UsageStore } from "../../src/lib/bot/usage";
 import { type Claim, confirmedClaims } from "../../src/lib/claims";
@@ -556,7 +556,7 @@ describe("limits", () => {
 
   it.each([
     [{ visitorMessages: 30, spentMicroUsd: 0 }, "visitor_limit"],
-    [{ visitorMessages: 0, spentMicroUsd: 1_000_000 }, "daily_budget"],
+    [{ visitorMessages: 0, spentMicroUsd: DAILY_BUDGET_MICRO_USD }, "daily_budget"],
   ] as const)("answers 429 when today is %j, without calling the model", async (today, code) => {
     store = fakeStore(today);
     const createModel = vi.fn();
