@@ -1,5 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
-import { chatErrorBody } from "../../src/lib/bot/chat-error";
+import { createUIMessageStream, createUIMessageStreamResponse } from "ai";
+import { chatErrorBody, STREAM_ERROR_TEXT } from "../../src/lib/bot/chat-error";
 import { DEMO_ANSWER_INTRO } from "../../src/lib/bot/demo";
 import { MAX_MESSAGES } from "../../src/lib/bot/limits";
 import { site } from "../../src/lib/site";
@@ -106,4 +107,33 @@ test("a 503 shows that the assistant isn't available, with the contact links", a
     "href",
     site.links.github,
   );
+});
+
+test("a stream that fails mid-answer shows the page's own error text, never the stream's", async ({
+  page,
+}) => {
+  // The body the endpoint sends when the model fails: a UI message stream
+  // whose error chunk carries STREAM_ERROR_TEXT, built with the same SDK calls.
+  const failed = createUIMessageStreamResponse({
+    stream: createUIMessageStream({
+      execute: () => {
+        throw new Error("the model failed");
+      },
+      onError: () => STREAM_ERROR_TEXT,
+    }),
+  });
+  const body = await failed.text();
+  await page.route("**/api/chat", (route) =>
+    route.fulfill({ status: 200, headers: Object.fromEntries(failed.headers), body }),
+  );
+  await page.goto("/es");
+  await page.getByLabel("Tu pregunta").fill("¿Hola?");
+  await page.getByRole("button", { name: "Enviar" }).click();
+
+  const alert = page.getByRole("alert");
+  await expect(alert).toContainText(
+    "Algo ha salido mal por mi parte. Vuelve a intentarlo en un momento.",
+  );
+  expect(body).toContain(STREAM_ERROR_TEXT);
+  await expect(page.getByText(STREAM_ERROR_TEXT)).toHaveCount(0);
 });

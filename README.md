@@ -126,7 +126,7 @@ mode.
 
 `pnpm eval` reads the API key from `.dev.vars` too, asks the assistant every
 case in [`evals/`](evals/) through the same code as `/api/chat`, checks each
-answer in code (citations, links, no contact details, no Markdown), and then
+answer in code (citations, length, no contact details, no Markdown), and then
 has a second model, Claude Sonnet 5.5, judge every answer sentence by
 sentence against the claims it used: a sentence that says more than its claim
 ("managed" where the claim says "technical lead") fails the case. Before any
@@ -214,5 +214,5 @@ photos) is not licensed for reuse. [`LICENSE`](LICENSE) has the exact split.
 
 ## Contact
 
-[LinkedIn](https://www.linkedin.com/in/julianpalomodeonis) ·
+[LinkedIn](https://www.linkedin.com/in/julianpalomo) ·
 [GitHub](https://github.com/Zitric)

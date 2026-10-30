@@ -69,14 +69,14 @@ must keep doing; the ADRs say why.
 
 - **The API key is read only on the server**, in `chat.ts` through the route. Without it, and without demo mode, the endpoint answers `503 { "error": "unavailable" }` and never creates a model.
 - `/api/chat` is the one internal route the browser calls with `fetch`, from `useChat` in `src/components/chat/Chat.tsx`; everything else goes through `createServerFn` (`react-and-typescript.md`).
-- Errors reach the client as `{ "error": ... }` (built in `chat-error.ts`) or a fixed stream message, never a stack trace or the provider's message. The real error goes to `console.error` once, from `streamText`'s own `onError` (without it the SDK logs it too), and Workers observability keeps it. The UI stream's `onError` only maps it to the fixed message.
+- Errors reach the client as `{ "error": ... }` (built in `chat-error.ts`) or a fixed stream message, never a stack trace or the provider's message. The real error goes to `console.error` once, from `streamText`'s own `onError` (without it the SDK logs it too), and Workers observability keeps it. The UI stream's `onError` only maps it to the fixed message. That message, `STREAM_ERROR_TEXT` in `chat-error.ts`, is never shown: `useChat` turns the error chunk into its `error`, and `chatErrorMessage` shows `errorGeneric` in the page's language, so never translate it on the server. `tests/e2e/chat.spec.ts` checks this on `/es`.
 - `tests/e2e/bundle.spec.ts` fails if the browser bundle contains `ANTHROPIC_API_KEY` or `confirmedByJulian`.
 
 ## Tests
 
 - Unit tests never call the real model. They use `MockLanguageModelV4` from `ai/test`, passed in through `handleChat`'s `createModel`, an in-memory store through `createStore`, so they never touch D1, and a fake `waitUntil` that collects what it's given.
 - The evals in `evals/` are the one place real models are called outside production: the bot's through `handleChat`, and the judge's directly (`.claude/rules/evals.md`). A change to the prompt, the tools or the model's settings needs a full eval run.
-- e2e tests run the chat in demo mode. The "not available" test fakes the 503 with `page.route`, using `chatErrorBody` so its body can't drift from the endpoint's.
+- e2e tests run the chat in demo mode. The "not available" test fakes the 503 with `page.route`, using `chatErrorBody` so its body can't drift from the endpoint's, and the stream-error test builds its failed stream with the SDK and `STREAM_ERROR_TEXT` the same way.
 
 ## The AI SDK
 

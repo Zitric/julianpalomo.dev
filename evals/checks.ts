@@ -1,13 +1,12 @@
 /**
  * The code checks: pure functions over one answer and its case's expectations.
- * They catch what text can show (citations, links, forbidden patterns); what
+ * They catch what text can show (citations, length, forbidden patterns); what
  * an answer means is the judge's job. A regex can't tell "he mentored" from
  * "he didn't mentor", so `mustNotMatch` is only for text that must never
  * appear in any form.
  */
-import { STREAM_ERROR_TEXT } from "../src/lib/bot/chat";
+import { STREAM_ERROR_TEXT } from "../src/lib/bot/chat-error";
 import { parseCitations } from "../src/lib/bot/citations";
-import { site } from "../src/lib/site";
 import type { Expectation } from "./cases";
 
 /** What the runner collected from one answer, as far as the checks need it. */
@@ -76,16 +75,30 @@ export function checkAnswer(answer: Answer, expect: Expectation): CheckResult[] 
     ),
     contactDetails(answer.text),
     markdown(answer.text),
-    outcome(expect, cited, answer.text),
+    outcome(expect, cited),
   ];
 
-  const { citeAnyOf, neverCite = [], mustMatch = [], mustNotMatch = [] } = expect;
+  const { citeAnyOf, neverCite = [], mustMatch = [], mustNotMatch = [], maxLength } = expect;
   // A "not covered" answer without `citeAnyOf` may cite nothing at all.
   const allowed = citeAnyOf ?? (expect.outcome === "not_covered" ? [] : undefined);
   if (allowed !== undefined) results.push(citeAnyOfCheck(expect.outcome, allowed, cited));
   if (neverCite.length > 0) {
     const forbidden = [...cited, ...invalid].filter((id) => neverCite.includes(id));
     results.push(check("never-cite", forbidden.length === 0, `cited ${list(forbidden)}`));
+  }
+  if (maxLength !== undefined) {
+    // What the visitor reads: the text segments, without any citation marker.
+    const visible = segments
+      .flatMap((segment) => (segment.type === "text" ? [segment.text] : []))
+      .join("")
+      .trim();
+    results.push(
+      check(
+        "max-length",
+        visible.length <= maxLength,
+        `${visible.length} characters, over ${maxLength}`,
+      ),
+    );
   }
   for (const source of mustMatch) {
     results.push(
@@ -114,18 +127,13 @@ function markdown(text: string): CheckResult {
   return check("no-markdown", found.length === 0, `Markdown: ${found.join(", ")}`);
 }
 
-function outcome(expect: Expectation, cited: readonly string[], text: string): CheckResult {
+function outcome(expect: Expectation, cited: readonly string[]): CheckResult {
   switch (expect.outcome) {
     case "answered":
       return check("outcome", cited.length > 0, "answered without a valid citation");
-    case "not_covered": {
-      const { linkedin, github } = site.links;
-      return check(
-        "outcome",
-        text.includes(linkedin) || text.includes(github),
-        "not covered, but no LinkedIn or GitHub link",
-      );
-    }
+    // Whether the answer says the claims don't cover it, or declines, is a
+    // matter of meaning: the judge's rubric decides, not a pattern.
+    case "not_covered":
     case "declined":
       return check("outcome", true, "");
     default: {

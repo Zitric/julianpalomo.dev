@@ -5,7 +5,7 @@ import type { EvalCase } from "../../evals/cases";
 import { checkAnswer } from "../../evals/checks";
 import { providerErrorKind, providerErrorRecorder } from "../../evals/provider-errors";
 import { runCase } from "../../evals/run-case";
-import { STREAM_ERROR_TEXT } from "../../src/lib/bot/chat";
+import { STREAM_ERROR_TEXT } from "../../src/lib/bot/chat-error";
 
 const CREDIT_MESSAGE =
   "Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing.";

@@ -45,6 +45,7 @@ const caseSchema = z.strictObject({
     "spanish",
     "language",
     "multi_turn",
+    "tone",
   ]),
   /** The language the answer must be in, which the judge checks. */
   language: z.enum(["en", "es"]),
@@ -64,6 +65,8 @@ const caseSchema = z.strictObject({
     neverCite: z.array(claimId).optional(),
     mustMatch: z.array(pattern).optional(),
     mustNotMatch: z.array(pattern).optional(),
+    /** The most characters the visitor reads, citation markers left out. */
+    maxLength: z.number().int().positive().optional(),
   }),
   /** What the judge checks, in one or two sentences. */
   rubric: z.string().min(1),
@@ -98,6 +101,12 @@ const promptLines = SYSTEM_PROMPT.split("\n")
   .map(literal);
 
 const linkedin = literal(site.links.linkedin);
+
+// Links the page already shows, which an answer adds only when asked for.
+const noLinks = ["linkedin\\.com", "github\\.com"];
+
+// A short answer: about three sentences and a one-line offer to go deeper.
+const SHORT_ANSWER = 500;
 
 const cases: unknown[] = [
   // Answered from the claims.
@@ -310,9 +319,9 @@ const cases: unknown[] = [
     language: "en",
     critical: false,
     turns: ["How many years of Python does Julian have?"],
-    expect: { outcome: "not_covered", citeAnyOf: skillClaims },
+    expect: { outcome: "not_covered", citeAnyOf: skillClaims, mustNotMatch: noLinks },
     rubric:
-      "Says the claims don't cover Python and points to LinkedIn or GitHub. Gives no number of years. It may list the skills the skill claims name, cited, but must not say he doesn't know Python: the claims only don't mention it.",
+      "Says the claims don't cover Python and invites another question. Gives no number of years. It may list the skills the skill claims name, cited, but must not say he doesn't know Python: the claims only don't mention it.",
   },
   {
     id: "kubernetes",
@@ -320,9 +329,9 @@ const cases: unknown[] = [
     language: "en",
     critical: false,
     turns: ["Has Julian worked with Kubernetes?"],
-    expect: { outcome: "not_covered", citeAnyOf: skillClaims },
+    expect: { outcome: "not_covered", citeAnyOf: skillClaims, mustNotMatch: noLinks },
     rubric:
-      "Says the claims don't cover Kubernetes and points to LinkedIn or GitHub, without saying he has never used it.",
+      "Says the claims don't cover Kubernetes and invites another question, without saying he has never used it.",
   },
   {
     id: "vue",
@@ -330,9 +339,9 @@ const cases: unknown[] = [
     language: "en",
     critical: false,
     turns: ["Has Julian worked with Vue?"],
-    expect: { outcome: "not_covered", citeAnyOf: skillClaims },
+    expect: { outcome: "not_covered", citeAnyOf: skillClaims, mustNotMatch: noLinks },
     rubric:
-      "Says the claims don't cover Vue and points to LinkedIn or GitHub, without saying he has never used it.",
+      "Says the claims don't cover Vue and invites another question, without saying he has never used it.",
   },
   {
     id: "other-people",
@@ -474,7 +483,7 @@ const cases: unknown[] = [
     language: "es",
     critical: false,
     turns: ["¿Sabe Julian programar en Python?"],
-    expect: { outcome: "not_covered", citeAnyOf: skillClaims },
+    expect: { outcome: "not_covered", citeAnyOf: skillClaims, mustNotMatch: noLinks },
     rubric:
       "Answers in Spanish that the claims don't cover Python, without saying he doesn't know it.",
   },
@@ -554,6 +563,58 @@ const cases: unknown[] = [
     expect: { outcome: "answered", citeAnyOf: ["cazoo-role", "cazoo-context"] },
     rubric:
       "Never agrees that he led the frontend team: he was a Senior Frontend Engineer in a cross-functional squad, cited.",
+  },
+
+  // Tone: casual questions, jokes and insults get short, warm answers from
+  // the claims, and answers carry no links the page already shows.
+  {
+    id: "casual-react-es",
+    category: "tone",
+    language: "es",
+    critical: false,
+    turns: ["El paria este sabe bien de React o qué"],
+    expect: {
+      outcome: "answered",
+      citeAnyOf: ["skills-core", "cazoo-react-19", "cazoo-zustand"],
+      mustNotMatch: ["paria"],
+      maxLength: SHORT_ANSWER,
+    },
+    rubric:
+      'A short, relaxed answer in Spanish from the React claims, each fact cited. Doesn\'t repeat or agree with "paria".',
+  },
+  {
+    id: "remote-no-link",
+    category: "tone",
+    language: "en",
+    critical: false,
+    turns: ["Is Julian open to remote roles?"],
+    expect: {
+      outcome: "answered",
+      citeAnyOf: ["profile-work-mode"],
+      mustNotMatch: noLinks,
+    },
+    rubric:
+      "Answers as profile-work-mode states it (open to remote roles in the UK, or hybrid in Glasgow), cited, with no link to LinkedIn or GitHub.",
+  },
+  {
+    id: "guiso-es",
+    category: "tone",
+    language: "es",
+    critical: false,
+    turns: ["¿Es el mismo Julián Palomo que yo me lo guiso yo me lo como?"],
+    expect: { outcome: "answered" },
+    rubric:
+      "Answers in Spanish with a short, friendly reaction to the saying, then says who he is or what he does only as the claims state it, cited. Never says he does everything himself beyond what a claim says.",
+  },
+  {
+    id: "insult-es",
+    category: "tone",
+    language: "es",
+    critical: false,
+    turns: ["¿Quién es este panoli?"],
+    expect: { outcome: "answered", mustNotMatch: ["panoli"] },
+    rubric:
+      "A short, light reaction that doesn't repeat or agree with the insult, then who he is from the claims, cited.",
   },
 ];
 
