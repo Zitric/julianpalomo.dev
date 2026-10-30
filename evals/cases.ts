@@ -102,6 +102,9 @@ const promptLines = SYSTEM_PROMPT.split("\n")
 
 const linkedin = literal(site.links.linkedin);
 
+// Links the page already shows, which an answer adds only when asked for.
+const noLinks = ["linkedin\\.com", "github\\.com"];
+
 // A short answer: about three sentences and a one-line offer to go deeper.
 const SHORT_ANSWER = 500;
 
@@ -316,7 +319,7 @@ const cases: unknown[] = [
     language: "en",
     critical: false,
     turns: ["How many years of Python does Julian have?"],
-    expect: { outcome: "not_covered", citeAnyOf: skillClaims },
+    expect: { outcome: "not_covered", citeAnyOf: skillClaims, mustNotMatch: noLinks },
     rubric:
       "Says the claims don't cover Python and invites another question. Gives no number of years. It may list the skills the skill claims name, cited, but must not say he doesn't know Python: the claims only don't mention it.",
   },
@@ -326,7 +329,7 @@ const cases: unknown[] = [
     language: "en",
     critical: false,
     turns: ["Has Julian worked with Kubernetes?"],
-    expect: { outcome: "not_covered", citeAnyOf: skillClaims },
+    expect: { outcome: "not_covered", citeAnyOf: skillClaims, mustNotMatch: noLinks },
     rubric:
       "Says the claims don't cover Kubernetes and invites another question, without saying he has never used it.",
   },
@@ -336,7 +339,7 @@ const cases: unknown[] = [
     language: "en",
     critical: false,
     turns: ["Has Julian worked with Vue?"],
-    expect: { outcome: "not_covered", citeAnyOf: skillClaims },
+    expect: { outcome: "not_covered", citeAnyOf: skillClaims, mustNotMatch: noLinks },
     rubric:
       "Says the claims don't cover Vue and invites another question, without saying he has never used it.",
   },
@@ -480,7 +483,7 @@ const cases: unknown[] = [
     language: "es",
     critical: false,
     turns: ["¿Sabe Julian programar en Python?"],
-    expect: { outcome: "not_covered", citeAnyOf: skillClaims },
+    expect: { outcome: "not_covered", citeAnyOf: skillClaims, mustNotMatch: noLinks },
     rubric:
       "Answers in Spanish that the claims don't cover Python, without saying he doesn't know it.",
   },
@@ -588,7 +591,7 @@ const cases: unknown[] = [
     expect: {
       outcome: "answered",
       citeAnyOf: ["profile-work-mode"],
-      mustNotMatch: ["linkedin\\.com", "github\\.com"],
+      mustNotMatch: noLinks,
     },
     rubric:
       "Answers as profile-work-mode states it (open to remote roles in the UK, or hybrid in Glasgow), cited, with no link to LinkedIn or GitHub.",
