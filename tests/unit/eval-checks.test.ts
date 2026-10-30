@@ -94,12 +94,12 @@ describe("checkAnswer", () => {
       expect(passes("outcome", answer({ text: "He worked at Cazoo." }))).toBe(false);
     });
 
-    it("needs the LinkedIn or GitHub link when not covered", () => {
+    it("leaves a 'not covered' answer to the judge, with or without a link", () => {
       const notCovered: Expectation = { outcome: "not_covered" };
       const linked = `The claims don't cover that. Try ${site.links.github}.`;
       expect(passes("outcome", answer({ text: linked }), notCovered)).toBe(true);
       expect(passes("outcome", answer({ text: "The claims don't cover that." }), notCovered)).toBe(
-        false,
+        true,
       );
     });
 
@@ -122,6 +122,30 @@ describe("checkAnswer", () => {
       const allowed: Expectation = { outcome: "not_covered", citeAnyOf: ["cazoo-role"] };
       expect(passes("cite-any-of", answer({ text }), allowed)).toBe(true);
       expect(passes("cite-any-of", answer({ text }), { outcome: "not_covered" })).toBe(false);
+    });
+  });
+
+  describe("max-length", () => {
+    const short: Expectation = { outcome: "answered", maxLength: 50 };
+
+    it("passes an answer within the limit and fails one over it", () => {
+      expect(passes("max-length", answer(), short)).toBe(true);
+      const long = answer({ text: `${"He worked at Cazoo. ".repeat(3)}[[cazoo-role]]` });
+      const failed = result(checkAnswer(long, short), "max-length");
+      expect(failed).toMatchObject({ pass: false, reason: "59 characters, over 50" });
+    });
+
+    it("leaves citation markers out of the count", () => {
+      const cited = answer({
+        text: "He was a Senior Frontend Engineer. [[cazoo-role]] [[cazoo-context]]",
+      });
+      expect(passes("max-length", cited, { outcome: "answered", maxLength: 35 })).toBe(true);
+    });
+
+    it("runs only when the case sets a limit", () => {
+      expect(checkAnswer(answer(), answered).some((check) => check.name === "max-length")).toBe(
+        false,
+      );
     });
   });
 
