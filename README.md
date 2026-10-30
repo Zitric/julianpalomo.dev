@@ -214,5 +214,5 @@ photos) is not licensed for reuse. [`LICENSE`](LICENSE) has the exact split.
 
 ## Contact
 
-[LinkedIn](https://www.linkedin.com/in/julianpalomodeonis) ·
+[LinkedIn](https://www.linkedin.com/in/julianpalomo) ·
 [GitHub](https://github.com/Zitric)
