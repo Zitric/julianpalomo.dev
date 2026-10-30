@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Expectation } from "../../evals/cases";
 import { type Answer, checkAnswer } from "../../evals/checks";
-import { STREAM_ERROR_TEXT } from "../../src/lib/bot/chat";
+import { STREAM_ERROR_TEXT } from "../../src/lib/bot/chat-error";
 import { site } from "../../src/lib/site";
 
 /** An answer that passes every check for an `answered` case. */

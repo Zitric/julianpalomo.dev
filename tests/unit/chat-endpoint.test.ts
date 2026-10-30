@@ -1,7 +1,8 @@
 import { simulateReadableStream } from "ai";
 import { MockLanguageModelV4 } from "ai/test";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { handleChat, STREAM_ERROR_TEXT } from "../../src/lib/bot/chat";
+import { handleChat } from "../../src/lib/bot/chat";
+import { STREAM_ERROR_TEXT } from "../../src/lib/bot/chat-error";
 import type { TokenUsage } from "../../src/lib/bot/limits";
 import { pageLanguageNote, SYSTEM_PROMPT } from "../../src/lib/bot/prompt";
 import type { UsageStore } from "../../src/lib/bot/usage";

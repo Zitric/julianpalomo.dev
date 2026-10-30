@@ -5,7 +5,7 @@
  * "he didn't mentor", so `mustNotMatch` is only for text that must never
  * appear in any form.
  */
-import { STREAM_ERROR_TEXT } from "../src/lib/bot/chat";
+import { STREAM_ERROR_TEXT } from "../src/lib/bot/chat-error";
 import { parseCitations } from "../src/lib/bot/citations";
 import type { Expectation } from "./cases";
 

@@ -18,7 +18,7 @@ import {
 import { z } from "zod";
 import { type Claim, confirmedClaims } from "../claims";
 import { localeSchema } from "../i18n/locale";
-import { type ChatErrorCode, chatErrorBody } from "./chat-error";
+import { type ChatErrorCode, chatErrorBody, STREAM_ERROR_TEXT } from "./chat-error";
 import type { ChatUIMessage } from "./chat-message";
 import { parseCitations, type Source } from "./citations";
 import { createDemoModel } from "./demo";
@@ -40,9 +40,6 @@ import { type D1Like, d1UsageStore, isD1, type UsageStore, utcDay, visitorHash }
 // characters. It is higher because an answer can be up to MAX_OUTPUT_TOKENS
 // long and useChat sends it back with the next question.
 const MAX_ANSWER_TEXT = 10_000;
-
-/** What the stream says when the model fails mid-answer; never the provider's message. */
-export const STREAM_ERROR_TEXT = "Something went wrong. Please try again.";
 
 // A missing, empty or malformed value reads as unset, never as an error.
 const envSchema = z.object({
