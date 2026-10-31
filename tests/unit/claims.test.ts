@@ -25,7 +25,8 @@ function privacyProblems(value: string): string[] {
   if (/\b[A-Z]{2,}[A-Z0-9]*-\d+\b/.test(value)) problems.push("ticket key");
   if (/#\d/.test(value)) problems.push("# followed by digits");
   for (const [url] of value.matchAll(/https?:\/\/\S+/g)) {
-    const allowed = /^https?:\/\/((www\.)?formatglasgow\.com|github\.com\/Zitric)(\/|$)/.test(url);
+    const allowed =
+      /^https?:\/\/((www\.)?formatglasgow\.com|github\.com\/julian-palomo)(\/|$)/.test(url);
     if (!allowed) problems.push(`link ${url}`);
   }
   return problems;
@@ -54,9 +55,11 @@ describe("privacyProblems", () => {
     ]);
   });
 
-  it("allows links to formatglasgow.com and github.com/Zitric", () => {
+  it("allows links to formatglasgow.com and github.com/julian-palomo", () => {
     expect(
-      privacyProblems("Built https://formatglasgow.com and https://github.com/Zitric/form-at"),
+      privacyProblems(
+        "Built https://formatglasgow.com and https://github.com/julian-palomo/form-at",
+      ),
     ).toEqual([]);
   });
 });

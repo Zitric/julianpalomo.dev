@@ -4,7 +4,7 @@ export const site = {
   url: "https://julianpalomo.dev",
   links: {
     linkedin: "https://www.linkedin.com/in/julianpalomo",
-    github: "https://github.com/Zitric",
+    github: "https://github.com/julian-palomo",
   },
 } as const;
 
