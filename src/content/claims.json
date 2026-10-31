@@ -123,11 +123,11 @@
   {
     "id": "format-role",
     "label": "Overview",
-    "text": "Form:at, an offline-first PWA for a Glasgow electronic music collective: personal project, built solo, May 2026 – present. Live at formatglasgow.com; code at github.com/Zitric/form-at.",
+    "text": "Form:at, an offline-first PWA for a Glasgow electronic music collective: personal project, built solo, May 2026 – present. Live at formatglasgow.com; code at github.com/julian-palomo/form-at.",
     "area": "project",
     "org": "Form:at",
     "source": "cv",
-    "confirmedByJulian": "2026-10-27"
+    "confirmedByJulian": "2026-10-31"
   },
   {
     "id": "format-offline",
@@ -411,11 +411,11 @@
   {
     "id": "site-role",
     "label": "Overview",
-    "text": "julianpalomo.dev, a personal site with an AI assistant that answers only from facts I have confirmed: personal project, October 2026 – present. Live at julianpalomo.dev; code at github.com/Zitric/julianpalomo.dev.",
+    "text": "julianpalomo.dev, a personal site with an AI assistant that answers only from facts I have confirmed: personal project, October 2026 – present. Live at julianpalomo.dev; code at github.com/julian-palomo/julianpalomo.dev.",
     "area": "project",
     "org": "julianpalomo.dev",
     "source": "cv",
-    "confirmedByJulian": "2026-10-29"
+    "confirmedByJulian": "2026-10-31"
   },
   {
     "id": "site-assistant",

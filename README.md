@@ -188,7 +188,7 @@ version from `packageManager` in `package.json`.
 ## The plan
 
 The next steps are tracked as
-[GitHub issues](https://github.com/Zitric/julianpalomo.dev/issues), one per
+[GitHub issues](https://github.com/julian-palomo/julianpalomo.dev/issues), one per
 piece of work.
 
 Each decision is recorded as it's made, one file each, in `docs/adr/`.
@@ -215,4 +215,4 @@ photos) is not licensed for reuse. [`LICENSE`](LICENSE) has the exact split.
 ## Contact
 
 [LinkedIn](https://www.linkedin.com/in/julianpalomo) ·
-[GitHub](https://github.com/Zitric)
+[GitHub](https://github.com/julian-palomo)

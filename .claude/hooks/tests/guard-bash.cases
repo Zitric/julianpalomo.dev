@@ -36,7 +36,7 @@ pass  | gh pr create --title "x" --body-file /dev/null
 pass  | gh pr create --base main --head feat/x --title "x" --body-file /dev/null --assignee @me
 pass  | gh pr view 9
 pass  | gh pr checks 9 --watch
-pass  | gh api repos/Zitric/julianpalomo.dev/pulls/9
+pass  | gh api repos/julian-palomo/julianpalomo.dev/pulls/9
 pass  | pnpm check
 pass  | pnpm test
 pass  | pnpm knip
@@ -104,7 +104,7 @@ block | git checkout feat/other
 block | git switch main
 block | gh pr merge 9 --squash
 block | gh pr merge 9 --auto --squash
-block | gh api -X PUT repos/Zitric/julianpalomo.dev/pulls/9/merge
+block | gh api -X PUT repos/julian-palomo/julianpalomo.dev/pulls/9/merge
 block | git commit -m "fix x" -m "Co-Authored-By: Claude <noreply@anthropic.com>"
 block | git commit -m "add x 🤖 Generated with Claude Code"
 block | git commit -m "add x" -m "https://claude.ai/code/session_abc"
