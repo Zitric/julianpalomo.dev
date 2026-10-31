@@ -105,7 +105,7 @@ export function AssistantMessage({ message, typed }: Props) {
             aria-expanded={view.list}
             aria-controls={listId}
             onClick={() => tap({ type: "link" })}
-            className="min-h-11 w-fit text-left text-[13px] font-semibold text-accent hover:underline"
+            className="min-h-11 w-fit text-left text-[13px] font-medium text-accent hover:underline"
           >
             {linkLabel}
           </button>
