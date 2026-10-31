@@ -42,10 +42,11 @@ sky when it fails. The footer credits Open-Meteo, as its CC BY 4.0 terms ask.
 
 You ask a question and the answer streams in from Claude (Sonnet 5.5, through
 the Vercel AI SDK), which can only look up the facts I've confirmed. Each fact
-an answer cites shows as a numbered citation and a source chip, such as "1 ·
-CV · Cazoo · Redux → Zustand", and a citation only counts if the model looked
-that fact up while answering. Tapping a number or a chip opens the claim as I
-confirmed it, with the date I confirmed it; the model never sees that date.
+an answer cites shows as a numbered citation, and a "Check sources" link under
+the answer unfolds a chip for each one, such as "1 · CV · Cazoo · Redux →
+Zustand"; a citation only counts if the model looked that fact up while
+answering. Tapping a number or a chip opens the claim as I confirmed it, with
+the date I confirmed it; the model never sees that date.
 Answers type themselves out word by word, can be copied with their sources,
 and are followed by more questions to ask. On a phone the chat gets a compact
 bar and a composer fixed above the keyboard; screen readers hear each answer
