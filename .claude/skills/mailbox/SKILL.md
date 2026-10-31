@@ -47,7 +47,7 @@ form), post nothing else in its place and tell Julián.
 Julián runs this; the cloud thread subscribes to the PR it opens. Start from a
 clean working tree.
 
-1. Check that `<name>` has no row in the `AGENTS.md` table, and each epic is an open issue the owner opened (`gh issue view <epic> --json state,author`).
+1. Check that `<name>` has no row in the `AGENTS.md` table, and each epic is an open issue the owner opened (`gh api 'repos/{owner}/{repo}/issues/<epic>' --jq '[.state, .author_association] | @tsv'` prints `open` and `OWNER`).
 2. The branch, with an empty commit: if the PR were ever merged, `main`'s files wouldn't change.
 
    ```bash
