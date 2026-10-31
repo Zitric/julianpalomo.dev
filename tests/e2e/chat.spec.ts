@@ -27,6 +27,7 @@ test("a question streams the demo answer with a source chip and the demo label",
   // The label, not the answer's first word: streamed text arrives in pieces,
   // and one of them can be the word "Demo" on its own.
   await expect(answer.locator("p").filter({ hasText: /^Demo$/ })).toBeVisible();
+  await answer.getByRole("button", { name: "Check sources (1)" }).click();
   const chips = answer.getByRole("list", { name: "Sources" }).getByRole("listitem");
   await expect(chips).toHaveCount(1);
   await expect(chips.first()).toHaveText(/^1 · (CV|Julian) · /);

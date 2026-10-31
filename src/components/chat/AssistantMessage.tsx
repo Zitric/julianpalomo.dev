@@ -7,8 +7,12 @@ import {
   answerAsText,
   confirmationLine,
   messageText,
+  nextSources,
   renderAnswer,
   revealOnMount,
+  SOURCES_CLOSED,
+  type SourcesEvent,
+  sourcesLinkLabel,
   splitIntoChunks,
   toolStatus,
 } from "./chat-view";
@@ -22,13 +26,15 @@ type Props = {
 /**
  * One answer (DESIGN.md section 10): its text, typing itself out word by
  * word, each word fading in; citations as numbered buttons; once the last
- * word is on screen, the numbered source chips rising in and a Copy button.
- * A number or a chip opens its claim, exactly as Julian confirmed it, under
- * the answer.
+ * word is on screen, a "Check sources" link and a Copy button. The link
+ * shows the numbered source chips, rising in. A number or a chip opens its
+ * claim, exactly as Julian confirmed it, under the answer; a number also
+ * shows the chips.
  */
 export function AssistantMessage({ message, typed }: Props) {
   const locale = useLocale();
   const claimId = useId();
+  const listId = useId();
   const names = t(locale, "sourceNames");
   const streaming = typed !== undefined;
   const text = messageText(message.parts);
@@ -49,9 +55,12 @@ export function AssistantMessage({ message, typed }: Props) {
   const chunks = splitIntoChunks(parts, boundaries);
   const fades = boundaries.length > 0;
 
-  const [open, setOpen] = useState<number | null>(null);
+  const [view, setView] = useState(SOURCES_CLOSED);
+  const tap = (event: SourcesEvent) => setView(nextSources(view, event));
+  const open = view.claim;
   const opened = chips.find(({ number }) => number === open);
-  const toggle = (number: number) => setOpen(open === number ? null : number);
+  const linkLabel = streaming ? undefined : sourcesLinkLabel(chips.length, view.list, locale);
+  const showList = linkLabel !== undefined && view.list;
   const labelOf = (number: number) => {
     const chip = chips.find((candidate) => candidate.number === number);
     return chip ? chipLabel(chip.source, names) : "";
@@ -81,7 +90,7 @@ export function AssistantMessage({ message, typed }: Props) {
               aria-label={t(locale, "citationLabel")(chunk.number, labelOf(chunk.number))}
               aria-expanded={open === chunk.number}
               aria-controls={claimId}
-              onClick={() => toggle(chunk.number)}
+              onClick={() => tap({ type: "citation", number: chunk.number })}
               className={fades ? "citation answer-chunk" : "citation"}
             >
               {chunk.number}
@@ -89,27 +98,43 @@ export function AssistantMessage({ message, typed }: Props) {
           ),
         )}
       </p>
-      {!streaming && chips.length > 0 && (
-        <ol aria-label={t(locale, "sourcesLabel")} className="flex flex-wrap gap-2">
-          {chips.map(({ number, source }, index) => (
-            <li
-              key={source.id}
-              className="chip-rise"
-              // One after another, 80ms apart (DESIGN.md section 11).
-              style={{ animationDelay: `${index * 80}ms` }}
-            >
-              <button
-                type="button"
-                aria-expanded={open === number}
-                aria-controls={claimId}
-                onClick={() => toggle(number)}
-                className="min-h-11 rounded-full border-[1.5px] border-border bg-field px-3 text-left text-[13px] font-medium break-words hover:border-accent"
-              >
-                {number} · {chipLabel(source, names)}
-              </button>
-            </li>
-          ))}
-        </ol>
+      {linkLabel !== undefined && (
+        <>
+          <button
+            type="button"
+            aria-expanded={view.list}
+            aria-controls={listId}
+            onClick={() => tap({ type: "link" })}
+            className="min-h-11 w-fit text-left text-[13px] font-semibold text-accent hover:underline"
+          >
+            {linkLabel}
+          </button>
+          {/* Always there while the link is, so aria-controls names an element; empty, it takes no gap. */}
+          <div id={listId} className="empty:hidden">
+            {showList && (
+              <ol aria-label={t(locale, "sourcesLabel")} className="flex flex-wrap gap-2">
+                {chips.map(({ number, source }, index) => (
+                  <li
+                    key={source.id}
+                    className="chip-rise"
+                    // One after another, 80ms apart (DESIGN.md section 11).
+                    style={{ animationDelay: `${index * 80}ms` }}
+                  >
+                    <button
+                      type="button"
+                      aria-expanded={open === number}
+                      aria-controls={claimId}
+                      onClick={() => tap({ type: "chip", number })}
+                      className="min-h-11 rounded-full border-[1.5px] border-border bg-field px-3 text-left text-[13px] font-medium break-words hover:border-accent"
+                    >
+                      {number} · {chipLabel(source, names)}
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+        </>
       )}
       <div id={claimId}>
         {opened && <Claim key={opened.number} number={opened.number} source={opened.source} />}

@@ -143,6 +143,48 @@ export function answerAsText(
   return `${prose}\n\n${sourcesHeading}\n${lines.join("\n")}`;
 }
 
+/**
+ * What an answer's sources show: whether the list of chips is open, and which
+ * claim is, by its number. Each answer starts closed and keeps its own state
+ * only while the page is open.
+ */
+export type SourcesView = { list: boolean; claim: number | null };
+
+export const SOURCES_CLOSED: SourcesView = { list: false, claim: null };
+
+/** A tap on the link under the answer, an inline citation number or a chip. */
+export type SourcesEvent =
+  | { type: "link" }
+  | { type: "citation"; number: number }
+  | { type: "chip"; number: number };
+
+/**
+ * The sources after a tap. The link opens the list, or hides it with any open
+ * claim, so the answer folds back to its text. A number or a chip opens its
+ * claim, or closes it when it's the one open; a number also opens the list,
+ * so its chip is in view.
+ */
+export function nextSources(view: SourcesView, event: SourcesEvent): SourcesView {
+  switch (event.type) {
+    case "link":
+      return view.list ? SOURCES_CLOSED : { ...view, list: true };
+    case "citation":
+      return { list: true, claim: view.claim === event.number ? null : event.number };
+    case "chip":
+      return { ...view, claim: view.claim === event.number ? null : event.number };
+    default: {
+      const unhandled: never = event;
+      throw new Error(String(unhandled));
+    }
+  }
+}
+
+/** The link's text, or undefined when the answer has no chips and so no link. */
+export function sourcesLinkLabel(count: number, open: boolean, locale: Locale): string | undefined {
+  if (count === 0) return undefined;
+  return open ? t(locale, "hideSources") : t(locale, "checkSources")(count);
+}
+
 /** The suggested questions this conversation hasn't asked yet, at most `limit`. */
 export function remainingSuggestions(
   suggestions: readonly string[],

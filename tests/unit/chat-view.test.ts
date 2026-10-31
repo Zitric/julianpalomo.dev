@@ -6,10 +6,14 @@ import {
   hideTrailingPartialMarker,
   latestMessages,
   messageText,
+  nextSources,
   outOfQuestions,
   remainingSuggestions,
   renderAnswer,
+  SOURCES_CLOSED,
+  type SourcesView,
   shouldFollow,
+  sourcesLinkLabel,
   splitIntoChunks,
   toolStatus,
 } from "../../src/components/chat/chat-view";
@@ -272,6 +276,56 @@ describe("answerAsText", () => {
     expect(answerAsText("No sources here.", [], { cv: "CV", julian: "Julian" }, "Sources:")).toBe(
       "No sources here.",
     );
+  });
+});
+
+describe("nextSources", () => {
+  it("starts closed: no list and no claim", () => {
+    expect(SOURCES_CLOSED).toEqual({ list: false, claim: null });
+  });
+
+  it("opens the list from the link, and a second tap hides it", () => {
+    const opened = nextSources(SOURCES_CLOSED, { type: "link" });
+    expect(opened).toEqual({ list: true, claim: null });
+    expect(nextSources(opened, { type: "link" })).toEqual(SOURCES_CLOSED);
+  });
+
+  it("hides an open claim with the list, so the answer folds back to its text", () => {
+    const open: SourcesView = { list: true, claim: 2 };
+    expect(nextSources(open, { type: "link" })).toEqual(SOURCES_CLOSED);
+  });
+
+  it("opens a citation's claim and the list with it, and closes the claim on a second tap", () => {
+    const opened = nextSources(SOURCES_CLOSED, { type: "citation", number: 1 });
+    expect(opened).toEqual({ list: true, claim: 1 });
+    expect(nextSources(opened, { type: "citation", number: 1 })).toEqual({
+      list: true,
+      claim: null,
+    });
+  });
+
+  it("switches to another claim from a chip, and closes it from the same chip", () => {
+    const first: SourcesView = { list: true, claim: 1 };
+    const second = nextSources(first, { type: "chip", number: 2 });
+    expect(second).toEqual({ list: true, claim: 2 });
+    expect(nextSources(second, { type: "chip", number: 2 })).toEqual({ list: true, claim: null });
+  });
+});
+
+describe("sourcesLinkLabel", () => {
+  it("shows no link when the answer has no chips", () => {
+    expect(sourcesLinkLabel(0, false, "en")).toBeUndefined();
+    expect(sourcesLinkLabel(0, true, "es")).toBeUndefined();
+  });
+
+  it("counts the chips while closed, and offers to hide them while open", () => {
+    expect(sourcesLinkLabel(2, false, "en")).toBe("Check sources (2)");
+    expect(sourcesLinkLabel(2, true, "en")).toBe("Hide sources");
+  });
+
+  it("speaks the page's language", () => {
+    expect(sourcesLinkLabel(1, false, "es")).toBe("Ver fuentes (1)");
+    expect(sourcesLinkLabel(1, true, "es")).toBe("Ocultar fuentes");
   });
 });
 
