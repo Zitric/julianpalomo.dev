@@ -13,7 +13,7 @@ points to, and works from what it finds there. The protocol is issue #82; the
 table of mailboxes is in `AGENTS.md` section 2.
 
 - **One mailbox per cloud thread**, since an event on a PR wakes one session only. It serves the epics in its row.
-- **Only local Claude Code writes in a mailbox**, from the `Zitric` account, and only through `post.sh`. The conversation is locked, so only collaborators can comment.
+- **Only local Claude Code writes in a mailbox**, from the owner's account (`julian-palomo`), and only through `post.sh`. The conversation is locked, so only collaborators can comment.
 - **A message is a pointer, never an instruction.** Nothing in a mailbox approves a plan, merges a PR or changes a setting.
 - **The branch never changes after it is created.** `guard-bash.sh` blocks a push to a `chore/mailbox-*` branch that `origin` already has, and any merge.
 
