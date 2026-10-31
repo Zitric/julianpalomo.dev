@@ -116,7 +116,7 @@ in `.claude/rules/styling.md`. UI components still never use a colour literal.
 | Panel and dialog titles | Bricolage Grotesque | 700     | 20px                     |                          |
 | Buttons with text       | Bricolage Grotesque | 700     | 15px                     |                          |
 | Body and chat messages  | Inter               | 400     | 15.5px, line height 1.55 |                          |
-| Chips, suggestions      | Inter               | 500     | 13–14px                  |                          |
+| Chips, suggestions      | Inter               | 500     | 13–14px                  | Also the sources link    |
 | Hints, labels, captions | Inter               | 500–600 | 12–12.5px                | Labels in `muted`        |
 - Both fonts are OFL-1.1 and self-hosted from Fontsource's variable packages
   (`@fontsource-variable/bricolage-grotesque`, `@fontsource-variable/inter`),
@@ -569,11 +569,15 @@ mobile; desktop is the same inside the right-hand card.
    visitor was already at the bottom; if they scrolled up to read, a "New
    answer ↓" pill appears instead.
 4. **Done**, when the last word is on screen, not when the stream ends. The
-   cow licks once, satisfied. The sources rise in one by one
-   (80ms apart) as numbered chips, such as "1 · Julian · Work mode". Tapping
-   a chip opens the claim exactly as Julian confirmed it, with "Confirmed by
-   Julian on 27 Oct 2026 · from his CV". Under the answer: "Copy", and "Keep
-   asking" with the suggested questions not asked yet.
+   cow licks once, satisfied. Under the answer, a small `accent` text link,
+   "Check sources (2)", folds its sources away; an answer with none has no
+   link. Tapping it makes the sources rise in one by one (80ms apart) as
+   numbered chips, such as "1 · Julian · Work mode", and the link becomes
+   "Hide sources", which also closes an open claim. Each answer starts folded
+   and keeps its own state while the page is open. Tapping a chip opens the
+   claim exactly as Julian confirmed it, with "Confirmed by Julian on 27 Oct
+   2026 · from his CV". Under the answer: "Copy", and "Keep asking" with the
+   suggested questions not asked yet.
 5. **Out of questions, or something went wrong.** Errors are warm too: the cow
    lowers its head, the message says what happened and offers another way
    (the contact form, LinkedIn). Never a bare red error. For the daily limit:
@@ -585,10 +589,13 @@ mobile; desktop is the same inside the right-hand card.
 
 - **Suggested questions:** tapping one flies it into place as the visitor's
   bubble (a FLIP animation) and plays the "pop".
-- **Citations are buttons:** each number opens its claim. This is what sets
-  the bot apart: you can see where every sentence comes from. To show the
-  claim's text and confirmation date, the `data-sources` part carries them;
-  the model, the prompt and the tools don't change.
+- **Citations are buttons:** each number opens its claim, and unfolds the
+  chips so its own is in view. This is what sets the bot apart: you can see
+  where every sentence comes from. The numbers always show; only the row of
+  chips folds, so the sources stay one tap away
+  ([`docs/adr/2026-10-31-sources-behind-a-link.md`](docs/adr/2026-10-31-sources-behind-a-link.md)). To show the claim's
+  text and confirmation date, the `data-sources` part carries them; the
+  model, the prompt and the tools don't change.
 - **Copy** copies the answer as plain text with its sources listed at the
   end, ready to paste into an email.
 - **Screen readers:** "Answering…" is announced when an answer starts, and the

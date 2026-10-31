@@ -28,6 +28,8 @@ test("a citation opens its claim with when Julian confirmed it", async ({ page }
   await expect(answer).toContainText(
     /Confirmed by Julian on \d{1,2} [A-Z][a-z]{2} \d{4} · from (his CV|Julian)/,
   );
+  // The number also opened the list, so its chip is in view.
+  await expect(answer.getByRole("button", { name: "Hide sources" })).toBeVisible();
   // The chip opens the same claim, and a second press closes it.
   const chip = answer.getByRole("list", { name: "Sources" }).getByRole("button");
   await expect(chip).toHaveAttribute("aria-expanded", "true");
@@ -35,32 +37,34 @@ test("a citation opens its claim with when Julian confirmed it", async ({ page }
   await expect(answer).not.toContainText("Confirmed by Julian");
 });
 
-test("the answer types itself out, and its chips rise only after the last word", async ({
+test("the answer types itself out, and its sources link appears only after the last word", async ({
   page,
 }) => {
   await ask(page, "What has Julian worked on?");
-  // Each animation frame: how long the answer's text is, and whether its chips are there.
+  // Each animation frame: how long the answer's text is, and whether its sources link is there.
   const frames = await page.evaluate(
     () =>
-      new Promise<{ length: number; chips: boolean }[]>((resolve) => {
-        const seen: { length: number; chips: boolean }[] = [];
+      new Promise<{ length: number; link: boolean }[]>((resolve) => {
+        const seen: { length: number; link: boolean }[] = [];
         const sample = () => {
           const answer = document.querySelector('article[aria-label="Answer"]');
           const length =
             answer?.querySelector('[data-testid="answer-text"]')?.textContent?.length ?? 0;
-          const chips = answer?.querySelector('ol[aria-label="Sources"]') != null;
-          seen.push({ length, chips });
-          if (chips || seen.length > 1200) resolve(seen);
+          const link = [...(answer?.querySelectorAll("button") ?? [])].some((button) =>
+            button.textContent?.startsWith("Check sources"),
+          );
+          seen.push({ length, link });
+          if (link || seen.length > 1200) resolve(seen);
           else requestAnimationFrame(sample);
         };
         sample();
       }),
   );
-  const lengths = frames.filter((frame) => !frame.chips).map((frame) => frame.length);
+  const lengths = frames.filter((frame) => !frame.link).map((frame) => frame.length);
   expect(new Set(lengths).size).toBeGreaterThan(5);
   const final = frames.at(-1);
-  expect(final?.chips).toBe(true);
-  // The chips came with or after the last word, never while text was still typing.
+  expect(final?.link).toBe(true);
+  // The link came with or after the last word, never while text was still typing.
   expect(Math.max(...lengths)).toBeLessThanOrEqual(final?.length ?? 0);
   const text = await page.getByTestId("answer-text").textContent();
   expect(final?.length).toBe(text?.length);
@@ -77,6 +81,47 @@ test("Copy puts the answer and its sources on the clipboard", async ({ page, con
   expect(copied.startsWith(DEMO_ANSWER_INTRO)).toBe(true);
   expect(copied).not.toContain("[[");
   expect(copied).toMatch(/\n\nSources:\n1\. (CV|Julian) · /);
+});
+
+test("the sources stay folded until the link opens them, from the keyboard too", async ({
+  page,
+}) => {
+  await ask(page, "What has Julian worked on?");
+  const answer = page.getByRole("article", { name: "Answer" });
+  const link = answer.getByRole("button", { name: "Check sources (1)" });
+  await expect(link).toHaveAttribute("aria-expanded", "false");
+  const list = answer.getByRole("list", { name: "Sources" });
+  await expect(list).toHaveCount(0);
+
+  // aria-controls names the element the list appears in.
+  const controls = await link.getAttribute("aria-controls");
+  expect(controls).toBeTruthy();
+  await link.focus();
+  await page.keyboard.press("Enter");
+  const hide = answer.getByRole("button", { name: "Hide sources" });
+  await expect(hide).toHaveAttribute("aria-expanded", "true");
+  await expect(
+    page.locator(`[id="${controls}"]`).getByRole("list", { name: "Sources" }),
+  ).toBeVisible();
+
+  // Hiding the list also closes a claim opened from its chip.
+  await list.getByRole("button").click();
+  await expect(answer).toContainText("Confirmed by Julian");
+  await hide.focus();
+  await page.keyboard.press("Enter");
+  await expect(list).toHaveCount(0);
+  await expect(answer).not.toContainText("Confirmed by Julian");
+  await expect(link).toHaveAttribute("aria-expanded", "false");
+});
+
+test("the sources link speaks Spanish on /es", async ({ page }) => {
+  await page.goto("/es");
+  await page.getByLabel("Tu pregunta").fill("¿En qué ha trabajado Julián?");
+  await page.getByRole("button", { name: "Enviar" }).click();
+  const answer = page.getByRole("article", { name: "Respuesta" });
+  await answer.getByRole("button", { name: "Ver fuentes (1)" }).click();
+  await expect(answer.getByRole("button", { name: "Ocultar fuentes" })).toBeVisible();
+  await expect(answer.getByRole("list", { name: "Fuentes" }).getByRole("listitem")).toHaveCount(1);
 });
 
 test("Keep asking offers the suggestions not asked yet", async ({ page }) => {
@@ -153,6 +198,7 @@ test("on a phone, an opened claim and the limit error stop clear of the composer
 
   await ask(page, "What has Julian worked on?");
   const answer = page.getByRole("article", { name: "Answer" });
+  await answer.getByRole("button", { name: "Check sources (1)" }).click();
   await answer.getByRole("list", { name: "Sources" }).getByRole("button").click();
   await above(answer.getByText(/^Confirmed by Julian on /));
 
@@ -192,6 +238,8 @@ test.describe("with reduced motion", () => {
     const answer = page.getByRole("article", { name: "Answer" });
     await expect(answer.getByRole("button", { name: /^Copy$/ })).toBeVisible();
     await answer.getByRole("button", { name: /^Source 1: / }).click();
+    // The number opened the list too, so its chips are part of the check.
+    await expect(answer.getByRole("list", { name: "Sources" })).toBeVisible();
     const running = await page
       .locator("main")
       .evaluate(

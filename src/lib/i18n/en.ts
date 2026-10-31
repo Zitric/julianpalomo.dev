@@ -64,6 +64,9 @@ export const en = {
   answering: "Answering…",
   answerLabel: "Answer",
   sourcesLabel: "Sources",
+  // The link under a finished answer that shows or hides its source chips.
+  checkSources: (count: number) => `Check sources (${count})`,
+  hideSources: "Hide sources",
   sourceNames: { cv: "CV", julian: "Julian" },
   demo: "Demo",
   lookingUpClaims: "Looking up claims…",

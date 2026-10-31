@@ -51,6 +51,8 @@ export const es: Messages = {
   answering: "Respondiendo…",
   answerLabel: "Respuesta",
   sourcesLabel: "Fuentes",
+  checkSources: (count) => `Ver fuentes (${count})`,
+  hideSources: "Ocultar fuentes",
   sourceNames: { cv: "CV", julian: "Julián" },
   demo: "Demo",
   lookingUpClaims: "Buscando en los datos confirmados…",
